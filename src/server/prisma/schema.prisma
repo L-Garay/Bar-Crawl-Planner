@@ -1,0 +1,25 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model BasicOuting {
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  date        DateTime
+  creator     BasicUser @relation(fields: [basicUserId], references: [id])
+  basicUserId Int
+}
+
+model BasicUser {
+  id      Int           @id @default(autoincrement())
+  name    String        @db.VarChar(255)
+  outings BasicOuting[]
+}
