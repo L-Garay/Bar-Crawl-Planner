@@ -11,11 +11,11 @@ datasource db {
 }
 
 model BasicOuting {
-  id          Int       @id @default(autoincrement())
-  name        String    @db.VarChar(255)
-  date        DateTime
-  creator     BasicUser @relation(fields: [basicUserId], references: [id])
-  basicUserId Int
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(255)
+  date      DateTime
+  creator   BasicUser @relation(fields: [creatorId], references: [id])
+  creatorId Int
 }
 
 model BasicUser {

@@ -1,0 +1,24 @@
+{
+   "include": ["**/*.ts"],
+   "compilerOptions": {
+     "rootDirs": ["src"],
+     "outDir": "dist",
+     "lib": ["ES2019", "dom"],
+     "isolatedModules": true,
+     "esModuleInterop": true,
+     "moduleResolution": "Node",
+     "resolveJsonModule": true,
+     "target": "ES2019",
+     "strict": true,
+     "allowJs": true,
+     "useUnknownInCatchVariables": false,
+     "noImplicitReturns": true,
+     "forceConsistentCasingInFileNames": true,
+     "baseUrl": ".",
+     "noEmit": true
+   },
+   "exclude":[ 
+      "node_modules"
+   ],
+   "compileOnSave":false
+ }
