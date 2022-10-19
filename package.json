@@ -18,13 +18,5 @@
   "bugs": {
     "url": "https://github.com/L-Garay/Bar-Crawl-Planner/issues"
   },
-  "homepage": "https://github.com/L-Garay/Bar-Crawl-Planner#readme",
-  "dependencies": {
-    "graphql": "^16.6.0",
-    "typescript": "^4.8.4"
-  },
-  "devDependencies": {
-    "@types/node": "^18.11.0",
-    "ts-node": "^10.9.1"
-  }
+  "homepage": "https://github.com/L-Garay/Bar-Crawl-Planner#readme"
 }
