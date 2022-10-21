@@ -28,6 +28,25 @@ const prisma = new PrismaClient();
 //   console.log('Basic User Created');
 // }
 
+export async function GetAllUsers() {
+  try {
+    return await prisma.basicUser.findMany();
+  } catch (error) {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+export async function GetAllOutings() {
+  try {
+    return await prisma.basicOuting.findMany();
+  } catch (error) {
+    console.error(error);
+    await prisma.$disconnect();
+    process.exit(1);
+  }
+}
+
 // CreateUser()
 //   .then(async () => {
 //     await prisma.$disconnect();
