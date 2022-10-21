@@ -10,16 +10,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model BasicOuting {
-  id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(255)
-  date      DateTime
-  creator   BasicUser @relation(fields: [creatorId], references: [id])
-  creatorId Int
-}
-
 model BasicUser {
   id      Int           @id @default(autoincrement())
   name    String        @db.VarChar(255)
-  outings BasicOuting[]
+  outings BasicOuting[] @relation(name: "Users_In_Outing")
+}
+
+model BasicOuting {
+  id         Int         @id @default(autoincrement())
+  name       String      @db.VarChar(255)
+  users      BasicUser[] @relation(name: "Users_In_Outing")
+  creator_id Int
+  created_at DateTime
+  // start_date_and_time DateTime
 }
