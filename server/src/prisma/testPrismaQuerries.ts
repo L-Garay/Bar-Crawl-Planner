@@ -1,26 +1,25 @@
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+// import { PrismaClient } from '@prismaClient/client';
+import { prismaClient } from '../index';
 
 // async function GetAll() {
-//   const allBasicUsers = await prisma.basicUser.findMany();
+//   const allBasicUsers = await prismaClient.basicUser.findMany();
 //   console.log('All Basic Users', allBasicUsers);
-//   const allBasicOutings = await prisma.basicOuting.findMany();
+//   const allBasicOutings = await prismaClient.basicOuting.findMany();
 //   console.log('All Basic Outings', allBasicOutings);
 // }
 
 // GetAll()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
 
 // async function CreateUser() {
-//   await prisma.basicUser.create({
+//   await prismaClient.basicUser.create({
 //     data: {
 //       name: 'Bob Vance',
 //     },
@@ -30,35 +29,35 @@ const prisma = new PrismaClient();
 
 export async function GetAllUsers() {
   try {
-    return await prisma.basicUser.findMany();
+    return await prismaClient.basicUser.findMany();
   } catch (error) {
     console.error(error);
-    await prisma.$disconnect();
+    await prismaClient.$disconnect();
     process.exit(1);
   }
 }
 export async function GetAllOutings() {
   try {
-    return await prisma.basicOuting.findMany();
+    return await prismaClient.basicOuting.findMany();
   } catch (error) {
     console.error(error);
-    await prisma.$disconnect();
+    await prismaClient.$disconnect();
     process.exit(1);
   }
 }
 
 // CreateUser()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
 
 // async function CreateManyUsers() {
-//   await prisma.basicUser.createMany({
+//   await prismaClient.basicUser.createMany({
 //     data: [
 //       { name: 'Michael Scott' },
 //       { name: 'Bob Vance' },
@@ -70,17 +69,17 @@ export async function GetAllOutings() {
 
 // CreateManyUsers()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
 
 // async function CreateOuting() {
 //   const date = new Date();
-//   await prisma.basicOuting.create({
+//   await prismaClient.basicOuting.create({
 //     data: {
 //       name: "Bob's Retirement",
 //       date: date,
@@ -94,11 +93,11 @@ export async function GetAllOutings() {
 
 // CreateOuting()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
 
@@ -108,7 +107,7 @@ export async function GetAllOutings() {
 //   userIdArray.forEach(async (id) => {
 //     console.log(id);
 
-//     const user = await prisma.basicUser.update({
+//     const user = await prismaClient.basicUser.update({
 //       where: { id: id },
 //       data: {
 //         outings: {
@@ -123,7 +122,7 @@ export async function GetAllOutings() {
 // }
 
 // async function ConnectUserWithOuting() {
-//   const user = await prisma.basicUser.update({
+//   const user = await prismaClient.basicUser.update({
 //     where: { id: 5 },
 //     data: {
 //       outings: {
@@ -141,16 +140,16 @@ export async function GetAllOutings() {
 
 // ConnectUserWithOuting()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
 
 // async function DisconnectUserWithOuting() {
-//   const user = await prisma.basicUser.update({
+//   const user = await prismaClient.basicUser.update({
 //     where: { id: 5 },
 //     data: {
 //       outings: {
@@ -166,16 +165,16 @@ export async function GetAllOutings() {
 
 // DisconnectUserWithOuting()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
 
 // async function GetOutingsByUser() {
-//   const outings = await prisma.basicUser.findFirst({
+//   const outings = await prismaClient.basicUser.findFirst({
 //     where: {
 //       id: 3,
 //     },
@@ -192,18 +191,18 @@ export async function GetAllOutings() {
 
 // GetOutingsByUser()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
 
 // async function CreateUserThenOuting() {
 //   const date = new Date();
 //   const date2 = new Date();
-//   const userOuting = await prisma.basicUser.create({
+//   const userOuting = await prismaClient.basicUser.create({
 //     data: {
 //       name: 'Jim Halpert',
 //       outings: {
@@ -227,10 +226,10 @@ export async function GetAllOutings() {
 
 // CreateUserThenOuting()
 //   .then(async () => {
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //   })
 //   .catch(async (e) => {
 //     console.error(e);
-//     await prisma.$disconnect();
+//     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });

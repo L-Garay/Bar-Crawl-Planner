@@ -2,6 +2,9 @@ import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import typeDefs from './schema';
 import resolvers from './resolvers';
+import { PrismaClient } from '@prisma/client';
+
+export const prismaClient = new PrismaClient();
 
 // The ApolloServer constructor requires two parameters: your schema
 // definition and your set of resolvers.
