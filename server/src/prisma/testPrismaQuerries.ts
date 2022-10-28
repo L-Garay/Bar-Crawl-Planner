@@ -1,5 +1,9 @@
 // import { PrismaClient } from '@prismaClient/client';
-import { prismaClient } from '../index';
+// import { prismaClient } from '../index';
+
+import { PrismaClient } from '@prisma/client';
+
+export const prismaClient = new PrismaClient();
 
 // async function GetAll() {
 //   const allBasicUsers = await prismaClient.basicUser.findMany();
@@ -27,24 +31,73 @@ import { prismaClient } from '../index';
 //   console.log('Basic User Created');
 // }
 
-export async function GetAllUsers() {
+// export async function GetAllUsers() {
+//   try {
+//     const users = await prismaClient.basicUser.findMany();
+//     console.log(users);
+//     return users;
+//   } catch (error) {
+//     console.error(error);
+//     await prismaClient.$disconnect();
+//     process.exit(1);
+//   }
+// }
+
+// GetAllUsers()
+//   .then(async () => {
+//     await prismaClient.$disconnect();
+//   })
+//   .catch(async (e) => {
+//     console.error(e);
+//     await prismaClient.$disconnect();
+//     process.exit(1);
+//   });
+
+export async function GetAllUsersWithOutings() {
   try {
-    return await prismaClient.basicUser.findMany();
+    const users = await prismaClient.basicUser.findMany({
+      include: { outings: true },
+    });
+    console.log(users);
+    return users;
   } catch (error) {
     console.error(error);
     await prismaClient.$disconnect();
     process.exit(1);
   }
 }
+
+GetAllUsersWithOutings()
+  .then(async () => {
+    await prismaClient.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prismaClient.$disconnect();
+    process.exit(1);
+  });
+
 export async function GetAllOutings() {
   try {
-    return await prismaClient.basicOuting.findMany();
+    const outings = await prismaClient.basicOuting.findMany();
+    console.log(outings);
+    return outings;
   } catch (error) {
     console.error(error);
     await prismaClient.$disconnect();
     process.exit(1);
   }
 }
+
+GetAllOutings()
+  .then(async () => {
+    await prismaClient.$disconnect();
+  })
+  .catch(async (e) => {
+    console.error(e);
+    await prismaClient.$disconnect();
+    process.exit(1);
+  });
 
 // CreateUser()
 //   .then(async () => {

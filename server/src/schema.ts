@@ -6,11 +6,13 @@ const typeDefs = `#graphql
 
   # This "BasicUser" type defines the queryable fields for every user in our data source.
   type BasicUser {
+    id: Int
     name: String
     outings: [BasicOuting]
   }
 
   type BasicOuting {
+    id: Int
     name: String
     creator_id: Int
     created_at: String
