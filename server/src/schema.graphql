@@ -1,0 +1,18 @@
+type BasicUser {
+  id: Int
+  name: String
+  outings: [BasicOuting]
+}
+
+type BasicOuting {
+  id: Int
+  name: String
+  creator_id: Int
+  created_at: String
+  users: [BasicUser]
+}
+
+type Query {
+  basicUsers: [BasicUser]
+  basicOutings: [BasicOuting]
+}

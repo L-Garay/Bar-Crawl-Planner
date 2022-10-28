@@ -21,6 +21,6 @@ model BasicOuting {
   name       String      @db.VarChar(255)
   users      BasicUser[] @relation(name: "Users_In_Outing")
   creator_id Int
-  created_at DateTime
+  created_at String      @db.VarChar(255)
   // start_date_and_time DateTime
 }

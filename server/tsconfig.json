@@ -1,5 +1,5 @@
 {
-   "include": ["**/**.ts", "prisma/schema.prisma"],
+   "include": ["**/**.ts"],
    "compilerOptions": {
     "rootDir": "src",
      "outDir": "dist",
@@ -18,7 +18,9 @@
      "forceConsistentCasingInFileNames": true,
    },
    "exclude":[ 
-      "node_modules"
+      "node_modules",
+      // NOTE need to figure out how to exclude this file from build
+      "/generated/**.ts"
    ],
    "compileOnSave":false
  }

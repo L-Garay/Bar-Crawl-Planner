@@ -55,9 +55,7 @@ export const prismaClient = new PrismaClient();
 
 export async function GetAllUsersWithOutings() {
   try {
-    const users = await prismaClient.basicUser.findMany({
-      include: { outings: true },
-    });
+    const users = await prismaClient.basicUser.findMany();
     console.log(users);
     return users;
   } catch (error) {
