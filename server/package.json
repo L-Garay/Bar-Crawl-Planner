@@ -14,7 +14,7 @@
   "scripts": {
     "compile": "rimraf ./dist && npm run codegen && tsc",
     "generateAndCompile": "npx prisma generate && npm run compile",
-    "start": "node ./dist/index.js",
+    "start": "nodemon ./dist/index.js",
     "compileAndStart": "npm run generateAndCompile && npm run start",
     "testPrismaQuerries": "npx ts-node src/prisma/testPrismaQuerries.ts",
     "postinstall": "prisma generate",
@@ -27,6 +27,7 @@
     "@graphql-codegen/typescript": "2.8.0",
     "@graphql-codegen/typescript-resolvers": "2.7.5",
     "@types/node": "^18.11.2",
+    "nodemon": "^2.0.20",
     "prisma": "^4.5.0",
     "ts-node": "^10.9.1"
   },
