@@ -12,9 +12,16 @@ import http from 'http';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import expressJwt from 'express-jwt';
+import { GetUserByEmail } from './prisma/querries/usersQuerries';
 require('dotenv').config();
+import ValidateJWT from './validate';
+import dotenv from 'dotenv';
 
 export const prismaClient = new PrismaClient();
+
+dotenv.config();
+
+const PORT = process.env.SERVER_PORT || 4000;
 
 // NOTE when compiled, this file is not included and therefore can never be found
 // NOTE even when running the 'ts-node' command, this file supposedly still cannot be found
@@ -40,25 +47,26 @@ async function StartServer() {
   // Ensure we wait for our server to start
   await server.start();
 
-  // Set up our Express middleware to handle CORS, body parsing,
-  // and our expressMiddleware function.
-  app.use('/playground', cors(), bodyParser.json(), expressMiddleware(server));
-  console.log(process.env.BASE_URL);
+  // NOTE order of app.use() and app.get() matters
   app.use(
     auth({
       issuerBaseURL: process.env.AUTH0_ISSUER_URL,
       baseURL: process.env.BASE_URL,
-      clientID: process.env.AUTH_CLIENT_ID,
+      clientID: process.env.AUTH0_CLIENT_ID,
       secret: process.env.SESSION_SECRET,
       authRequired: false,
       auth0Logout: true,
     })
   );
 
+  // Set up our Express middleware to handle CORS, body parsing,
+  // and our expressMiddleware function.
+
   app.get('/', (req, res) => {
+    console.log(req.oidc.idToken);
     const message = req.oidc.isAuthenticated()
-      ? `Hello ${req.oidc.user?.name}, you have sucessfully logged in!`
-      : 'You are logged out.';
+      ? 'You are logged in'
+      : 'You are logged out';
     res.send(message);
   });
 
@@ -66,14 +74,39 @@ async function StartServer() {
     res.send(JSON.stringify(req.oidc.user));
   });
 
+  app.use(
+    '/', // fuzzy matches, will match /playground /logan etc
+    cors(),
+    bodyParser.json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => {
+        // NOTE that this will be in the format of a JWT
+        // Will need to ensure it is signed with my auth0 private key
+
+        console.log('Headers authorization', req.headers.authorization);
+
+        const authorizationHeader = req.headers.authorization || '';
+        const decodedToken = await ValidateJWT(authorizationHeader);
+        if (decodedToken.error) {
+          // handle error case here
+          console.error(`Error validating token: ${decodedToken.error}`);
+        }
+        console.log('Decoded token', decodedToken);
+        // const email = req.oidc?.user ? req.oidc?.user.email : '';
+        // const user = await GetUserByEmail(email);
+        return { test: 'test' };
+      },
+    })
+  );
   app.set('trust proxy', true);
 
-  const port = process.env.SERVER_PORT || 4000;
   // Modified server startup
   await new Promise((resolve) =>
-    httpServer.listen({ port: port }, () => resolve)
+    httpServer.listen({ port: PORT }, () => {
+      console.log(`🚀  Server ready at http://localhost:${PORT}/`);
+      resolve;
+    })
   );
-  console.log(`🚀  Server ready at http://localhost:${port}/`);
 }
 
 StartServer();

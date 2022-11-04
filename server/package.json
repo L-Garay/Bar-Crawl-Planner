@@ -21,8 +21,9 @@
   "scripts": {
     "compile": "rimraf ./dist && npm run codegen && tsc",
     "generateAndCompile": "npx prisma generate && npm run compile",
-    "start": "nodemon ./dist/index.js",
     "compileAndStart": "npm run generateAndCompile && npm run start",
+    "startCompiled": "nodemon ./dist/index.js",
+    "nodemonTS": "npx nodemon ./src/index.ts",
     "testPrismaQuerries": "npx ts-node src/prisma/testPrismaQuerries.ts",
     "postinstall": "prisma generate",
     "codegen": "graphql-codegen --config codegen.yml"
