@@ -8,10 +8,10 @@ const resolvers: Resolvers = {
   Query: {
     basicUsers: (parent, args, context, info) => {
       console.log(context);
-      const { user, idToken } = context;
+      const { user, decodedToken } = context;
 
       // const authUser = req
-      if (!user || !idToken) {
+      if (!user || !decodedToken) {
         return null;
       }
 
@@ -19,8 +19,8 @@ const resolvers: Resolvers = {
     },
     basicOutings: (parent, args, context, info) => {
       console.log(context);
-      const { user, idToken } = context;
-      if (!user || !idToken) {
+      const { user, decodedToken } = context;
+      if (!user || !decodedToken) {
         return null;
       }
 

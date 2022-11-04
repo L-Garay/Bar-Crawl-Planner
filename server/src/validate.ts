@@ -8,33 +8,12 @@ const client = jwksClient({
   jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
 });
 
-// const getKey = (callback: any) => {
-//   const kid = process.env.AUTH0_TENANT_KID;
-//   client.getSigningKey(kid, (error, key) => {
-//     console.log(kid);
-//     console.log(key);
-
-//     const signingKey = key?.getPublicKey();
-//     callback(null, signingKey);
-//   });
-// };
-
 const isTokenValid = async (token: string): Promise<any> => {
   const bearerToken = token.split(' ');
-  console.log('BEARER TOKEN', bearerToken);
 
   const kid = process.env.AUTH0_TENANT_KID;
   const key = await client.getSigningKey(kid);
-  console.log('KEY', key);
   const signingKey = key.getPublicKey();
-  console.log('SIGNING KEY', signingKey);
-
-  try {
-    const decoded = jwt.verify(bearerToken[1], signingKey);
-    return { decoded };
-  } catch (error) {
-    return { error };
-  }
 
   return new Promise((resolve, reject): any => {
     jwt.verify(

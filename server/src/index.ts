@@ -80,21 +80,18 @@ async function StartServer() {
     bodyParser.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
-        // NOTE that this will be in the format of a JWT
-        // Will need to ensure it is signed with my auth0 private key
-
-        console.log('Headers authorization', req.headers.authorization);
-
         const authorizationHeader = req.headers.authorization || '';
         const decodedToken = await ValidateJWT(authorizationHeader);
         if (decodedToken.error) {
           // handle error case here
           console.error(`Error validating token: ${decodedToken.error}`);
         }
-        console.log('Decoded token', decodedToken);
-        // const email = req.oidc?.user ? req.oidc?.user.email : '';
-        // const user = await GetUserByEmail(email);
-        return { test: 'test' };
+        const email = decodedToken.decoded.email || '';
+        const user = await GetUserByEmail(email);
+        // NOTE need to clear this when user logs out
+        // NOTE see note above
+        // NOTE see notes above
+        return { decodedToken: decodedToken.decoded, user }; // should I store the entire decoded token, a specific property, or the undecoded token?
       },
     })
   );
