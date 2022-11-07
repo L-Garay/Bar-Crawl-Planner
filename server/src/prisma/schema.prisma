@@ -10,10 +10,53 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// When a person first signs up for the site, and they go through the auth0 flow, we'll consider this making their 'Account'
+// This will hold the basic authentication information provided by Auth0
+// Then we'll have a seperate 'Profile' table which will hold all other relevant user data (outings, friends, phone number, custom profile image, favorites/preferences, etc)
+// The two models will be one-to-one, as an account can only have one associated profile and vice versa
+// Then when someone logs in we can fire a 'GetProfileByAccountEmail' query to fetch the user's profile data based on the email we get from Auth0 to fetch the Account, and then find the linked/associated user's Profile
+
+model Account {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique @db.VarChar(255)
+  email_verified Boolean  @default(false)
+  created_at     String   @db.VarChar(255)
+  profile        Profile?
+}
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  profile_img String   @db.VarChar(255)
+  updated_at  String   @db.VarChar(255)
+  account     Account  @relation(fields: [account_Id], references: [id])
+  account_Id  Int      @unique
+  outings     Outing[] @relation(name: "Profiles_In_Outing")
+}
+
+model Outing {
+  id                  Int       @id @default(autoincrement())
+  name                String    @db.VarChar(255)
+  profiles            Profile[] @relation(name: "Profiles_In_Outing")
+  creator_id          Int
+  created_at          String    @db.VarChar(255)
+  start_date_and_time String    @db.VarChar(255)
+}
+
+// OR should we just have one 'User's table which will hold everything?
+// This way we only need to make a single query/mutation whenever
+// ANSWER: NO WE DO NOT WANT A MONO-TABLE WITH 20+ COLUMNS IN IT TO HOLD EVERYTHING
+
+// --------------------- OLD PATTERN ---------------------
 model BasicUser {
   id      Int           @id @default(autoincrement())
   name    String        @db.VarChar(255)
   outings BasicOuting[] @relation(name: "Users_In_Outing")
+  // email          String        @unique @db.VarChar(255)
+  // email_verified Boolean       @default(false)
+  // created_at     String        @db.VarChar(255)
+  // profile_img String  @db.VarChar(255)
+  // updated_at  String  @db.VarChar(255)
 }
 
 model BasicOuting {
