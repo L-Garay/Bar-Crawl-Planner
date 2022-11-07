@@ -1,21 +1,17 @@
-import { ApolloServer } from '@apollo/server';
-import resolvers from './resolvers';
-import { PrismaClient } from '@prisma/client';
-// import { readFileSync } from 'fs';
-import typeDefs from './schema';
-import { auth, requiresAuth } from 'express-openid-connect';
-import path from 'path';
-import { expressMiddleware } from '@apollo/server/express4';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import expressJwt from 'express-jwt';
-import { GetUserByEmail } from './prisma/querries/usersQuerries';
-require('dotenv').config();
-import ValidateJWT from './validate';
 import dotenv from 'dotenv';
+import { ApolloServer } from '@apollo/server';
+import { PrismaClient } from '@prisma/client';
+import { auth, requiresAuth } from 'express-openid-connect';
+import { expressMiddleware } from '@apollo/server/express4';
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
+import { GetUserByEmail } from './prisma/querries/usersQuerries';
+import typeDefs from './schema';
+import resolvers from './resolvers';
+import ValidateJWT from './validate';
 
 export const prismaClient = new PrismaClient();
 
@@ -30,11 +26,8 @@ const PORT = process.env.SERVER_PORT || 4000;
 // });
 
 async function StartServer() {
-  // Required logic for integrating with Express
   const app = express();
   // Our httpServer handles incoming requests to our Express app.
-  // Below, we tell Apollo Server to "drain" this httpServer,
-  // enabling our servers to shut down gracefully.
   const httpServer = http.createServer(app);
 
   // Same ApolloServer initialization as before, plus the drain plugin
@@ -44,10 +37,10 @@ async function StartServer() {
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   });
-  // Ensure we wait for our server to start
+
   await server.start();
 
-  // NOTE order of app.use() and app.get() matters
+  // Order of app.use() and app.get() matters
   app.use(
     auth({
       issuerBaseURL: process.env.AUTH0_ISSUER_URL,
@@ -59,11 +52,8 @@ async function StartServer() {
     })
   );
 
-  // Set up our Express middleware to handle CORS, body parsing,
-  // and our expressMiddleware function.
-
   app.get('/', (req, res) => {
-    console.log(req.oidc.idToken);
+    console.log('id token: ', req.oidc.idToken);
     const message = req.oidc.isAuthenticated()
       ? 'You are logged in'
       : 'You are logged out';
@@ -74,23 +64,37 @@ async function StartServer() {
     res.send(JSON.stringify(req.oidc.user));
   });
 
+  // Set up our Express middleware to handle CORS, body parsing,
+  // and our expressMiddleware function.
   app.use(
     '/', // fuzzy matches, will match /playground /logan etc
     cors(),
     bodyParser.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
-        const authorizationHeader = req.headers.authorization || '';
-        const decodedToken = await ValidateJWT(authorizationHeader);
+        const authorizationHeader = req.headers.authorization;
+        if (!authorizationHeader) {
+          // how to handle this case
+          // would this be the situation when a user logs out/hasn't logged in yet?
+          console.log('There is no authorization header');
+          return {};
+        }
+
+        const token = authorizationHeader.split(' ');
+        const decodedToken = await ValidateJWT(token[1]);
         if (decodedToken.error) {
           // handle error case here
           console.error(`Error validating token: ${decodedToken.error}`);
+          return {};
         }
+
         const email = decodedToken.decoded.email || '';
         const user = await GetUserByEmail(email);
+
         // NOTE need to clear this when user logs out
         // NOTE see note above
-        // NOTE see notes above
+        // NOTE this may need to be handled client side see:
+        // https://www.apollographql.com/docs/react/caching/advanced-topics/
         return { decodedToken: decodedToken.decoded, user }; // should I store the entire decoded token, a specific property, or the undecoded token?
       },
     })

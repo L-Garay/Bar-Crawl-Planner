@@ -9,15 +9,13 @@ const client = jwksClient({
 });
 
 const isTokenValid = async (token: string): Promise<any> => {
-  const bearerToken = token.split(' ');
-
   const kid = process.env.AUTH0_TENANT_KID;
   const key = await client.getSigningKey(kid);
   const signingKey = key.getPublicKey();
 
   return new Promise((resolve, reject): any => {
     jwt.verify(
-      bearerToken[1],
+      token,
       signingKey,
       {
         audience: process.env.AUTH0_CLIENT_ID,
@@ -34,7 +32,6 @@ const isTokenValid = async (token: string): Promise<any> => {
       }
     );
   });
-  // return result;
 };
 
 export default isTokenValid;

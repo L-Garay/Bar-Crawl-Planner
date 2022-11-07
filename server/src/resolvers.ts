@@ -9,8 +9,6 @@ const resolvers: Resolvers = {
     basicUsers: (parent, args, context, info) => {
       console.log(context);
       const { user, decodedToken } = context;
-
-      // const authUser = req
       if (!user || !decodedToken) {
         return null;
       }

@@ -17,10 +17,5 @@
      "noImplicitReturns": true,
      "forceConsistentCasingInFileNames": true,
    },
-   "exclude":[ 
-      "node_modules",
-      // NOTE need to figure out how to exclude this file from build
-      "/generated/**.ts"
-   ],
    "compileOnSave":false
  }
