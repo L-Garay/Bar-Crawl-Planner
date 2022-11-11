@@ -80,6 +80,7 @@ async function StartServer() {
         if (!authorizationHeader) {
           // how to handle this case
           // would this be the situation when a user logs out/hasn't logged in yet?
+          // do we need to do anything here other than just ensure that the context is empty in this situation?
           console.log('There is no authorization header');
           return {};
         }
