@@ -8,7 +8,7 @@ import { PrismaClient } from '@prisma/client';
 import { auth, requiresAuth } from 'express-openid-connect';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { GetUserByEmail } from './prisma/querries/usersQuerries';
+import { GetAccountByEmail } from './prisma/querries/accountQuerries';
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import ValidateJWT from './validateJWT';
@@ -110,7 +110,8 @@ async function StartServer() {
         }
 
         const email = decodedToken.decoded.email || '';
-        const user = await GetUserByEmail(email);
+        // NOTE still need to handle the case where a user signs up to the site for the first time and so there won't a user in the DB to find
+        const user = await GetAccountByEmail(email);
 
         // NOTE need to clear this when user logs out
         // NOTE see note above

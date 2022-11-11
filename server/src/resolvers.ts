@@ -1,13 +1,14 @@
 import { GetAllOutings } from './prisma/querries/outingsQuerries';
-import { GetAllUsers } from './prisma/querries/usersQuerries';
+import { GetAllProfiles } from './prisma/querries/profileQuerries';
 import { Resolvers } from './generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
+import { GetAllAccounts } from './prisma/querries/accountQuerries';
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
 const resolvers: Resolvers = {
   Query: {
-    basicUsers: (parent, args, context, info) => {
+    accounts: async (parent, args, context, info) => {
       console.log(context);
       const { authError } = context;
       if (authError) {
@@ -16,9 +17,17 @@ const resolvers: Resolvers = {
         });
       }
 
-      return GetAllUsers();
+      const data = await GetAllAccounts();
+      if (data.status === 'Failure') {
+        // NOTE how to handle Prisma failure in this resolver
+        throw new GraphQLError('Temp error message for accounts', {
+          extensions: { code: 'DB ERROR' },
+        });
+      } else {
+        return data.data;
+      }
     },
-    basicOutings: (parent, args, context, info) => {
+    profiles: async (parent, args, context, info) => {
       console.log(context);
       const { authError } = context;
       if (authError) {
@@ -27,7 +36,34 @@ const resolvers: Resolvers = {
         });
       }
 
-      return GetAllOutings();
+      const data = await GetAllProfiles();
+      if (data.status === 'Failure') {
+        // NOTE how to handle Prisma failure in this resolver
+        throw new GraphQLError('Temp error message for profiles', {
+          extensions: { code: 'DB ERROR' },
+        });
+      } else {
+        return data.data;
+      }
+    },
+    outings: async (parent, args, context, info) => {
+      console.log(context);
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const data = await GetAllOutings();
+      if (data.status === 'Failure') {
+        // NOTE how to handle Prisma failure in this resolver
+        throw new GraphQLError('Temp error message for outings', {
+          extensions: { code: 'DB ERROR' },
+        });
+      } else {
+        return data.data;
+      }
     },
   },
 };
