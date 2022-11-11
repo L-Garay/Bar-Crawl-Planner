@@ -60,6 +60,10 @@ async function StartServer() {
     res.send(message);
   });
 
+  app.get('/healthcheck', (req, res) => {
+    res.status(200).send('Healthy!');
+  });
+
   app.get('/protected', requiresAuth(), (req, res) => {
     res.send(JSON.stringify(req.oidc.user));
   });

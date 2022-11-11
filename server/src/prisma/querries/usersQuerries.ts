@@ -1,12 +1,19 @@
 import { prismaClient } from '../../index';
+import GetPrismaError from './getPrismaError';
 
 export async function CreateUser() {
-  await prismaClient.basicUser.create({
-    data: {
-      name: 'logangaray+barcrawl1@gmail.com',
-    },
-  });
-  console.log('Basic User Created');
+  try {
+    const user = await prismaClient.basicUser.create({
+      data: {
+        name: 'logangaray+barcrawl1@gmail.com',
+      },
+    });
+    console.log('Basic User Created');
+    return { status: 'Success', user };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', error: newError };
+  }
 }
 
 // CreateUser()
