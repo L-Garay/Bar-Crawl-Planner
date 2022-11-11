@@ -1,4 +1,6 @@
 import { prismaClient } from '../../index';
+import { QueryData } from './accountQuerries';
+import GetPrismaError from './getPrismaError';
 
 // NOTE you will only need to uncomment out the function invocations when attempting to seed/setup data in the DB
 
@@ -26,15 +28,35 @@ import { prismaClient } from '../../index';
 //     process.exit(1);
 //   });
 
-export async function GetAllOutings() {
+export async function GetOutingByOutingId(
+  outingId: number
+): Promise<QueryData> {
+  try {
+    const outings = await prismaClient.outing.findUnique({
+      where: {
+        id: outingId,
+      },
+    });
+    console.log(outings);
+    return { status: 'Success', data: outings };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: newError };
+    // await prismaClient.$disconnect();
+    // process.exit(1);
+  }
+}
+
+export async function GetAllOutings(): Promise<QueryData> {
   try {
     const outings = await prismaClient.outing.findMany();
     console.log(outings);
-    return outings;
+    return { status: 'Success', data: outings };
   } catch (error) {
-    console.error(error);
-    await prismaClient.$disconnect();
-    process.exit(1);
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: newError };
+    // await prismaClient.$disconnect();
+    // process.exit(1);
   }
 }
 
