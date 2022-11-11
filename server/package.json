@@ -26,7 +26,9 @@
     "nodemonTS": "npx nodemon ./src/index.ts",
     "testPrismaQuerries": "npx ts-node src/prisma/testPrismaQuerries.ts",
     "postinstall": "prisma generate",
-    "codegen": "graphql-codegen --config codegen.yml"
+    "codegen": "graphql-codegen --config codegen.yml",
+    "createPrismaMigration": "npx prisma migrate dev --create-only",
+    "prismaMigrate": "npx prisma migrate dev"
   },
   "author": "",
   "license": "ISC",

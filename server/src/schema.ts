@@ -2,8 +2,35 @@
 // that together define the "shape" of queries that are executed against
 // your data.
 const typeDefs = `#graphql
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
+  
+  type Account {
+    id: Int
+    email: String
+    email_verified: Boolean
+    created_at: String
+    profile: Profile
+  }
 
+  type Profile {
+    id: Int
+    name: String
+    profile_img: String
+    updated_at: String
+    account: Account
+    account_id: Int
+    outings: [Outing]
+  }
+
+  type Outing {
+    id: Int
+    name: String
+    profiles: [Profile]
+    creator_profile_id: String 
+    created_at: String
+    start_date_and_time: String
+  }
+
+  # ------------- OLD PATTERN -------------
   # This "BasicUser" type defines the queryable fields for every user in our data source.
   type BasicUser {
     id: Int
@@ -25,6 +52,13 @@ const typeDefs = `#graphql
   type Query {
     basicUsers: [BasicUser]
     basicOutings: [BasicOuting]
+    account: Account
+    profile: Profile
+    outing: Outing
+    accounts: [Account]
+    profiles: [Profile]
+    outings: [Outing]
+    
   }
 `;
 

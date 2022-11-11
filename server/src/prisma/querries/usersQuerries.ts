@@ -1,20 +1,20 @@
 import { prismaClient } from '../../index';
 import GetPrismaError from './getPrismaError';
 
-export async function CreateUser() {
-  try {
-    const user = await prismaClient.basicUser.create({
-      data: {
-        name: 'logangaray+barcrawl1@gmail.com',
-      },
-    });
-    console.log('Basic User Created');
-    return { status: 'Success', user };
-  } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', error: newError };
-  }
-}
+// export async function CreateUser() {
+//   try {
+//     const user = await prismaClient.basicUser.create({
+//       data: {
+//         name: 'logangaray+barcrawl1@gmail.com',
+//       },
+//     });
+//     console.log('Basic User Created');
+//     return { status: 'Success', user };
+//   } catch (error) {
+//     const newError = GetPrismaError(error);
+//     return { status: 'Failure', error: newError };
+//   }
+// }
 
 // CreateUser()
 //   .then(async () => {
@@ -26,16 +26,16 @@ export async function CreateUser() {
 //     process.exit(1);
 //   });
 
-export async function CreateManyUsers() {
-  await prismaClient.basicUser.createMany({
-    data: [
-      { name: 'Michael Scott' },
-      { name: 'Bob Vance' },
-      { name: 'Pam Beasley' },
-    ],
-  });
-  console.log('Many Basic Users Created');
-}
+// export async function CreateManyUsers() {
+//   await prismaClient.basicUser.createMany({
+//     data: [
+//       { name: 'Michael Scott' },
+//       { name: 'Bob Vance' },
+//       { name: 'Pam Beasley' },
+//     ],
+//   });
+//   console.log('Many Basic Users Created');
+// }
 
 // CreateManyUsers()
 //   .then(async () => {
@@ -49,7 +49,7 @@ export async function CreateManyUsers() {
 
 export async function GetAllUsers() {
   try {
-    const users = await prismaClient.basicUser.findMany();
+    const users = await prismaClient.account.findMany();
     console.log(users);
     return users;
   } catch (error) {
@@ -72,9 +72,9 @@ export async function GetAllUsers() {
 // NOTE right now this is actually checking the user's name, but in the future this will check their email
 export async function GetUserByEmail(email: string) {
   try {
-    const user = await prismaClient.basicUser.findFirst({
+    const user = await prismaClient.account.findFirst({
       where: {
-        name: email,
+        email: email,
       },
     });
     return user;
@@ -85,22 +85,22 @@ export async function GetUserByEmail(email: string) {
   }
 }
 
-export async function ConnectUserWithOuting() {
-  const user = await prismaClient.basicUser.update({
-    where: { id: 5 },
-    data: {
-      outings: {
-        connect: {
-          id: 4,
-        },
-      },
-    },
-    include: {
-      outings: true,
-    },
-  });
-  console.log(user);
-}
+// export async function ConnectUserWithOuting() {
+//   const user = await prismaClient.basicUser.update({
+//     where: { id: 5 },
+//     data: {
+//       outings: {
+//         connect: {
+//           id: 4,
+//         },
+//       },
+//     },
+//     include: {
+//       outings: true,
+//     },
+//   });
+//   console.log(user);
+// }
 
 // ConnectUserWithOuting()
 //   .then(async () => {
@@ -112,20 +112,20 @@ export async function ConnectUserWithOuting() {
 //     process.exit(1);
 //   });
 
-export async function DisconnectUserWithOuting() {
-  const user = await prismaClient.basicUser.update({
-    where: { id: 5 },
-    data: {
-      outings: {
-        disconnect: { id: 4 },
-      },
-    },
-    include: {
-      outings: true,
-    },
-  });
-  console.log(user);
-}
+// export async function DisconnectUserWithOuting() {
+//   const user = await prismaClient.basicUser.update({
+//     where: { id: 5 },
+//     data: {
+//       outings: {
+//         disconnect: { id: 4 },
+//       },
+//     },
+//     include: {
+//       outings: true,
+//     },
+//   });
+//   console.log(user);
+// }
 
 // DisconnectUserWithOuting()
 //   .then(async () => {

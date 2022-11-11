@@ -38,7 +38,7 @@ model Outing {
   id                  Int       @id @default(autoincrement())
   name                String    @db.VarChar(255)
   profiles            Profile[] @relation(name: "Profiles_In_Outing")
-  creator_id          Int
+  creator_profile_id  Int
   created_at          String    @db.VarChar(255)
   start_date_and_time String    @db.VarChar(255)
 }
@@ -48,22 +48,22 @@ model Outing {
 // ANSWER: NO WE DO NOT WANT A MONO-TABLE WITH 20+ COLUMNS IN IT TO HOLD EVERYTHING
 
 // --------------------- OLD PATTERN ---------------------
-model BasicUser {
-  id      Int           @id @default(autoincrement())
-  name    String        @db.VarChar(255)
-  outings BasicOuting[] @relation(name: "Users_In_Outing")
-  // email          String        @unique @db.VarChar(255)
-  // email_verified Boolean       @default(false)
-  // created_at     String        @db.VarChar(255)
-  // profile_img String  @db.VarChar(255)
-  // updated_at  String  @db.VarChar(255)
-}
+// model BasicUser {
+//   id      Int           @id @default(autoincrement())
+//   name    String        @db.VarChar(255)
+//   outings BasicOuting[] @relation(name: "Users_In_Outing")
+//   // email          String        @unique @db.VarChar(255)
+//   // email_verified Boolean       @default(false)
+//   // created_at     String        @db.VarChar(255)
+//   // profile_img String  @db.VarChar(255)
+//   // updated_at  String  @db.VarChar(255)
+// }
 
-model BasicOuting {
-  id         Int         @id @default(autoincrement())
-  name       String      @db.VarChar(255)
-  users      BasicUser[] @relation(name: "Users_In_Outing")
-  creator_id Int
-  created_at String      @db.VarChar(255)
-  // start_date_and_time DateTime
-}
+// model BasicOuting {
+//   id         Int         @id @default(autoincrement())
+//   name       String      @db.VarChar(255)
+//   users      BasicUser[] @relation(name: "Users_In_Outing")
+//   creator_id Int
+//   created_at String      @db.VarChar(255)
+//   // start_date_and_time DateTime
+// }

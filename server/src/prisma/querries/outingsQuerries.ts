@@ -1,16 +1,20 @@
 import { prismaClient } from '../../index';
 
-export async function CreateOuting() {
-  const date = new Date().toISOString();
-  await prismaClient.basicOuting.create({
-    data: {
-      name: "Bob's Retirement",
-      created_at: date,
-      creator_id: 3, // NOTE don't like that this is hardcoded for now
-    },
-  });
-  console.log('Basic Outing Created');
-}
+// NOTE you will only need to uncomment out the function invocations when attempting to seed/setup data in the DB
+
+// export async function CreateOuting() {
+//   const date = new Date().toISOString();
+//   const start = new Date('06-15-2023').toISOString();
+//   await prismaClient.outing.create({
+//     data: {
+//       name: "Michael's Birthday",
+//       created_at: date,
+//       creator_id: 2, // NOTE don't like that this is hardcoded for now
+//       start_date_and_time: start,
+//     },
+//   });
+//   console.log('Basic Outing Created');
+// }
 
 // CreateOuting()
 //   .then(async () => {
@@ -24,7 +28,7 @@ export async function CreateOuting() {
 
 export async function GetAllOutings() {
   try {
-    const outings = await prismaClient.basicOuting.findMany();
+    const outings = await prismaClient.outing.findMany();
     console.log(outings);
     return outings;
   } catch (error) {
@@ -44,21 +48,21 @@ export async function GetAllOutings() {
 //     process.exit(1);
 //   });
 
-export async function GetOutingsByUser() {
-  const outings = await prismaClient.basicUser.findFirst({
-    where: {
-      id: 3,
-    },
-    include: {
-      outings: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-  console.log(outings);
-}
+// export async function GetOutingsByUser() {
+//   const outings = await prismaClient.profile.findFirst({
+//     where: {
+//       id: 3,
+//     },
+//     include: {
+//       outings: {
+//         select: {
+//           name: true,
+//         },
+//       },
+//     },
+//   });
+//   console.log(outings);
+// }
 
 // GetOutingsByUser()
 //   .then(async () => {
