@@ -12,7 +12,40 @@ type BasicOuting {
   users: [BasicUser]
 }
 
+type Account {
+  id: Int
+  email: String
+  email_verified: Boolean
+  created_at: String
+  profile: Profile
+}
+
+type Profile {
+  id: Int
+  name: String
+  profile_img: String
+  updated_at: String
+  account: Account
+  account_id: Int
+  outings: [Outing]
+}
+
+type Outing {
+  id: Int
+  name: String
+  profiles: [Profile]
+  creator_profile_id: String
+  created_at: String
+  start_date_and_time: String
+}
+
 type Query {
   basicUsers: [BasicUser]
   basicOutings: [BasicOuting]
+  account: Account
+  profile: Profile
+  outing: Outing
+  accounts: [Account]
+  profiles: [Profile]
+  outings: [Outing]
 }

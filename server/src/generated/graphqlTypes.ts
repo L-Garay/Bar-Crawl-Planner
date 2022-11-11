@@ -13,6 +13,15 @@ export type Scalars = {
   Float: number;
 };
 
+export type Account = {
+  __typename?: 'Account';
+  created_at?: Maybe<Scalars['String']>;
+  email?: Maybe<Scalars['String']>;
+  email_verified?: Maybe<Scalars['Boolean']>;
+  id?: Maybe<Scalars['Int']>;
+  profile?: Maybe<Profile>;
+};
+
 export type BasicOuting = {
   __typename?: 'BasicOuting';
   created_at?: Maybe<Scalars['String']>;
@@ -29,10 +38,37 @@ export type BasicUser = {
   outings?: Maybe<Array<Maybe<BasicOuting>>>;
 };
 
+export type Outing = {
+  __typename?: 'Outing';
+  created_at?: Maybe<Scalars['String']>;
+  creator_profile_id?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['Int']>;
+  name?: Maybe<Scalars['String']>;
+  profiles?: Maybe<Array<Maybe<Profile>>>;
+  start_date_and_time?: Maybe<Scalars['String']>;
+};
+
+export type Profile = {
+  __typename?: 'Profile';
+  account?: Maybe<Account>;
+  account_id?: Maybe<Scalars['Int']>;
+  id?: Maybe<Scalars['Int']>;
+  name?: Maybe<Scalars['String']>;
+  outings?: Maybe<Array<Maybe<Outing>>>;
+  profile_img?: Maybe<Scalars['String']>;
+  updated_at?: Maybe<Scalars['String']>;
+};
+
 export type Query = {
   __typename?: 'Query';
+  account?: Maybe<Account>;
+  accounts?: Maybe<Array<Maybe<Account>>>;
   basicOutings?: Maybe<Array<Maybe<BasicOuting>>>;
   basicUsers?: Maybe<Array<Maybe<BasicUser>>>;
+  outing?: Maybe<Outing>;
+  outings?: Maybe<Array<Maybe<Outing>>>;
+  profile?: Maybe<Profile>;
+  profiles?: Maybe<Array<Maybe<Profile>>>;
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -105,22 +141,37 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
+  Account: ResolverTypeWrapper<Account>;
   BasicOuting: ResolverTypeWrapper<BasicOuting>;
   BasicUser: ResolverTypeWrapper<BasicUser>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  Outing: ResolverTypeWrapper<Outing>;
+  Profile: ResolverTypeWrapper<Profile>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
+  Account: Account;
   BasicOuting: BasicOuting;
   BasicUser: BasicUser;
   Boolean: Scalars['Boolean'];
   Int: Scalars['Int'];
+  Outing: Outing;
+  Profile: Profile;
   Query: {};
   String: Scalars['String'];
+}>;
+
+export type AccountResolvers<ContextType = any, ParentType extends ResolversParentTypes['Account'] = ResolversParentTypes['Account']> = ResolversObject<{
+  created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  email_verified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type BasicOutingResolvers<ContextType = any, ParentType extends ResolversParentTypes['BasicOuting'] = ResolversParentTypes['BasicOuting']> = ResolversObject<{
@@ -139,14 +190,44 @@ export type BasicUserResolvers<ContextType = any, ParentType extends ResolversPa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type OutingResolvers<ContextType = any, ParentType extends ResolversParentTypes['Outing'] = ResolversParentTypes['Outing']> = ResolversObject<{
+  created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  creator_profile_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
+  start_date_and_time?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ProfileResolvers<ContextType = any, ParentType extends ResolversParentTypes['Profile'] = ResolversParentTypes['Profile']> = ResolversObject<{
+  account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
+  account_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
+  profile_img?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updated_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
+  accounts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Account']>>>, ParentType, ContextType>;
   basicOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['BasicOuting']>>>, ParentType, ContextType>;
   basicUsers?: Resolver<Maybe<Array<Maybe<ResolversTypes['BasicUser']>>>, ParentType, ContextType>;
+  outing?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType>;
+  outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
+  profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
+  profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
+  Account?: AccountResolvers<ContextType>;
   BasicOuting?: BasicOutingResolvers<ContextType>;
   BasicUser?: BasicUserResolvers<ContextType>;
+  Outing?: OutingResolvers<ContextType>;
+  Profile?: ProfileResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 }>;
 
