@@ -24,10 +24,10 @@ const isTokenValid = async (token: string): Promise<any> => {
       },
       (error, decoded) => {
         if (error) {
-          resolve({ error });
+          resolve({ status: 401, error });
         }
         if (decoded) {
-          resolve({ decoded });
+          resolve({ status: 200, decoded });
         }
       }
     );
