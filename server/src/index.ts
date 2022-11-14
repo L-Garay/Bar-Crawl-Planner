@@ -110,7 +110,7 @@ async function StartServer() {
         }
 
         const email = decodedToken.decoded.email || '';
-        // NOTE still need to handle the case where a user signs up to the site for the first time and so there won't a user in the DB to find
+        // TODO still need to handle the case where a user signs up to the site for the first time and so there won't a user in the DB to find
         const user = await GetAccountByEmail(email);
 
         // NOTE need to clear this when user logs out
