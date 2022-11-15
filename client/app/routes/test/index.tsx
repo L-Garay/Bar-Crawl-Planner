@@ -17,6 +17,9 @@ export default function Posts() {
   return (
     <main>
       <h1>Test Page</h1>
+      <div>
+        <Link to="/async">Here is a link to an asynchronous page.</Link>
+      </div>
       <ul>
         {posts.map((post) => (
           <li key={post.slug}>
