@@ -1,43 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { Auth0Client } from '@auth0/auth0-spa-js';
 import getAuthOClient from '../auth/authClient';
+import type { LoaderFunction } from '@remix-run/node';
+import getConfig from '~/utils/getConfig';
+import { useLoaderData } from '@remix-run/react';
 
-// NOTE loader is exported and used in server, which tries to call this client side only auth0 module
-// the module tries to access 'document' which is not defined in the server
+export const loader: LoaderFunction = async () => {
+  const environmentVariables = process.env;
+  const config = getConfig(environmentVariables);
+  return { config };
+};
 
-// export const loader: LoaderFunction = async () => {
-//   const authClient = await getAuthOClient();
-//   return authClient;
-// };
-
-// NOTE in this current configuration, getting the error
-// Cannot read properties of null (reading 'useState')
-// which would indicate that react is not imported at the time this is code is hit
-const TestView = async () => {
-  const [authClient, setAuthClient] = useState<Auth0Client | undefined>(
+export default function TestView() {
+  const { config } = useLoaderData();
+  const [authClient, setAuthClient] = React.useState<Auth0Client | undefined>(
     undefined
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     const getAndSetClient = async () => {
-      const client = await getAuthOClient();
+      const client = await getAuthOClient(config);
       setAuthClient(client);
     };
 
     getAndSetClient().catch((error) => {
       console.error(error);
     });
-  }, []);
+  }, [config]);
 
   return (
     <>
       {authClient && (
         <main>
           <h1>This should be an asynchronous page</h1>
+          <p>
+            As in, the rendering of this page waits for an asynchronous request
+            to resolve
+          </p>
         </main>
       )}
     </>
   );
-};
-
-export default TestView;
+}
