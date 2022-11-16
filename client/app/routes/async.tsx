@@ -1,32 +1,11 @@
-import React from 'react';
-import type { Auth0Client } from '@auth0/auth0-spa-js';
-import getAuthOClient from '../auth/authClient';
-import type { LoaderFunction } from '@remix-run/node';
-import getConfig from '~/utils/getConfig';
-import { useLoaderData } from '@remix-run/react';
+import useAuthContext from '~/auth/authContext';
+// import type { LoaderFunction } from '@remix-run/node';
 
-export const loader: LoaderFunction = async () => {
-  const environmentVariables = process.env;
-  const config = getConfig(environmentVariables);
-  return { config };
-};
+// export const loader: LoaderFunction = async () => {};
 
 export default function TestView() {
-  const { config } = useLoaderData();
-  const [authClient, setAuthClient] = React.useState<Auth0Client | undefined>(
-    undefined
-  );
-
-  React.useEffect(() => {
-    const getAndSetClient = async () => {
-      const client = await getAuthOClient(config);
-      setAuthClient(client);
-    };
-
-    getAndSetClient().catch((error) => {
-      console.error(error);
-    });
-  }, [config]);
+  const { authClient } = useAuthContext();
+  console.log(authClient);
 
   return (
     <>
