@@ -5,7 +5,6 @@ import useAuthContext from '~/auth/authContext';
 
 export default function TestView() {
   const { authClient } = useAuthContext();
-  console.log(authClient);
 
   return (
     <>
