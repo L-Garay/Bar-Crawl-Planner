@@ -8,7 +8,7 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from '@remix-run/react';
-import { AuthProvider } from './auth/authContext';
+import { AuthProvider } from './contexts/authContext';
 import getConfig from './utils/getConfig';
 
 export const meta: MetaFunction = () => ({

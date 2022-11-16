@@ -1,4 +1,4 @@
-import useAuthContext from '~/auth/authContext';
+import useAuthContext from '~/contexts/authContext';
 // import type { LoaderFunction } from '@remix-run/node';
 
 // export const loader: LoaderFunction = async () => {};
