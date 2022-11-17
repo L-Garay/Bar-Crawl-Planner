@@ -68,6 +68,13 @@ async function StartServer() {
     res.send(JSON.stringify(req.oidc.user));
   });
 
+  app.post('/start-session', () => {
+    // run token validation
+    // get user
+    // check user
+    // create session
+  });
+
   // Set up our Express middleware to handle CORS, body parsing,
   // and our expressMiddleware function.
   app.use(

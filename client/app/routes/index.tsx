@@ -3,15 +3,7 @@ import { Link } from '@remix-run/react';
 import useAuthContext from '~/contexts/authContext';
 
 export default function LandingPage() {
-  const { authClient } = useAuthContext();
-  const [isLoggedIn, setIsLoggedIn] = React.useState<boolean | undefined>(
-    false
-  );
-
-  React.useMemo(async () => {
-    const status = await authClient?.isAuthenticated();
-    setIsLoggedIn(status);
-  }, [authClient]);
+  const { authClient, isLoggedIn } = useAuthContext();
 
   const attemptLogin = async () => {
     try {
@@ -19,6 +11,7 @@ export default function LandingPage() {
         authorizationParams: {
           // TODO figure out why after successful login and redirect to proper page; query params of 'code' and 'state' are added to url
           redirect_uri: window.ENV.AUTH0.LOGIN_URL,
+          // once a user hits this page, that is when you start the process to valiate token and user and start session
         },
       });
     } catch (error) {
@@ -28,11 +21,10 @@ export default function LandingPage() {
   };
 
   const attemptLogout = async () => {
+    // NOTE this is not how this is suppossed to be actually setup
     await authClient?.logout();
     await authClient?.handleRedirectCallback();
   };
-
-  console.log(isLoggedIn);
 
   return (
     <>
