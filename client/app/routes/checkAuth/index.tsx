@@ -13,6 +13,11 @@ import {
 
 // NOTE this is not getting called/hit
 // neither using the submit() function or using the native form/button submission
+// NOTE NOTE NOTE NOTE NOTE NOTE
+// it appears as though the native submit is adding the hidden input's name and value to the url
+// maybe we can pull the id token out of the request url?
+// would that be a security vulnerability by exposing it in the url?
+// can it be done, but just needs to be encoded first?
 export async function action({ formData }: Request) {
   const data = await formData();
   const test = data.get('test');
