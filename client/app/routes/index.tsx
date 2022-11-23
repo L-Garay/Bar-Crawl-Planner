@@ -9,7 +9,6 @@ export default function LandingPage() {
     try {
       await authClient?.loginWithRedirect({
         authorizationParams: {
-          // TODO figure out why after successful login and redirect to proper page; query params of 'code' and 'state' are added to url
           redirect_uri: window.ENV.AUTH0.LOGIN_URL,
           // once a user hits this page, that is when you start the process to valiate token and user and start session
         },

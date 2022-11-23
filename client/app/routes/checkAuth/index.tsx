@@ -1,48 +1,42 @@
 import React from 'react';
 import useAuthContext from '~/contexts/authContext';
 import { json, redirect } from '@remix-run/node';
-import {
-  useLoaderData,
-  useSubmit,
-  SubmitOptions,
-  Form,
-  useActionData,
-} from '@remix-run/react';
+import { useSubmit } from '@remix-run/react';
 
-// export async function loader({ request }: any) {}
+export async function loader({ request }: any) {
+  console.log('HIT THE LOADER');
+  return json({ foo: 'bar' });
+}
 
-// NOTE this is not getting called/hit
-// neither using the submit() function or using the native form/button submission
-// NOTE NOTE NOTE NOTE NOTE NOTE
-// it appears as though the native submit is adding the hidden input's name and value to the url
-// maybe we can pull the id token out of the request url?
-// would that be a security vulnerability by exposing it in the url?
-// can it be done, but just needs to be encoded first?
-export async function action({ formData }: Request) {
-  const data = await formData();
-  const test = data.get('test');
-  console.log('DATA FROM ACTION', data);
-  return json({ test });
+export async function action({ request }: any) {
+  const data = await request.formData();
+  const token = data.get('idToken');
+  console.log('DATA FROM ACTION', token);
+  // here is where will make the server call to our api and hit the /start-session (route name TBD)
+  // need to pass idToken to validate and get/create user
+  // a user will then returned
+  // we will need to create a Remix session for said user
+  // then we will need to redirect them to the homepage
+  return redirect('/homepage');
 }
 
 export default function CheckAuth() {
   const { authClient, setIsLoggedIn } = useAuthContext();
   const [idToken, setIdToken] = React.useState<string | undefined>(undefined);
 
-  // can use this function to trigger an 'empty' action, which will trigger the loader
+  // can use this function to trigger an action call programatically
   const submit = useSubmit();
-  const actionData = useActionData();
-  console.log('Action Data', actionData);
 
   // Call auth0 redirect callback
   // get auth0 user id token and set it in state
   React.useEffect(() => {
     const query = window.location.search;
     const hasParams = query.includes('code=') && query.includes('state=');
+
     const authRedirectCallback = async () => {
       await authClient?.handleRedirectCallback();
-      const test = await authClient?.isAuthenticated();
-      return test;
+      const isAuthenticated = await authClient?.isAuthenticated();
+      return isAuthenticated;
     };
 
     if (hasParams) {
@@ -51,8 +45,8 @@ export default function CheckAuth() {
           if (isLoggedIn) {
             setIsLoggedIn(isLoggedIn);
             authClient?.getIdTokenClaims().then((claims) => {
+              //NOTE should we send the raw token or the entire claims object?
               const token = claims?.__raw || '';
-              console.log('ID TOKEN', token);
               setIdToken(token);
             });
           }
@@ -64,31 +58,22 @@ export default function CheckAuth() {
     }
   }, [authClient, setIsLoggedIn]);
 
-  // Use id token to make request to server to validate token and get/set user
+  // Use id token and make request to Remix server
   // clear url of auth0 params
-  console.log('idToken from component state', idToken);
-  // React.useEffect(() => {
-  // here is where we would make the call to the server with the fetched id token to validate
-  //   console.log(
-  //     'this hook should submit the remix action with the idToken and then clear the url params'
-  //   );
-
-  //   if (idToken) {
-  //     console.log('about to call submit() from effect hook');
-
-  //     submit({ idToken });
-  //     window.history.replaceState({}, '', '/checkAuth'); // NOTE change url name
-  //   }
-  // }, [idToken, submit]);
+  React.useEffect(() => {
+    if (idToken) {
+      submit(
+        { idToken },
+        { method: 'post', action: '/checkAuth/?index', replace: false }
+      );
+      window.history.replaceState({}, '', '/checkAuth'); // NOTE change url name
+    }
+  }, [idToken, submit]);
 
   return (
     <>
       <main>
         <h1>This will be an 'auth' only page</h1>
-        <Form>
-          <input type="hidden" name="test" value={'test'} />
-          <button type="submit">Test</button>
-        </Form>
         <p>
           This is the intermediate page where we will validate token and claims
           from auth0 sign-redirect
