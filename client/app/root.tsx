@@ -9,7 +9,7 @@ import {
   useLoaderData,
 } from '@remix-run/react';
 import { AuthProvider } from './contexts/authContext';
-import getConfig from './utils/getConfig';
+import getConfig from './utils/config.server';
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
@@ -18,8 +18,7 @@ export const meta: MetaFunction = () => ({
 });
 
 export async function loader() {
-  const environmentVariables = process.env;
-  const config = getConfig(environmentVariables);
+  const config = getConfig();
   return { config };
 }
 
