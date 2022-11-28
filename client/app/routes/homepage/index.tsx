@@ -1,9 +1,23 @@
+import type { LoaderFunction } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
 import React from 'react';
-import useAuthContext from '~/contexts/authContext';
+import { authenticator } from '~/auth/authenticator';
+import { getSession } from '~/auth/session';
+import getConfig from '~/utils/config.server';
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const config = getConfig();
+  const isAuthenticated = await authenticator.isAuthenticated(request);
+  console.log('isAuthenticated from loader on homepage', isAuthenticated);
+
+  const cookie = request.headers.get('Cookie');
+  const session = await getSession(cookie);
+  return { session };
+};
 
 export default function HomePage() {
-  const { authClient, isLoggedIn } = useAuthContext();
-  console.log(isLoggedIn, 'from the actual homepage');
+  const { session } = useLoaderData();
+  console.log('Session', session);
 
   return (
     <>

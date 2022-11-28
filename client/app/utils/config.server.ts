@@ -3,6 +3,7 @@ import invariant from 'tiny-invariant';
 const getConfig = () => {
   invariant(process.env.SERVER_ADDRESS, 'SERVER_ADDRESS is undefined');
   invariant(process.env.AUTH0_CLIENT_ID, 'AUTH0_CLIENT_ID is undefined');
+  invariant(process.env.AUTH0_AUDIENCE, 'AUTH0_AUDIENCE is undefined');
   invariant(
     process.env.AUTH0_SESSION_SECRET,
     'AUTH0_SESSION_SECRET is undefined'
@@ -23,6 +24,7 @@ const getConfig = () => {
 
   const SERVER_ADDRESS = process.env.SERVER_ADDRESS!;
   const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID!;
+  const AUTH0_AUDIENCE = process.env.AUTH0_AUDIENCE!;
   const AUTH0_SESSION_SECRET = process.env.AUTH0_SESSION_SECRET!;
   const AUTH0_CLIENT_SECRET = process.env.AUTH0_CLIENT_SECRET!;
   const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN!;
@@ -35,6 +37,7 @@ const getConfig = () => {
   const config = {
     AUTH0: {
       CLIENT_ID: AUTH0_CLIENT_ID,
+      AUDIENCE: AUTH0_AUDIENCE,
       CLIENT_SECRET: AUTH0_CLIENT_SECRET,
       SESSION_SECRET: AUTH0_SESSION_SECRET,
       DOMAIN: AUTH0_DOMAIN,

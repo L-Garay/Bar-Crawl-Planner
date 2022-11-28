@@ -1,31 +1,26 @@
 import React from 'react';
-import { Link } from '@remix-run/react';
+import { Form, Link } from '@remix-run/react';
 import useAuthContext from '~/contexts/authContext';
 import getConfig from '~/utils/config.server';
+import type { ActionFunction, LoaderFunction } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
+import { authenticator } from '~/auth/authenticator';
+
+export const action: ActionFunction = ({ request }) => {
+  return authenticator.authenticate('auth0', request);
+};
+
+export const loader: LoaderFunction = async ({ request }) => {
+  const config = getConfig();
+  const user = await authenticator.isAuthenticated(request);
+  console.log('User from main page loader', user);
+  if (user) {
+    return redirect(config.AUTH0.LOGIN_URL);
+  } else return { foo: 'bar' };
+};
 
 export default function LandingPage() {
-  const { authClient, isLoggedIn } = useAuthContext();
-
-  const attemptLogin = async () => {
-    const config = getConfig();
-    try {
-      await authClient?.loginWithRedirect({
-        authorizationParams: {
-          redirect_uri: config.AUTH0.LOGIN_URL,
-          // once a user hits this page, that is when you start the process to valiate token and user and start session
-        },
-      });
-    } catch (error) {
-      // TODO figure out how to handle this case properly
-      console.error(error);
-    }
-  };
-
-  const attemptLogout = async () => {
-    // NOTE this is not how this is suppossed to be actually setup
-    await authClient?.logout();
-    await authClient?.handleRedirectCallback();
-  };
+  const { authClient } = useAuthContext();
 
   return (
     <>
@@ -38,11 +33,9 @@ export default function LandingPage() {
         >
           <h1>Welcome to Remix</h1>
           <Link to="/test">Test Link</Link>
-          {isLoggedIn ? (
-            <button onClick={attemptLogout}>Logout</button>
-          ) : (
-            <button onClick={attemptLogin}>Login</button>
-          )}
+          <Form method="post">
+            <button>Login</button>
+          </Form>
         </div>
       )}
     </>
