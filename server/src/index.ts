@@ -68,13 +68,13 @@ async function StartServer() {
     res.send(JSON.stringify(req.oidc.user));
   });
 
-  app.post('/authenticate', (req, res) => {
+  app.get('/authenticate', (req, res) => {
     console.log('Hitting the authenticate route in server', req.body);
     // run token validation
     // get user
     // check user
     // create session
-    return { foo: 'bar' };
+    res.status(200).send({ foo: 'barbarbar' });
   });
 
   // Set up our Express middleware to handle CORS, body parsing,

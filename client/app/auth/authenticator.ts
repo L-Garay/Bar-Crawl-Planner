@@ -1,4 +1,3 @@
-import type { Request } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Authenticator } from 'remix-auth';
 import { Auth0Strategy } from 'remix-auth-auth0';
@@ -27,8 +26,14 @@ let auth0Strategy = new Auth0Strategy(
     // Get the user data from your DB or API using the tokens and profile
     // NOTE the returned data object needs to match the 'User' type
     // { email, token, name? }
-    // const userData = await fetch(`${config.SERVER.ADDRESS}/authenticate`);
-    // console.log(JSON.stringify(userData));
+    console.log('Should be about to fetch server');
+    try {
+      const userData = await fetch(`${config.SERVER.ADDRESS}/authenticate`);
+      console.log(JSON.stringify(userData));
+    } catch (error) {
+      console.error('Error trying to fetch server:', error);
+    }
+    console.log('Should have just fetched server');
     const testUser = {
       email: 'test.com',
       token: 'kj;alkdfjd',
