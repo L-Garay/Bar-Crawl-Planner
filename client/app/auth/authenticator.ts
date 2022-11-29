@@ -1,13 +1,10 @@
+import type { Request } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { Authenticator } from 'remix-auth';
 import { Auth0Strategy } from 'remix-auth-auth0';
 import getConfig from '~/utils/config.server';
 import type { User } from '../types/sharedTypes';
-import {
-  getSession,
-  commitSession,
-  destroySession,
-  sessionStorage,
-} from './session';
+import { getSession, destroySession, sessionStorage } from './session';
 
 const config = getConfig();
 
@@ -41,3 +38,27 @@ let auth0Strategy = new Auth0Strategy(
 );
 
 authenticator.use(auth0Strategy);
+
+// Helper methods
+const getLogoutUrl = () => {
+  const config = getConfig();
+
+  const logoutURL = new URL(config.AUTH0.LOGOUT_URL);
+  logoutURL.searchParams.set('client_id', config.AUTH0.CLIENT_ID);
+  logoutURL.searchParams.set('returnTo', config.AUTH0.RETURN_TO_URL);
+
+  return logoutURL.toString();
+};
+
+// NOTE can't type the request as 'Request' because in the logout.tsx resource route, when passing in the request from the action
+// It produces an error saying "Argument of type 'Request' is not assignable to parameter of type 'NodeRequest'."
+export const logout = async (request: any) => {
+  const session = await getSession(request.headers.get('Cookie'));
+  const url = getLogoutUrl();
+
+  return redirect(url, {
+    headers: {
+      'Set-Cookie': await destroySession(session),
+    },
+  });
+};
