@@ -68,6 +68,7 @@ async function StartServer() {
     res.send(JSON.stringify(req.oidc.user));
   });
 
+  // NOTE will not be using this
   app.get('/authenticate', (req, res) => {
     console.log('Hitting the authenticate route in server', req.path);
     // run token validation
@@ -76,11 +77,18 @@ async function StartServer() {
     res.status(200).send(JSON.stringify({ foo: 'barbarbar' }));
   });
 
+  // NOTE will likely need to expand/modify this going forward
+  // this is a basic example to be able to test connection
+  const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+  };
+
   // Set up our Express middleware to handle CORS, body parsing,
   // and our expressMiddleware function.
   app.use(
     '/playground', // fuzzy matches, will match /playground /logan etc
-    cors(),
+    cors(corsOptions),
     bodyParser.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {

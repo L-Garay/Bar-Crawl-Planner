@@ -1,15 +1,20 @@
-import type { NormalizedCacheObject } from '@apollo/client';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
+import React from 'react';
 
-let apolloClient: ApolloClient<NormalizedCacheObject> | undefined;
-
-const getApolloClient = (serverAddress: string) => {
-  if (!apolloClient) {
-    return new ApolloClient({
-      uri: `${serverAddress}/playground`,
-      cache: new InMemoryCache(),
-    });
-  } else return apolloClient;
+const useGetApolloClient = (serverAddress: string, idToken?: string) => {
+  const callback = React.useCallback(() => {
+    if (serverAddress) {
+      return new ApolloClient({
+        uri: `${serverAddress}/playground`,
+        cache: new InMemoryCache(),
+        credentials: 'include',
+        headers: {
+          authorization: `Bearer ${idToken}`,
+        },
+      });
+    }
+  }, [serverAddress, idToken]);
+  return callback;
 };
 
-export default getApolloClient;
+export default useGetApolloClient;
