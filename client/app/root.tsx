@@ -1,3 +1,4 @@
+import { ApolloProvider } from '@apollo/client';
 import type { MetaFunction } from '@remix-run/node';
 import {
   Links,
@@ -8,6 +9,7 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from '@remix-run/react';
+import getApolloClient from './apollo/getClient';
 import { AuthProvider } from './contexts/authContext';
 import getConfig from './utils/config.server';
 
@@ -24,6 +26,7 @@ export async function loader() {
 
 export default function App() {
   const { config } = useLoaderData();
+  const client = getApolloClient(config.SERVER.SERVER_ADDRESS);
   return (
     <html lang="en">
       <head>
@@ -37,7 +40,9 @@ export default function App() {
           }}
         />
         <AuthProvider>
-          <Outlet />
+          <ApolloProvider client={client}>
+            <Outlet />
+          </ApolloProvider>
         </AuthProvider>
         <ScrollRestoration />
         <Scripts />
