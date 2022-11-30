@@ -69,22 +69,23 @@ async function StartServer() {
   });
 
   app.get('/authenticate', (req, res) => {
-    console.log('Hitting the authenticate route in server', req.body);
+    console.log('Hitting the authenticate route in server', req.path);
     // run token validation
     // get user
-    // check user
-    // create session
-    res.status(200).send({ foo: 'barbarbar' });
+    // set user
+    res.status(200).send(JSON.stringify({ foo: 'barbarbar' }));
   });
 
   // Set up our Express middleware to handle CORS, body parsing,
   // and our expressMiddleware function.
   app.use(
-    '/', // fuzzy matches, will match /playground /logan etc
+    '/playground', // fuzzy matches, will match /playground /logan etc
     cors(),
     bodyParser.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
+        console.log('Is the apollo context getting hit?');
+
         const authorizationHeader = req.headers.authorization;
         if (!authorizationHeader) {
           // how to handle this case

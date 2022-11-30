@@ -9,7 +9,7 @@ const config = getConfig();
 
 // Create an instance of the authenticator, pass a generic with what your
 // strategies will return and will be stored in the session
-export const authenticator = new Authenticator<User>(sessionStorage);
+export const authenticator = new Authenticator<User | null>(sessionStorage);
 
 let auth0Strategy = new Auth0Strategy(
   {
@@ -20,25 +20,27 @@ let auth0Strategy = new Auth0Strategy(
     audience: config.AUTH0.AUDIENCE,
   },
   // Sets the token header
-  async (data) => {
-    console.log(JSON.stringify(data), 'data from the authenticator callback');
+  async (authData) => {
+    const idToken = authData.extraParams.id_token;
 
     // Get the user data from your DB or API using the tokens and profile
-    // NOTE the returned data object needs to match the 'User' type
-    // { email, token, name? }
-    console.log('Should be about to fetch server');
-    try {
-      const userData = await fetch(`${config.SERVER.ADDRESS}/authenticate`);
-      console.log(JSON.stringify(userData));
-    } catch (error) {
-      console.error('Error trying to fetch server:', error);
-    }
-    console.log('Should have just fetched server');
-    const testUser = {
-      email: 'test.com',
-      token: 'kj;alkdfjd',
+    // NOTE the returned data object to have atleast the user's email and name is optional
+
+    const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    if (response.status === 403) return null;
+
+    const userData = await response.json();
+    console.log(userData);
+    return {
+      token: 'foo0',
+      email: 'bar.com',
     };
-    return testUser;
+    // return { token: idToken, email: userData.email, name: userData.name };
   }
 );
 
