@@ -9,7 +9,11 @@ export const action: ActionFunction = ({ request }) => {
   return authenticator.authenticate('auth0', request);
 };
 
+// IF they are logged in with NO/Invalid token then hard log them out/clear sessions etc
 export const loader: LoaderFunction = async ({ request }) => {
+  // NOTE I'm not sure if this will ever allow a user to just sit on this page, or if it will always either have them log in or redirect themt to homepage
+  // return authenticator.authenticate('auth0', request);
+
   const config = getConfig();
   const user = await authenticator.isAuthenticated(request);
   if (user) {

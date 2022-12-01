@@ -3,7 +3,7 @@ import React from 'react';
 
 const useGetApolloClient = (serverAddress: string, idToken?: string) => {
   const callback = React.useCallback(() => {
-    if (serverAddress) {
+    if (serverAddress && idToken) {
       return new ApolloClient({
         uri: `${serverAddress}/playground`,
         cache: new InMemoryCache(),

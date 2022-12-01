@@ -30,7 +30,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function App() {
   const { config, authData } = useLoaderData();
-
+  // If there is already a token when 'first' booting up, we will want to run some validation on token before using it to create client
   const getClient = useGetApolloClient(
     config.SERVER.ADDRESS,
     authData?.extraParams.id_token
