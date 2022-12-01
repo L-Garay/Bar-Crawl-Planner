@@ -11,7 +11,8 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { GetAccountByEmail } from './prisma/querries/accountQuerries';
 import typeDefs from './schema';
 import resolvers from './resolvers';
-import ValidateJWT from './validateJWT';
+import ValidateJWT from './auth/validateJWT';
+import { runTokenValidation } from './auth/helperFunctions';
 
 export const prismaClient = new PrismaClient();
 
@@ -69,12 +70,19 @@ async function StartServer() {
   });
 
   // NOTE will not be using this
-  app.get('/authenticate', (req, res) => {
+  app.get('/authenticate', async (req, res) => {
     console.log('Hitting the authenticate route in server', req.path);
-    // run token validation
+    const authorizationHeader = req.headers.authorization;
+    if (!authorizationHeader) {
+      // TODO need to send proper response
+      return res.status(400);
+    }
+
+    const token = authorizationHeader.split(' ');
+    const decodedToken = await ValidateJWT(token[1]);
     // get user
     // set user
-    res.status(200).send(JSON.stringify({ foo: 'barbarbar' }));
+    return res.status(200).send(JSON.stringify({ foo: 'barbarbar' }));
   });
 
   // NOTE will likely need to expand/modify this going forward
@@ -93,13 +101,9 @@ async function StartServer() {
     expressMiddleware(server, {
       context: async ({ req }) => {
         console.log('Is the apollo context getting hit?');
+        const decodedToken = await runTokenValidation(req);
 
-        const authorizationHeader = req.headers.authorization;
-        if (!authorizationHeader) {
-          // how to handle this case
-          // would this be the situation when a user logs out/hasn't logged in yet?
-          // do we need to do anything here other than just ensure that the context is empty in this situation?
-          console.error('There is no authorization header');
+        if (decodedToken.noAuthorizationHeader) {
           return {
             authError: {
               code: 'UNAUTHENTICATED',
@@ -108,17 +112,7 @@ async function StartServer() {
           };
         }
 
-        const token = authorizationHeader.split(' ');
-        const decodedToken = await ValidateJWT(token[1]);
-        if (decodedToken.error) {
-          console.error(
-            `Error validating token: ${decodedToken.error.message}`
-          );
-          // NOTE given that in this code block we'll be fairly confident that if there is an error it has to do with the JWT
-          // should we be more specific in our message that we send back to the client in this case?
-          // the returned strings below will be used to construct the GraphQLError in the resolvers
-          // which is then what will get returned by said resolver to the client
-          // Maybe we don't send the client anything specific at this point but we/they kick off side effects that once resolved can print/say/do more specific things (fill out a help form, reset password, follow debug steps etc)
+        if (decodedToken.unauthorized) {
           return {
             authError: {
               code: 'UNAUTHORIZED',
@@ -130,11 +124,13 @@ async function StartServer() {
         const email = decodedToken.decoded.email || '';
         // TODO still need to handle the case where a user signs up to the site for the first time and so there won't a user in the DB to find
         const user = await GetAccountByEmail(email);
+        console.log('Found user in apollo context:', user);
 
         // NOTE need to clear this when user logs out
         // NOTE see note above
         // NOTE this may need to be handled client side see:
         // https://www.apollographql.com/docs/react/caching/advanced-topics/
+        //  OR just make query against the server called like 'LogoutAndClear' that will have a specific header that we can check for, and if it is present we know to just return an empty context object ('clear it out')
         return { decodedToken: decodedToken.decoded, user }; // should I store the entire decoded token, a specific property, or the undecoded token?
       },
     })
