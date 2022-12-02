@@ -35,10 +35,13 @@ export default function HomePage() {
     <>
       <main>
         <h1>This is the Home Page</h1>
+        <h3>Welcome {authData.info.name}</h3>
+        <h4>{authData.info.email}</h4>
         <p>
           This is the page users will land when they have logged, they've been
           authenticated and a user session has been created for them
         </p>
+        <small>Data from grapqhl query</small>
         <small>{JSON.stringify(data)}</small>
         <Form method="post" action="/resources/logout">
           <button>Logout</button>

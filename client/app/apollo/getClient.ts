@@ -3,7 +3,7 @@ import React from 'react';
 
 const useGetApolloClient = (serverAddress: string, idToken?: string) => {
   const callback = React.useCallback(() => {
-    if (serverAddress && idToken) {
+    if (idToken) {
       return new ApolloClient({
         uri: `${serverAddress}/graphql`,
         cache: new InMemoryCache(),
@@ -11,6 +11,12 @@ const useGetApolloClient = (serverAddress: string, idToken?: string) => {
         headers: {
           authorization: `Bearer ${idToken}`,
         },
+      });
+    } else {
+      return new ApolloClient({
+        uri: `${serverAddress}/graphql`,
+        cache: new InMemoryCache(),
+        credentials: 'include',
       });
     }
   }, [serverAddress, idToken]);

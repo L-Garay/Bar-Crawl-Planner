@@ -73,14 +73,12 @@ async function StartServer() {
   });
 
   app.get('/authenticate', async (req, res) => {
-    const authorizationHeader = req.headers.authorization;
-    if (!authorizationHeader) {
+    const decodedToken = await runTokenValidation(req);
+
+    if (decodedToken.noAuthorizationHeader) {
       // TODO need to send proper response
       return res.status(400);
     }
-
-    const token = authorizationHeader.split(' ');
-    const decodedToken = await ValidateJWT(token[1]);
 
     if (decodedToken.unauthorized) {
       // TODO need to send proper response
