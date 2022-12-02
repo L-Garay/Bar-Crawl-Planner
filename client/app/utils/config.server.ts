@@ -21,6 +21,7 @@ const getConfig = () => {
   );
   invariant(process.env.COOKIE_SECRET, 'COOKIE_SECRET is undefined');
   invariant(process.env.AUTH0_CALLBACK_URL, 'AUTH0_CALLBACK_URL is undefined');
+  invariant(process.env.LOGIN_PAGE, 'LOGIN_PAGE is undefined');
   // invariant(
   //   process.env.AUTH0_RETURN_TO_URL,
   //   "AUTH0_RETURN_TO_URL is undefined",
@@ -37,6 +38,7 @@ const getConfig = () => {
   const AUTH0_RETURN_TO_URL = process.env.AUTH0_RETURN_TO_URL!;
   const COOKIE_SECRET = process.env.COOKIE_SECRET!;
   const AUTH0_CALLBACK_URL = process.env.AUTH0_CALLBACK_URL!;
+  const LOGIN_PAGE = process.env.LOGIN_PAGE!;
   // const AUTH0_RETURN_TO_URL = process.env.AUTH0_RETURN_TO_URL!;
 
   const config = {
@@ -49,6 +51,7 @@ const getConfig = () => {
       RETURN_TO_URL: AUTH0_RETURN_TO_URL,
       LOGOUT_URL: AUTH0_LOGOUT_URL,
       LOGIN_URL: AUTH0_LOGIN_URL,
+      LOGIN_PAGE,
       CALLBACK_URL: AUTH0_CALLBACK_URL,
       COOKIE_SECRET: COOKIE_SECRET,
     },
