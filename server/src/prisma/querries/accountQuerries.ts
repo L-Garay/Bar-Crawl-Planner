@@ -71,3 +71,29 @@ export async function GetAllAccounts(): Promise<QueryData> {
     return { status: 'Failure', data: newError };
   }
 }
+
+export async function GetAccountWithProfileData(
+  email: string
+): Promise<QueryData> {
+  try {
+    // NOTE may want to check if the data is 'null', which means no one was found
+    // depending on the situation in which this method is called, it may change what the side effects should be
+    const data = await prismaClient.account.findUnique({
+      where: {
+        email: email,
+      },
+      include: {
+        profile: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    const expectedUser = { email: data?.email, name: data?.profile?.name };
+    return { status: 'Success', data: expectedUser };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: newError };
+  }
+}

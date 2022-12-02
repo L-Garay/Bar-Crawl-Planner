@@ -8,7 +8,10 @@ import { PrismaClient } from '@prisma/client';
 import { auth, requiresAuth } from 'express-openid-connect';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { GetAccountByEmail } from './prisma/querries/accountQuerries';
+import {
+  GetAccountByEmail,
+  GetAccountWithProfileData,
+} from './prisma/querries/accountQuerries';
 import typeDefs from './schema';
 import resolvers from './resolvers';
 import ValidateJWT from './auth/validateJWT';
@@ -69,9 +72,7 @@ async function StartServer() {
     res.send(JSON.stringify(req.oidc.user));
   });
 
-  // NOTE will not be using this
   app.get('/authenticate', async (req, res) => {
-    console.log('Hitting the authenticate route in server', req.path);
     const authorizationHeader = req.headers.authorization;
     if (!authorizationHeader) {
       // TODO need to send proper response
@@ -80,9 +81,22 @@ async function StartServer() {
 
     const token = authorizationHeader.split(' ');
     const decodedToken = await ValidateJWT(token[1]);
-    // get user
-    // set user
-    return res.status(200).send(JSON.stringify({ foo: 'barbarbar' }));
+
+    if (decodedToken.unauthorized) {
+      // TODO need to send proper response
+      return res.status(400);
+    }
+
+    const email = decodedToken.decoded.email || '';
+    const userData = await GetAccountWithProfileData(email);
+
+    if (userData.status === 'Failure') {
+      // NOTE do anything else here?
+      return res.status(500);
+    }
+
+    // set/return user
+    return res.status(200).send(userData.data);
   });
 
   // NOTE will likely need to expand/modify this going forward
