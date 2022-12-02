@@ -2,16 +2,14 @@ import { redirect } from '@remix-run/node';
 import { Authenticator } from 'remix-auth';
 import { Auth0Strategy } from 'remix-auth-auth0';
 import getConfig from '~/utils/config.server';
-import type { Auth0User } from '../types/sharedTypes';
+import type { User } from '../types/sharedTypes';
 import { getSession, destroySession, sessionStorage } from './session';
 
 const config = getConfig();
 
 // Create an instance of the authenticator, pass a generic with what your
 // strategies will return and will be stored in the session
-export const authenticator = new Authenticator<Auth0User | null>(
-  sessionStorage
-);
+export const authenticator = new Authenticator<User | null>(sessionStorage);
 
 let auth0Strategy = new Auth0Strategy(
   {
@@ -23,23 +21,19 @@ let auth0Strategy = new Auth0Strategy(
   },
   // Sets the token header
   async (authData) => {
-    // NOTE I don't believe we can/should do this user fetching here
-    // at this point we should only get and set the authData in session
-    // that way we can then fetch that data throughout the rest of the app
-    // then on the homepage we can use the authenticator.isAuthenticated() method to check to see if there is a 'user'/authData set
-    // if NOT then we can redirect them back to the landing page as that would indicate something went wrong
-    // if the data IS SET then we can use that idToken to then create the apollo client
+    // NOTE actually we will want to fetch the user here and set it, BUT we'll also still need to pass along the idToken so we can still create the apollo client
+    const token = authData.extraParams.id_token;
+    const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-    // const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
-    //   headers: {
-    //     Authorization: `Bearer ${idToken}`,
-    //   },
-    // });
-    // if (response.status === 403) return null;
-    // const userData = await response.json();
-    // console.log(userData);
+    if (response.status === 400 || response.status === 500) return null;
 
-    return { ...authData };
+    const userData = await response.json();
+
+    return { info: { ...userData }, token };
   }
 );
 

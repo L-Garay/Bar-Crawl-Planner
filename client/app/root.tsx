@@ -23,18 +23,15 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({ request }) => {
   const config = getConfig();
-  const authData = await authenticator.isAuthenticated(request);
+  const userData = await authenticator.isAuthenticated(request);
 
-  return { config, authData };
+  return { config, userData };
 };
 
 export default function App() {
-  const { config, authData } = useLoaderData();
+  const { config, userData } = useLoaderData();
   // If there is already a token when 'first' booting up, we will want to run some validation on token before using it to create client
-  const getClient = useGetApolloClient(
-    config.SERVER.ADDRESS,
-    authData?.extraParams.id_token
-  );
+  const getClient = useGetApolloClient(config.SERVER.ADDRESS, userData.token);
   const client = getClient() as ApolloClient<any>;
 
   return (

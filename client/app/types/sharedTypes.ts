@@ -1,10 +1,9 @@
-import type { AppLoadContext } from '@remix-run/node';
-import type { Auth0ExtraParams, Auth0Profile } from 'remix-auth-auth0';
+export type UserInfo = {
+  name: string;
+  email: string;
+};
 
-export type Auth0User = {
-  accessToken: string;
-  extraParams: Auth0ExtraParams;
-  refreshToken?: string;
-  context?: AppLoadContext;
-  profile: Auth0Profile;
+export type User = {
+  token: string;
+  info: UserInfo;
 };
