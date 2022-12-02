@@ -1,29 +1,34 @@
 import React from 'react';
-import { Form, Link } from '@remix-run/react';
+import { Form, useLoaderData } from '@remix-run/react';
 import getConfig from '~/utils/config.server';
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { authenticator } from '~/auth/authenticator';
+import { logout } from '~/auth/authenticator';
+import { validateUserAndSession } from '~/utils/validateUserAndSession';
 
-export const action: ActionFunction = ({ request }) => {
-  return authenticator.authenticate('auth0', request);
-};
-
-// IF they are logged in with NO/Invalid token then hard log them out/clear sessions etc
-export const loader: LoaderFunction = async ({ request }) => {
-  // NOTE I'm not sure if this will ever allow a user to just sit on this page, or if it will always either have them log in or redirect themt to homepage
-  // return authenticator.authenticate('auth0', request);
-
+export const action: ActionFunction = async ({ request }) => {
   const config = getConfig();
-  const user = await authenticator.isAuthenticated(request);
-  if (user) {
+
+  const data = await request.formData();
+  const valid = data.get('valid');
+
+  if (valid === 'true') {
     return redirect(config.AUTH0.LOGIN_URL);
   } else {
-    return { noUser: true };
+    // this would indicate we should do some cleaning before having them re-login again
+    // using the logout() method will handle both logging the user out of their auth0 account and clearing the remix session
+    // passing 'true' indicates that we WANT to get redirected to the login PAGE
+    return await logout(request, true);
   }
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+  return await validateUserAndSession(request);
+};
+
 export default function LandingPage() {
+  const { valid } = useLoaderData();
+
   return (
     <>
       <div
@@ -33,9 +38,26 @@ export default function LandingPage() {
         }}
       >
         <h1>Welcome to Remix</h1>
-        <Link to="/test">Test Link</Link>
+        {/* <Link to="/test">Test Link</Link> */}
+        <p>
+          This will be the landing page where I'd like to have a nice long page
+          with cool scrolling and animations.
+        </p>
+        <p>
+          It will include information about the app in general, along with its
+          different features and what not.
+        </p>
         <Form method="post">
-          <button>Login</button>
+          <input
+            name="valid"
+            type="checkbox"
+            hidden // hide input from users
+            value={valid} // dynamically change value
+            defaultChecked={true} // HAS TO BE TRUE in order for data to be sent
+          />
+          <button type="submit">
+            {valid ? 'Continue to homepage' : 'Login'}
+          </button>
         </Form>
       </div>
     </>
