@@ -5,7 +5,7 @@ const useGetApolloClient = (serverAddress: string, idToken?: string) => {
   const callback = React.useCallback(() => {
     if (serverAddress && idToken) {
       return new ApolloClient({
-        uri: `${serverAddress}/playground`,
+        uri: `${serverAddress}/graphql`,
         cache: new InMemoryCache(),
         credentials: 'include',
         headers: {

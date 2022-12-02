@@ -109,7 +109,7 @@ async function StartServer() {
   // Set up our Express middleware to handle CORS, body parsing,
   // and our expressMiddleware function.
   app.use(
-    '/playground', // fuzzy matches, will match /playground /logan etc
+    '/graphql',
     cors(corsOptions),
     bodyParser.json(),
     expressMiddleware(server, {
