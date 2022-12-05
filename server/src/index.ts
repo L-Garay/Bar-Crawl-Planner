@@ -73,7 +73,7 @@ async function StartServer() {
   });
 
   app.get('/authenticate', async (req, res) => {
-    const decodedToken = await runTokenValidation(req);
+    const decodedToken: any = await runTokenValidation(req);
 
     if (decodedToken.noAuthorizationHeader) {
       // TODO need to send proper response
@@ -139,11 +139,10 @@ async function StartServer() {
         console.log('Found user in apollo context:', user);
 
         // NOTE need to clear this when user logs out
-        // NOTE see note above
         // NOTE this may need to be handled client side see:
         // https://www.apollographql.com/docs/react/caching/advanced-topics/
         //  OR just make query against the server called like 'LogoutAndClear' that will have a specific header that we can check for, and if it is present we know to just return an empty context object ('clear it out')
-        return { decodedToken: decodedToken.decoded, user }; // should I store the entire decoded token, a specific property, or the undecoded token?
+        return { decodedToken: decodedToken.decoded, user };
       },
     })
   );

@@ -21,7 +21,6 @@ let auth0Strategy = new Auth0Strategy(
   },
   // Sets the token header
   async (authData) => {
-    // NOTE actually we will want to fetch the user here and set it, BUT we'll also still need to pass along the idToken so we can still create the apollo client
     const token = authData.extraParams.id_token;
     const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
       headers: {
