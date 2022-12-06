@@ -77,13 +77,11 @@ async function StartServer() {
     const decodedToken: any = await runTokenValidation(req);
 
     if (decodedToken.noAuthorizationHeader) {
-      // TODO need to send proper response
-      return res.status(400);
+      return res.status(400).send(null);
     }
 
     if (decodedToken.unauthorized) {
-      // TODO need to send proper response
-      return res.status(400);
+      return res.status(400).send(null);
     }
 
     const email = decodedToken.decoded.email || '';
