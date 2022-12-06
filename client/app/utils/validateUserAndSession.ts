@@ -1,5 +1,8 @@
 import { authenticator } from '~/auth/authenticator';
 import { getSession } from '~/auth/session';
+import getConfig from './config.server';
+
+const config = getConfig();
 
 export const validateUserAndSession = async (request: any) => {
   // Check if the user is 'logged in' according to remix-auth
@@ -11,8 +14,16 @@ export const validateUserAndSession = async (request: any) => {
   // console.log('SESSION', session.data);
 
   // TODO run token validation here too
+  const data = await fetch(`${config.SERVER.ADDRESS}/validate`, {
+    headers: {
+      Authorization: `Bearer ${user?.token}`,
+    },
+  });
+  const isTokenValid: boolean = await data.json();
 
-  if (user && session.has('user')) {
+  const valid = Boolean(user) && Boolean(session.has('user')) && isTokenValid;
+
+  if (valid) {
     return { valid: true };
   } else {
     return { valid: false };
