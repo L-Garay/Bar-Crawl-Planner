@@ -30,9 +30,15 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function App() {
   const { config, userData } = useLoaderData();
-  console.log(userData);
 
-  // If there is already a token when 'first' booting up, we will want to run some validation on token before using it to create client
+  // If there is already a token when 'first' booting up, we will want to run some validation on token before using it to create client (even though we create a client anyway)
+  // This will be handled by the validateUserAndSession() used on both the login route and the landng page
+  // Depending on the outcome of that function, userData will either be properly set or not
+  // If it is properly set, that means 1) all credentials were valid to begin with or 2) new credentials have been set
+  // In either case, we can be confident the client will still be configured properly (since creds haven't changed or it will get recreated by the callback below)
+  // If it is not properly set, that means the creds were expired or no one is logged in
+  // If the creds are expired, the other pages should handle having the user log in and therefore a user shouldn't be able to see/interact with any pages that would need to make gql requests
+  // If no one is logged in, same situation as expired creds, the other pages should handle having the user log in and therefore they shouldn't be able to interact with any pages that make gql requests MEANING it is okay to have a 'bad' temporary client until they do log in and a new client is created for them by the callback
   const getClient = useGetApolloClient(config.SERVER.ADDRESS, userData?.token);
   const client = getClient() as ApolloClient<any>;
 

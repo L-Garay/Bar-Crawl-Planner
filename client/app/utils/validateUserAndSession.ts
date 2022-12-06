@@ -7,11 +7,9 @@ const config = getConfig();
 export const validateUserAndSession = async (request: any) => {
   // Check if the user is 'logged in' according to remix-auth
   const user = await authenticator.isAuthenticated(request);
-  // console.log('USER', user);
 
   // Check if the user has an active Remix session
   const session = await getSession(request.headers.get('Cookie'));
-  // console.log('SESSION', session.data);
 
   // Run token validation
   const data = await fetch(`${config.SERVER.ADDRESS}/validate`, {

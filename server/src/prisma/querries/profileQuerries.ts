@@ -32,7 +32,6 @@ export async function GetProfileByAccountId(id: number): Promise<QueryData> {
         id: id,
       },
     });
-    console.log(profile);
     return { status: 'Success', data: profile };
   } catch (error) {
     const newError = GetPrismaError(error);
@@ -45,7 +44,6 @@ export async function GetProfileByAccountId(id: number): Promise<QueryData> {
 export async function GetAllProfiles(): Promise<QueryData> {
   try {
     const profiles = await prismaClient.profile.findMany();
-    console.log(profiles);
     return { status: 'Success', data: profiles };
   } catch (error) {
     const newError = GetPrismaError(error);

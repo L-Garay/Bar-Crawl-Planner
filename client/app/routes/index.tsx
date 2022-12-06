@@ -1,4 +1,3 @@
-import React from 'react';
 import { Form, useLoaderData } from '@remix-run/react';
 import getConfig from '~/utils/config.server';
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
@@ -38,7 +37,6 @@ export default function LandingPage() {
         }}
       >
         <h1>Welcome to Remix</h1>
-        {/* <Link to="/test">Test Link</Link> */}
         <p>
           This will be the landing page where I'd like to have a nice long page
           with cool scrolling and animations.

@@ -75,7 +75,6 @@ async function StartServer() {
 
   app.get('/authenticate', async (req, res) => {
     const decodedToken: any = await runTokenValidation(req);
-    console.log('decodedToken', decodedToken);
 
     if (decodedToken.noAuthorizationHeader || decodedToken.unauthorized) {
       return res.status(400).send(null);
@@ -137,7 +136,6 @@ async function StartServer() {
     bodyParser.json(),
     expressMiddleware(server, {
       context: async ({ req }) => {
-        console.log('Is the apollo context getting hit?');
         const decodedToken = await runTokenValidation(req);
 
         if (decodedToken.noAuthorizationHeader) {
@@ -161,7 +159,6 @@ async function StartServer() {
         const email = decodedToken.decoded.email || '';
         // TODO still need to handle the case where a user signs up to the site for the first time and so there won't a user in the DB to find
         const user = await GetAccountByEmail(email);
-        console.log('Found user in apollo context:', user);
 
         // NOTE need to clear this when user logs out
         // NOTE this may need to be handled client side see:

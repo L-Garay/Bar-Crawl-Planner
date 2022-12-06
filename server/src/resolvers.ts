@@ -9,7 +9,6 @@ import { GetAllAccounts } from './prisma/querries/accountQuerries';
 const resolvers: Resolvers = {
   Query: {
     accounts: async (parent, args, context, info) => {
-      console.log(context);
       const { authError } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -28,7 +27,6 @@ const resolvers: Resolvers = {
       }
     },
     profiles: async (parent, args, context, info) => {
-      console.log(context);
       const { authError } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -47,7 +45,6 @@ const resolvers: Resolvers = {
       }
     },
     outings: async (parent, args, context, info) => {
-      console.log(context);
       const { authError } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {

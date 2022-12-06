@@ -37,7 +37,6 @@ export async function GetOutingByOutingId(
         id: outingId,
       },
     });
-    console.log(outings);
     return { status: 'Success', data: outings };
   } catch (error) {
     const newError = GetPrismaError(error);
@@ -50,7 +49,6 @@ export async function GetOutingByOutingId(
 export async function GetAllOutings(): Promise<QueryData> {
   try {
     const outings = await prismaClient.outing.findMany();
-    console.log(outings);
     return { status: 'Success', data: outings };
   } catch (error) {
     const newError = GetPrismaError(error);

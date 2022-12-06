@@ -43,7 +43,6 @@ export async function GetAccountByEmail(email: string): Promise<QueryData> {
 export async function GetAllAccounts(): Promise<QueryData> {
   try {
     const users = await prismaClient.account.findMany();
-    console.log(users);
     return { status: 'Success', data: users };
   } catch (error) {
     const newError = GetPrismaError(error);
@@ -98,7 +97,6 @@ export async function CreateAccountAndProfile() {
         },
       },
     });
-    console.log('Basic Account and Profile Created');
     return { status: 'Success', user };
   } catch (error) {
     const newError = GetPrismaError(error);
