@@ -1,4 +1,5 @@
 import ValidateJWT from './validateJWT';
+import dayjs from 'dayjs';
 
 export const runTokenValidation = async (request: any) => {
   const authorizationHeader = request.headers.authorization;
@@ -23,4 +24,12 @@ export const runTokenValidation = async (request: any) => {
     return { unauthorized: true };
   }
   return decodedToken;
+};
+
+export const checkTokenExpiration = (decodedToken: any): boolean => {
+  const expirationTime = decodedToken.decoded.exp;
+  const now = dayjs();
+  const expiration = dayjs.unix(expirationTime);
+  const isValid = now.isBefore(expiration);
+  return isValid;
 };

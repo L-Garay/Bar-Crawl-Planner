@@ -5,7 +5,6 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '@prisma/client';
-import { auth, requiresAuth } from 'express-openid-connect';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import {
@@ -15,7 +14,10 @@ import {
 } from './prisma/querries/accountQuerries';
 import typeDefs from './schema';
 import resolvers from './resolvers';
-import { runTokenValidation } from './auth/helperFunctions';
+import {
+  checkTokenExpiration,
+  runTokenValidation,
+} from './auth/helperFunctions';
 import { CreateProfile } from './prisma/querries/profileQuerries';
 
 export const prismaClient = new PrismaClient();
@@ -46,41 +48,36 @@ async function StartServer() {
   await server.start();
 
   // Order of app.use() and app.get() matters
-  app.use(
-    auth({
-      issuerBaseURL: process.env.AUTH0_ISSUER_URL,
-      baseURL: process.env.BASE_URL,
-      clientID: process.env.AUTH0_CLIENT_ID,
-      secret: process.env.SESSION_SECRET,
-      authRequired: false,
-      auth0Logout: true,
-    })
-  );
-
-  app.get('/', (req, res) => {
-    console.log('id token: ', req.oidc.idToken);
-    const message = req.oidc.isAuthenticated()
-      ? 'You are logged in'
-      : 'You are logged out';
-    res.send(message);
-  });
 
   app.get('/healthcheck', (req, res) => {
     res.status(200).send('Healthy!');
   });
 
-  app.get('/protected', requiresAuth(), (req, res) => {
-    res.send(JSON.stringify(req.oidc.user));
+  app.get('/validate', async (req, res) => {
+    // NOTE this route is used as a 'background' check so to speak, so we really don't care about specific errors or ensuring we log them in this situation
+    // However, this runTokenValidation() is used elsewhere that does care about errors and logging them
+    // which means that every time it's used here, it will log error messages when there is no token/the token is invalid, which creates unnecessary noise
+    // TODO look into ways to prevent that if possible
+    const decodedToken: any = await runTokenValidation(req);
+
+    // Even though these are errors, we don't want to treat them like actual errors here
+    if (decodedToken.noAuthorizationHeader || decodedToken.unauthorized) {
+      return res.status(200).send(false);
+    }
+
+    const isValid = checkTokenExpiration(decodedToken);
+    if (isValid) {
+      return res.status(200).send(true);
+    } else {
+      return res.status(200).send(false);
+    }
   });
 
   app.get('/authenticate', async (req, res) => {
     const decodedToken: any = await runTokenValidation(req);
+    console.log('decodedToken', decodedToken);
 
-    if (decodedToken.noAuthorizationHeader) {
-      return res.status(400).send(null);
-    }
-
-    if (decodedToken.unauthorized) {
+    if (decodedToken.noAuthorizationHeader || decodedToken.unauthorized) {
       return res.status(400).send(null);
     }
 
