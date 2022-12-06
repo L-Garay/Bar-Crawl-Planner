@@ -28,6 +28,12 @@ let auth0Strategy = new Auth0Strategy(
       },
     });
 
+    // NOTE it seems if the authenticator callback returns null, the authenticator can't be used (which makes sense I guess)
+    // However, this then leads to potentiall issues where there is a legitimate error in which no user can be fetch/found
+    // And so then how do we want to handle those situations?
+    // Having the authenticator just not work doesn't seem like the right choice
+    // HOWEVER, it seems that if userData === null itself...things still 'work'
+    // As in, the authenticator just invalidates the user and in will redirect them to wherever is configured in the .authenticate() method
     if (response.status === 400 || response.status === 500) return null;
 
     const userData = await response.json();
