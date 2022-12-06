@@ -9,13 +9,14 @@ import { auth, requiresAuth } from 'express-openid-connect';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import {
+  CreateAccount,
   GetAccountByEmail,
   GetAccountWithProfileData,
 } from './prisma/querries/accountQuerries';
 import typeDefs from './schema';
 import resolvers from './resolvers';
-import ValidateJWT from './auth/validateJWT';
 import { runTokenValidation } from './auth/helperFunctions';
+import { CreateProfile } from './prisma/querries/profileQuerries';
 
 export const prismaClient = new PrismaClient();
 
@@ -88,12 +89,41 @@ async function StartServer() {
     const email = decodedToken.decoded.email || '';
     const userData = await GetAccountWithProfileData(email);
 
-    if (userData.status === 'Failure') {
-      // NOTE do anything else here?
-      return res.status(500);
+    // Indicates that an account could not be found, but no errors occurred
+    let newUser;
+    if (userData.status === 'Success' && userData.data === null) {
+      try {
+        const {
+          email_verified: verified,
+          name,
+          picture,
+        } = decodedToken.decoded;
+
+        const account = await CreateAccount(email, verified);
+
+        const profile = await CreateProfile(name, picture, account.data.id);
+
+        newUser = {
+          name: profile.data.name,
+          email: account.data.email,
+        };
+
+        return res.status(200).send(newUser);
+      } catch (error) {
+        console.error('Error trying to create account or profile', error);
+        res.status(500).send(null);
+      }
     }
 
-    // set/return user
+    // Indicates that there is an error object to read
+    if (userData.status === 'Failure') {
+      console.error(
+        'Hitting the error block of the /auth route',
+        JSON.stringify(userData.data)
+      );
+      return res.status(500).send(null);
+    }
+
     return res.status(200).send(userData.data);
   });
 
