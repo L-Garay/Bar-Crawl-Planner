@@ -13,7 +13,7 @@ export const validateUserAndSession = async (request: any) => {
   const session = await getSession(request.headers.get('Cookie'));
   // console.log('SESSION', session.data);
 
-  // TODO run token validation here too
+  // Run token validation
   const data = await fetch(`${config.SERVER.ADDRESS}/validate`, {
     headers: {
       Authorization: `Bearer ${user?.token}`,
