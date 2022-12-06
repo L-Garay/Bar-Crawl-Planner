@@ -12,7 +12,6 @@ import {
 } from '@remix-run/react';
 import useGetApolloClient from './apollo/getClient';
 import { authenticator } from './auth/authenticator';
-import { AuthProvider } from './contexts/authContext';
 import getConfig from './utils/config.server';
 
 export const meta: MetaFunction = () => ({
@@ -54,11 +53,9 @@ export default function App() {
             __html: `window.ENV = ${JSON.stringify(config)}`,
           }}
         />
-        <AuthProvider>
-          <ApolloProvider client={client}>
-            <Outlet />
-          </ApolloProvider>
-        </AuthProvider>
+        <ApolloProvider client={client}>
+          <Outlet />
+        </ApolloProvider>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
