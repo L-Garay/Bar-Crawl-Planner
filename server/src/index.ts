@@ -12,7 +12,7 @@ import {
   GetAccountByEmail,
   GetAccountWithProfileData,
 } from './prisma/querries/accountQuerries';
-import typeDefs from './schema';
+import typeDefs from './schemas/schema';
 import resolvers from './resolvers';
 import {
   checkTokenExpiration,
@@ -28,7 +28,7 @@ const PORT = process.env.SERVER_PORT || 4000;
 
 // NOTE when compiled, this file is not included and therefore can never be found
 // NOTE even when running the 'ts-node' command, this file supposedly still cannot be found
-// const typeDefs = readFileSync('./schema.graphql', {
+// const typeDefs = readFileSync('./schemas/schema.graphql', {
 //   encoding: 'utf-8',
 // });
 

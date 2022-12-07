@@ -1,5 +1,5 @@
 import { prismaClient } from '../../index';
-import GetPrismaError from './getPrismaError';
+import GetPrismaError from '../../utilities/getPrismaError';
 
 export type QueryData = {
   status: string;
@@ -54,8 +54,6 @@ export async function GetAccountWithProfileData(
   email: string
 ): Promise<QueryData> {
   try {
-    // NOTE may want to check if the data is 'null', which means no one was found
-    // depending on the situation in which this method is called, it may change what the side effects should be
     const data = await prismaClient.account.findUnique({
       where: {
         email: email,
@@ -69,6 +67,7 @@ export async function GetAccountWithProfileData(
       },
     });
 
+    // We don't want to use .findUniqueOrThrow because if an account can't be found, that just indicates we need to create one
     if (data === null) return { status: 'Success', data: null };
 
     const expectedUser = { email: data?.email, name: data?.profile?.name };

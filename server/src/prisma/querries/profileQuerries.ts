@@ -1,6 +1,6 @@
 import { prismaClient } from '../../index';
 import { QueryData } from './accountQuerries';
-import GetPrismaError from './getPrismaError';
+import GetPrismaError from '../../utilities/getPrismaError';
 
 export async function CreateProfile(
   name: string,

@@ -1,6 +1,6 @@
 import { prismaClient } from '../../index';
 import { QueryData } from './accountQuerries';
-import GetPrismaError from './getPrismaError';
+import GetPrismaError from '../../utilities/getPrismaError';
 
 // NOTE you will only need to uncomment out the function invocations when attempting to seed/setup data in the DB
 

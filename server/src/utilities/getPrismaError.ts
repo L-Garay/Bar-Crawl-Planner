@@ -6,9 +6,10 @@ import {
   PrismaClientUnknownRequestError,
   PrismaClientValidationError,
 } from '@prisma/client/runtime';
-import { prismaClient } from '../../index';
+import { prismaClient } from '../index';
 
-// Could eventually use this enum to more specifically generate Prisma errors in the future
+// Could eventually use this enum to more specifically generate Prisma errors in the future (and same concept could be used for Apollo and GraphQL)
+// NOTE is something to worry about now or can be done later?
 // type knownPrismaErrors =
 //   | PrismaClientInitializationError
 //   | PrismaClientKnownRequestError
