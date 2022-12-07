@@ -22,22 +22,6 @@ export type Account = {
   profile?: Maybe<Profile>;
 };
 
-export type BasicOuting = {
-  __typename?: 'BasicOuting';
-  created_at?: Maybe<Scalars['String']>;
-  creator_id?: Maybe<Scalars['Int']>;
-  id?: Maybe<Scalars['Int']>;
-  name?: Maybe<Scalars['String']>;
-  users?: Maybe<Array<Maybe<BasicUser>>>;
-};
-
-export type BasicUser = {
-  __typename?: 'BasicUser';
-  id?: Maybe<Scalars['Int']>;
-  name?: Maybe<Scalars['String']>;
-  outings?: Maybe<Array<Maybe<BasicOuting>>>;
-};
-
 export type Mutation = {
   __typename?: 'Mutation';
   createAccount?: Maybe<Account>;
@@ -82,8 +66,6 @@ export type Query = {
   __typename?: 'Query';
   account?: Maybe<Account>;
   accounts?: Maybe<Array<Maybe<Account>>>;
-  basicOutings?: Maybe<Array<Maybe<BasicOuting>>>;
-  basicUsers?: Maybe<Array<Maybe<BasicUser>>>;
   outing?: Maybe<Outing>;
   outings?: Maybe<Array<Maybe<Outing>>>;
   profile?: Maybe<Profile>;
@@ -161,8 +143,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Account: ResolverTypeWrapper<Account>;
-  BasicOuting: ResolverTypeWrapper<BasicOuting>;
-  BasicUser: ResolverTypeWrapper<BasicUser>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -175,8 +155,6 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Account: Account;
-  BasicOuting: BasicOuting;
-  BasicUser: BasicUser;
   Boolean: Scalars['Boolean'];
   Int: Scalars['Int'];
   Mutation: {};
@@ -192,22 +170,6 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
   email_verified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type BasicOutingResolvers<ContextType = any, ParentType extends ResolversParentTypes['BasicOuting'] = ResolversParentTypes['BasicOuting']> = ResolversObject<{
-  created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  creator_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  users?: Resolver<Maybe<Array<Maybe<ResolversTypes['BasicUser']>>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type BasicUserResolvers<ContextType = any, ParentType extends ResolversParentTypes['BasicUser'] = ResolversParentTypes['BasicUser']> = ResolversObject<{
-  id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['BasicOuting']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -240,8 +202,6 @@ export type ProfileResolvers<ContextType = any, ParentType extends ResolversPare
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   accounts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Account']>>>, ParentType, ContextType>;
-  basicOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['BasicOuting']>>>, ParentType, ContextType>;
-  basicUsers?: Resolver<Maybe<Array<Maybe<ResolversTypes['BasicUser']>>>, ParentType, ContextType>;
   outing?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType>;
   outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
@@ -250,8 +210,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 
 export type Resolvers<ContextType = any> = ResolversObject<{
   Account?: AccountResolvers<ContextType>;
-  BasicOuting?: BasicOutingResolvers<ContextType>;
-  BasicUser?: BasicUserResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Outing?: OutingResolvers<ContextType>;
   Profile?: ProfileResolvers<ContextType>;

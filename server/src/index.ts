@@ -19,6 +19,8 @@ import {
   checkTokenExpiration,
   runTokenValidation,
 } from './auth/helperFunctions';
+// import { readFileSync } from 'fs';
+// import path from 'path';
 
 export const prismaClient = new PrismaClient();
 
@@ -26,11 +28,16 @@ dotenv.config();
 
 const PORT = process.env.SERVER_PORT || 4000;
 
-// NOTE when compiled, this file is not included and therefore can never be found
-// NOTE even when running the 'ts-node' command, this file supposedly still cannot be found
-// const typeDefs = readFileSync('./schemas/schema.graphql', {
-//   encoding: 'utf-8',
-// });
+// NOTE when compiled, I get a node module error, something about a syntax error and an unexpected ';' character somewhere
+// HOWEVER, if I use the 'regular typeDefs' I am able to successfully compile/build the server code and then run the compiled code and able to hit the different enpoints and make gql requests
+// ALTHOUGH, I'm only using one of the generated types currently, to type my resolvers object
+// QUESTION, I'm assuming these types are the same/equivalent to TS types and therefore are not actually needed/used anyway once compiled?
+// const generatedTypeDefs = readFileSync(
+//   path.resolve(__dirname, './schemas/schema.js'),
+//   {
+//     encoding: 'utf-8',
+//   }
+// );
 
 async function StartServer() {
   const app = express();
@@ -157,7 +164,6 @@ async function StartServer() {
         }
 
         const email = decodedToken.decoded.email || '';
-        // TODO still need to handle the case where a user signs up to the site for the first time and so there won't a user in the DB to find
         const user = await GetAccountByEmail(email);
 
         // NOTE need to clear this when user logs out

@@ -26,8 +26,6 @@ type Outing {
 }
 
 type Query {
-  basicUsers: [BasicUser]
-  basicOutings: [BasicOuting]
   account: Account
   profile: Profile
   outing: Outing
