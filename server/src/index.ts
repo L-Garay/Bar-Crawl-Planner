@@ -3,22 +3,22 @@ import http from 'http';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
+import typeDefs from './schemas/schema';
+import resolvers from './resolvers';
 import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '@prisma/client';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import {
-  CreateAccount,
   GetAccountByEmail,
   GetAccountWithProfileData,
 } from './prisma/querries/accountQuerries';
-import typeDefs from './schemas/schema';
-import resolvers from './resolvers';
+import { CreateProfile } from './prisma/mutations/profileMutations';
+import { CreateAccount } from './prisma/mutations/accountMutations';
 import {
   checkTokenExpiration,
   runTokenValidation,
 } from './auth/helperFunctions';
-import { CreateProfile } from './prisma/querries/profileQuerries';
 
 export const prismaClient = new PrismaClient();
 

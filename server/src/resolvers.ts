@@ -1,6 +1,6 @@
 import { GetAllOutings } from './prisma/querries/outingsQuerries';
 import { GetAllProfiles } from './prisma/querries/profileQuerries';
-import { Resolvers } from './generated/graphqlTypes';
+import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
 import { GetAllAccounts } from './prisma/querries/accountQuerries';
 
