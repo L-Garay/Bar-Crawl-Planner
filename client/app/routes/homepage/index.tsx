@@ -1,8 +1,8 @@
 import type { LoaderFunction } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
-import { authenticator } from '~/auth/authenticator';
-import { getSession } from '~/auth/session';
+import { logout } from '~/auth/authenticator';
 import { useQuery, gql } from '@apollo/client';
+import { validateUserAndSession } from '~/utils/validateUserAndSession';
 
 const testQuery = gql`
   query accounts {
@@ -14,20 +14,18 @@ const testQuery = gql`
 `;
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const authData = await authenticator.isAuthenticated(request);
-  // NOTE do we need to add in a failureRedirect here?
+  const { valid, user, session } = await validateUserAndSession(request);
 
-  const cookie = request.headers.get('Cookie');
-  const session = await getSession(cookie);
-
-  return { session, authData };
+  if (valid) {
+    return { session, user, valid };
+  } else {
+    return logout(request, true);
+  }
 };
 
 export default function HomePage() {
-  const { authData } = useLoaderData();
+  const { user } = useLoaderData();
 
-  // NOTE will need to implement token check on root/index page before uncommenting this, as old tokens will get used to create apollo client which will then lead to auth errors
-  // May need to redirect back to the root/landing page from the loader above
   const { loading, error, data } = useQuery(testQuery);
 
   if (loading) return <h1>Loading...</h1>;
@@ -37,8 +35,8 @@ export default function HomePage() {
     <>
       <main>
         <h1>This is the Home Page</h1>
-        <h3>Welcome {authData.info.name}</h3>
-        <h4>{authData.info.email}</h4>
+        <h3>Welcome {user.info.name}</h3>
+        <h4>{user.info.email}</h4>
         <p>
           This is the page users will land when they have logged, they've been
           authenticated and a user session has been created for them

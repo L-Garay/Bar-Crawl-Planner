@@ -11,8 +11,8 @@ import {
   useLoaderData,
 } from '@remix-run/react';
 import useGetApolloClient from './apollo/getClient';
-import { authenticator } from './auth/authenticator';
 import getConfig from './utils/config.server';
+import { validateUserAndSession } from './utils/validateUserAndSession';
 
 export const meta: MetaFunction = () => ({
   charset: 'utf-8',
@@ -22,13 +22,13 @@ export const meta: MetaFunction = () => ({
 
 export const loader: LoaderFunction = async ({ request }) => {
   const config = getConfig();
-  const userData = await authenticator.isAuthenticated(request);
+  const { valid, user } = await validateUserAndSession(request);
 
-  return { config, userData };
+  return { config, user, valid };
 };
 
 export default function App() {
-  const { config, userData } = useLoaderData();
+  const { config, user } = useLoaderData();
 
   // If there is already a token when 'first' booting up, we will want to run some validation on token before using it to create client (even though we create a client anyway)
   // This will be handled by the validateUserAndSession() used on both the login route and the landng page
@@ -38,7 +38,7 @@ export default function App() {
   // If it is not properly set, that means the creds were expired or no one is logged in
   // If the creds are expired, the other pages should handle having the user log in and therefore a user shouldn't be able to see/interact with any pages that would need to make gql requests
   // If no one is logged in, same situation as expired creds, the other pages should handle having the user log in and therefore they shouldn't be able to interact with any pages that make gql requests MEANING it is okay to have a 'bad' temporary client until they do log in and a new client is created for them by the callback
-  const getClient = useGetApolloClient(config.SERVER.ADDRESS, userData?.token);
+  const getClient = useGetApolloClient(config.SERVER.ADDRESS, user?.token);
   const client = getClient() as ApolloClient<any>;
 
   return (

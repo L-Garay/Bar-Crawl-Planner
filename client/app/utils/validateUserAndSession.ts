@@ -22,7 +22,7 @@ export const validateUserAndSession = async (request: any) => {
   const valid = Boolean(user) && Boolean(session.has('user')) && isTokenValid;
 
   if (valid) {
-    return { valid: true };
+    return { valid: true, user, session };
   } else {
     return { valid: false };
   }
