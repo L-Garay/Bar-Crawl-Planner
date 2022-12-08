@@ -61,6 +61,13 @@ const getLogoutUrl = (returnToLoginPage?: boolean) => {
 
 // NOTE can't type the request as 'Request' because in the logout.tsx resource route, when passing in the request from the action
 // It produces an error saying "Argument of type 'Request' is not assignable to parameter of type 'NodeRequest'."
+
+/**
+ * @desc Use this to handle both logging the user out of their Auth0 account and clearing their Remix session
+ * @param request the standard request object from either the loader or action
+ * @param returnToLoginPage Pass a truthy value to have the user redirected straight to the login page. Default is the Landing page
+ * @returns a Remix redirect, not actual data.
+ */
 export const logout = async (request: any, returnToLoginPage?: boolean) => {
   const session = await getSession(request.headers.get('Cookie'));
   const url = getLogoutUrl(returnToLoginPage);

@@ -14,9 +14,6 @@ export const action: ActionFunction = async ({ request }) => {
   if (valid === 'true') {
     return redirect(config.AUTH0.LOGIN_URL);
   } else {
-    // this would indicate we should do some cleaning before having them re-login again
-    // using the logout() method will handle both logging the user out of their auth0 account and clearing the remix session
-    // passing 'true' indicates that we WANT to get redirected to the login PAGE
     return await logout(request, true);
   }
 };
