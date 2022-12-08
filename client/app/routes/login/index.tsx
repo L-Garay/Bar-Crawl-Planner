@@ -16,8 +16,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   if (valid) {
     return redirect(config.AUTH0.LOGIN_URL);
   } else {
-    // not sure what to return in this situation, can/should it be just an empty object?
-    return valid;
+    return null;
   }
 };
 
