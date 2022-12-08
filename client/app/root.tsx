@@ -27,6 +27,30 @@ export const loader: LoaderFunction = async ({ request }) => {
   return { config, user, valid };
 };
 
+function Document({
+  children,
+  title = `Bar Crawl Planner`,
+}: {
+  children: React.ReactNode;
+  title?: string;
+}) {
+  return (
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <title>{title}</title>
+        <Links />
+      </head>
+      <body>
+        {children}
+        <LiveReload />
+        <ScrollRestoration />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
 export default function App() {
   const { config, user } = useLoaderData();
 
@@ -42,24 +66,21 @@ export default function App() {
   const client = getClient() as ApolloClient<any>;
 
   return (
-    <html lang="en">
-      <head>
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.ENV = ${JSON.stringify(config)}`,
-          }}
-        />
-        <ApolloProvider client={client}>
-          <Outlet />
-        </ApolloProvider>
-        <ScrollRestoration />
-        <Scripts />
-        <LiveReload />
-      </body>
-    </html>
+    <Document>
+      <ApolloProvider client={client}>
+        <Outlet />
+      </ApolloProvider>
+    </Document>
+  );
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return (
+    <Document title="Uh-oh!">
+      <div className="error-container">
+        <h1>App Error</h1>
+        <pre>{error.message}</pre>
+      </div>
+    </Document>
   );
 }
