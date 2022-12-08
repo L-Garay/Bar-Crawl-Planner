@@ -11,7 +11,7 @@ export async function CreateAccount(
       data: {
         email,
         email_verified,
-        created_at: new Date().toISOString(), // TODO I don't think this does what I think it does
+        created_at: new Date().toISOString(), // NOTE may want to pass in user's timezone here?
       },
     });
 

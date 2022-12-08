@@ -14,7 +14,7 @@ export async function CreateProfile(
       data: {
         name,
         profile_img,
-        updated_at: new Date().toISOString(), // TODO I don't think this does what I think it does
+        updated_at: new Date().toISOString(),
         account_Id: account_id,
       },
     });
