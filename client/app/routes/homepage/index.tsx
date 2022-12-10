@@ -29,7 +29,7 @@ export default function HomePage() {
   const { loading, error, data } = useQuery(testQuery);
 
   if (loading) return <h1>Loading...</h1>;
-  if (error) return <h1>Error: {error.message}</h1>;
+  if (error) throw error;
 
   return (
     <>
@@ -48,5 +48,15 @@ export default function HomePage() {
         </Form>
       </main>
     </>
+  );
+}
+
+// TODO properly think about and update this
+export function ErrorBoundary({ error }: { error: Error }) {
+  return (
+    <main>
+      <h1>Home Page error</h1>
+      <p>{error.message}</p>
+    </main>
   );
 }
