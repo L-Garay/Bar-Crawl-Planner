@@ -1,0 +1,20 @@
+.test-button {
+  display: inline-flex;
+  position: relative;
+  height: 25px;
+  border: none;
+  vertical-align: middle;
+  border-radius: 10%;
+}
+.test-button:hover {
+  cursor: pointer;
+  background-color: lightseagreen;
+  outline: 2px solid goldenrod;
+}
+.test-button:disabled {
+  color: grey;
+  cursor: default;
+  pointer-events: none;
+}
+
+/*# sourceMappingURL=homepage.css.map */

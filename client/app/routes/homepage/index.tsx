@@ -1,8 +1,9 @@
-import type { LoaderFunction } from '@remix-run/node';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
 import { logout } from '~/auth/authenticator';
 import { useQuery, gql } from '@apollo/client';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
+import styles from '../../generatedStyles/homePage.css';
 
 const testQuery = gql`
   query accounts {
@@ -12,6 +13,15 @@ const testQuery = gql`
     }
   }
 `;
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: styles,
+    },
+  ];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const { valid, user, session } = await validateUserAndSession(request);
@@ -44,7 +54,7 @@ export default function HomePage() {
         <small>Data from grapqhl query</small>
         <small>{JSON.stringify(data)}</small>
         <Form method="post" action="/resources/logout">
-          <button>Logout</button>
+          <button className="test-button">Logout</button>
         </Form>
       </main>
     </>
