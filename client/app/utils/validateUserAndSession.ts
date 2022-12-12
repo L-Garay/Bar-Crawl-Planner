@@ -1,5 +1,6 @@
 import { authenticator } from '~/auth/authenticator';
 import { getSession } from '~/auth/session';
+import type { ValidationResponse } from '~/types/sharedTypes';
 import getConfig from './config.server';
 
 const config = getConfig();
@@ -9,7 +10,9 @@ const config = getConfig();
  * @param request the standard request object from either the loader or action.
  * @returns On success it will return a boolean value indicating if things are valid, along with the user and session data. On failure, it will just return the boolean value.
  */
-export const validateUserAndSession = async (request: any) => {
+export const validateUserAndSession = async (
+  request: any
+): Promise<ValidationResponse> => {
   // Check if the user is 'logged in' according to remix-auth
   const user = await authenticator.isAuthenticated(request);
 
@@ -29,6 +32,6 @@ export const validateUserAndSession = async (request: any) => {
   if (valid) {
     return { valid: true, user, session };
   } else {
-    return { valid: false };
+    return { valid: false, user: null, session: null };
   }
 };
