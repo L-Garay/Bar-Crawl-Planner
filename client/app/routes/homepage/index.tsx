@@ -3,7 +3,7 @@ import { Form, useLoaderData } from '@remix-run/react';
 import { logout } from '~/auth/authenticator';
 import { useQuery, gql } from '@apollo/client';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
-import styles from '../../generatedStyles/homePage.css';
+import styles from '../../generatedStyles/homepage.css';
 
 const testQuery = gql`
   query accounts {
