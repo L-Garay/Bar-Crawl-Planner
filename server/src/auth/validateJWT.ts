@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import jwksClient from 'jwks-rsa';
+import { TokenValidationResponse } from '../types/sharedTypes';
 
 dotenv.config();
 
@@ -8,7 +9,9 @@ const client = jwksClient({
   jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
 });
 
-const isTokenValid = async (token: string): Promise<any> => {
+const isTokenValid = async (
+  token: string
+): Promise<TokenValidationResponse> => {
   const kid = process.env.AUTH0_TENANT_KID;
   const key = await client.getSigningKey(kid);
   const signingKey = key.getPublicKey();

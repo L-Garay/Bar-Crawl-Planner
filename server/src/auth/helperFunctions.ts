@@ -1,14 +1,18 @@
 import ValidateJWT from './validateJWT';
 import moment from 'moment';
+import { TokenValidationResponse } from '../types/sharedTypes';
 
-export const runTokenValidation = async (request: any) => {
+export const runTokenValidation = async (
+  request: any
+): Promise<TokenValidationResponse> => {
   const authorizationHeader = request.headers.authorization;
   if (!authorizationHeader) {
-    // how to handle this case
-    // would this be the situation when a user logs out/hasn't logged in yet?
-    // do we need to do anything here other than just ensure that the context is empty in this situation?
     console.error('There is no authorization header');
-    return { noAuthorizationHeader: true };
+    const error: Error = {
+      name: 'UNAUTHENTICATED',
+      message: 'No authorization header',
+    };
+    return { status: 401, decoded: undefined, error };
   }
 
   const token = authorizationHeader.split(' ');
@@ -16,20 +20,30 @@ export const runTokenValidation = async (request: any) => {
 
   if (decodedToken.error) {
     console.error(`Error validating token: ${decodedToken.error.message}`);
-    // NOTE given that in this code block we'll be fairly confident that if there is an error it has to do with the JWT
-    // should we be more specific in our message that we send back to the client in this case?
-    // the returned strings below will be used to construct the GraphQLError in the resolvers
-    // which is then what will get returned by said resolver to the client
-    // Maybe we don't send the client anything specific at this point but we/they kick off side effects that once resolved can print/say/do more specific things (fill out a help form, reset password, follow debug steps etc)
-    return { unauthorized: true };
+    decodedToken.error.name = 'UNAUTHORIZED';
+    return decodedToken;
   }
   return decodedToken;
 };
 
-export const checkTokenExpiration = (decodedToken: any): boolean => {
-  const expirationTime = decodedToken.decoded.exp;
+export const checkTokenExpiration = (
+  decodedToken: TokenValidationResponse
+): boolean => {
+  if (
+    typeof decodedToken.decoded === 'string' ||
+    typeof decodedToken.decoded === 'undefined'
+  ) {
+    return false;
+  }
+  // TODO need to figure out how to handle the decodedToken being a string
+  // NOTE setting the time to 0 will always force isBefore() to resolve to false
+  // this will cause the user to get logged out if they are already logged in
+  // or prevent them from being able to log in successfully (if their token is never updated/fixed)
+  // Is this the desired behavior?
+  const expirationTime = decodedToken.decoded.exp || 0;
   const now = moment();
   const expiration = moment.unix(expirationTime);
   const isValid = now.isBefore(expiration);
+
   return isValid;
 };

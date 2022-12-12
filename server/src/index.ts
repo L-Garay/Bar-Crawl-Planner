@@ -41,11 +41,8 @@ const PORT = process.env.SERVER_PORT || 4000;
 
 async function StartServer() {
   const app = express();
-  // Our httpServer handles incoming requests to our Express app.
   const httpServer = http.createServer(app);
 
-  // Same ApolloServer initialization as before, plus the drain plugin
-  // for our httpServer.
   const server = new ApolloServer({
     typeDefs,
     resolvers,
@@ -53,8 +50,6 @@ async function StartServer() {
   });
 
   await server.start();
-
-  // Order of app.use() and app.get() matters
 
   app.get('/healthcheck', (req, res) => {
     res.status(200).send('Healthy!');
@@ -65,10 +60,10 @@ async function StartServer() {
     // However, this runTokenValidation() is used elsewhere that does care about errors and logging them
     // which means that every time it's used here, it will log error messages when there is no token/the token is invalid, which creates unnecessary noise
     // TODO look into ways to prevent that if possible
-    const decodedToken: any = await runTokenValidation(req);
+    const decodedToken = await runTokenValidation(req);
 
     // Even though these are errors, we don't want to treat them like actual errors here
-    if (decodedToken.noAuthorizationHeader || decodedToken.unauthorized) {
+    if (decodedToken.error) {
       return res.status(200).send(false);
     }
 
@@ -81,10 +76,18 @@ async function StartServer() {
   });
 
   app.get('/authenticate', async (req, res) => {
-    const decodedToken: any = await runTokenValidation(req);
+    const decodedToken = await runTokenValidation(req);
 
-    if (decodedToken.noAuthorizationHeader || decodedToken.unauthorized) {
+    if (decodedToken.error) {
       return res.status(400).send(null);
+    }
+
+    // TODO need to look into how to handle if the decoded token is a string
+    if (
+      typeof decodedToken.decoded === 'string' ||
+      typeof decodedToken.decoded === 'undefined'
+    ) {
+      return res.status(500).send(null);
     }
 
     const email = decodedToken.decoded.email || '';
@@ -141,25 +144,30 @@ async function StartServer() {
       context: async ({ req }) => {
         const decodedToken = await runTokenValidation(req);
 
-        if (decodedToken.noAuthorizationHeader) {
+        if (decodedToken.error?.name === 'UNAUTHENTICATED') {
           return {
             authError: {
-              code: 'UNAUTHENTICATED',
+              code: decodedToken.error.name,
               message: 'You are not authenticated, please log in to continue.',
             },
           };
         }
 
-        if (decodedToken.unauthorized) {
+        if (decodedToken.error?.name === 'UNAUTHORIZED') {
           return {
             authError: {
-              code: 'UNAUTHORIZED',
+              code: decodedToken.error.name,
               message: 'You do not have permission to do this.',
             },
           };
         }
 
-        const email = decodedToken.decoded.email || '';
+        // NOTE what should be returned in this situation?
+        // Should we treat it as an error?
+        // When an empty object is returned, all auth based gql requests will fail (which is all of them)
+        if (typeof decodedToken.decoded === 'string') return {};
+
+        const email = decodedToken.decoded?.email;
         const user = await GetAccountByEmail(email);
 
         // NOTE need to clear this when user logs out
