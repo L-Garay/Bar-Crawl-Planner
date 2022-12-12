@@ -12,7 +12,7 @@ export async function GetAccountByEmail(email: string): Promise<QueryData> {
     return { status: 'Success', data: user };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }
 
@@ -22,7 +22,7 @@ export async function GetAllAccounts(): Promise<QueryData> {
     return { status: 'Success', data: users };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }
 
@@ -50,6 +50,6 @@ export async function GetAccountWithProfileData(
     return { status: 'Success', data: expectedUser };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }

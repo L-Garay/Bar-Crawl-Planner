@@ -12,7 +12,7 @@ export async function GetProfileByAccountId(id: number): Promise<QueryData> {
     return { status: 'Success', data: profile };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }
 
@@ -22,7 +22,7 @@ export async function GetAllProfiles(): Promise<QueryData> {
     return { status: 'Success', data: profiles };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }
 

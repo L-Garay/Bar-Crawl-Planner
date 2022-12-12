@@ -14,7 +14,7 @@ export async function GetOutingByOutingId(
     return { status: 'Success', data: outings };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }
 
@@ -24,7 +24,7 @@ export async function GetAllOutings(): Promise<QueryData> {
     return { status: 'Success', data: outings };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }
 

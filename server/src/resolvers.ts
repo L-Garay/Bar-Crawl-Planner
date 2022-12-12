@@ -18,9 +18,8 @@ const resolvers: Resolvers = {
 
       const data = await GetAllAccounts();
       if (data.status === 'Failure') {
-        // TODO how to handle Prisma failure in this resolver
-        throw new GraphQLError('Temp error message for accounts', {
-          extensions: { code: 'DB ERROR' },
+        throw new GraphQLError('Cannot get all accounts', {
+          extensions: { code: data.error?.name, message: data.error?.message },
         });
       } else {
         return data.data;
@@ -36,9 +35,8 @@ const resolvers: Resolvers = {
 
       const data = await GetAllProfiles();
       if (data.status === 'Failure') {
-        // TODO how to handle Prisma failure in this resolver
-        throw new GraphQLError('Temp error message for profiles', {
-          extensions: { code: 'DB ERROR' },
+        throw new GraphQLError('Cannot get all profiles', {
+          extensions: { code: data.error?.name, message: data.error?.message },
         });
       } else {
         return data.data;
@@ -54,9 +52,8 @@ const resolvers: Resolvers = {
 
       const data = await GetAllOutings();
       if (data.status === 'Failure') {
-        // TODO how to handle Prisma failure in this resolver
-        throw new GraphQLError('Temp error message for outings', {
-          extensions: { code: 'DB ERROR' },
+        throw new GraphQLError('Cannot get all outings', {
+          extensions: { code: data.error?.name, message: data.error?.message },
         });
       } else {
         return data.data;

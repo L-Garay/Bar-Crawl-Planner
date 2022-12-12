@@ -118,10 +118,6 @@ async function StartServer() {
 
     // Indicates that there is an error object to read
     if (userData.status === 'Failure') {
-      console.error(
-        'Hitting the error block of the /auth route',
-        JSON.stringify(userData.data)
-      );
       return res.status(500).send(null);
     }
 

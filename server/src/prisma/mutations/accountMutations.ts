@@ -18,7 +18,7 @@ export async function CreateAccount(
     return { status: 'Success', data: account };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }
 
@@ -43,7 +43,7 @@ export async function CreateAccountAndProfile() {
     return { status: 'Success', user };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', error: newError };
+    return { status: 'Failure', data: null, error: newError };
     // NOTE need to figure out when/where to properly call this
     // presumably we don't want this snippet at the end of every function, more likely it should go around a parent wrapping handler
     // where the handler can handle the returned data/errors from all child functions, and then the handler can disconnect/exit if necessary

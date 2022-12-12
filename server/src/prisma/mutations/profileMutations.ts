@@ -21,6 +21,6 @@ export async function CreateProfile(
     return { status: 'Success', data: profile };
   } catch (error) {
     const newError = GetPrismaError(error);
-    return { status: 'Failure', data: newError };
+    return { status: 'Failure', data: null, error: newError };
   }
 }

@@ -1,6 +1,7 @@
 export type QueryData = {
   status: string;
   data: any;
+  error?: PrismaError;
 };
 
 export type PrismaError = {
