@@ -1,0 +1,23 @@
+#footer-container {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr);
+  gap: 10px;
+}
+
+.message {
+  grid-column: 1/2;
+}
+
+.link-list {
+  grid-column: 1/3;
+}
+
+.social-media {
+  grid-column: 1/2;
+}
+
+.licenses {
+  grid-column: span 4;
+}
+
+/*# sourceMappingURL=footer.css.map */

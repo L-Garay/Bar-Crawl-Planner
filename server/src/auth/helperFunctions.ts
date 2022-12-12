@@ -7,7 +7,6 @@ export const runTokenValidation = async (
 ): Promise<TokenValidationResponse> => {
   const authorizationHeader = request.headers.authorization;
   if (!authorizationHeader) {
-    console.error('There is no authorization header');
     const error: Error = {
       name: 'UNAUTHENTICATED',
       message: 'No authorization header',
@@ -19,7 +18,6 @@ export const runTokenValidation = async (
   const decodedToken = await ValidateJWT(token[1]);
 
   if (decodedToken.error) {
-    console.error(`Error validating token: ${decodedToken.error.message}`);
     decodedToken.error.name = 'UNAUTHORIZED';
     return decodedToken;
   }
