@@ -1,16 +1,3 @@
-import type { LinksFunction } from '@remix-run/node';
-import React from 'react';
-import styles from '../generatedStyles/footer.css';
-
-export const links: LinksFunction = () => {
-  return [
-    {
-      rel: 'stylesheet',
-      href: styles,
-    },
-  ];
-};
-
 export const BasicFooter = () => {
   return (
     <div id="footer-container">
@@ -41,7 +28,7 @@ export const BasicFooter = () => {
           *icon here* <span>Github</span>
         </div>
       </div>
-      <div className="licenses">Copyright goes here along with MIT licence</div>
+      <div id="licenses">Copyright goes here along with MIT licence</div>
     </div>
   );
 };
