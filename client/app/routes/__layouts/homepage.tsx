@@ -3,7 +3,7 @@ import { Form, useLoaderData } from '@remix-run/react';
 import { logout } from '~/auth/authenticator';
 import { useQuery, gql } from '@apollo/client';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
-import styles from '../../generatedStyles/homepage.css';
+import homepageStyles from '../../generatedStyles/homepage.css';
 
 const testQuery = gql`
   query accounts {
@@ -18,7 +18,7 @@ export const links: LinksFunction = () => {
   return [
     {
       rel: 'stylesheet',
-      href: styles,
+      href: homepageStyles,
     },
   ];
 };
@@ -42,22 +42,20 @@ export default function HomePage() {
   if (error) throw error;
 
   return (
-    <>
-      <main>
-        <h1>This is the Home Page</h1>
-        <h3>Welcome {user.info.name}</h3>
-        <h4>{user.info.email}</h4>
-        <p>
-          This is the page users will land when they have logged, they've been
-          authenticated and a user session has been created for them
-        </p>
-        <small>Data from grapqhl query</small>
-        <small>{JSON.stringify(data)}</small>
-        <Form method="post" action="/resources/logout">
-          <button className="test-button">Logout</button>
-        </Form>
-      </main>
-    </>
+    <main>
+      <h1>This is the Home Page</h1>
+      <h3>Welcome {user.info.name}</h3>
+      <h4>{user.info.email}</h4>
+      <p>
+        This is the page users will land when they have logged, they've been
+        authenticated and a user session has been created for them
+      </p>
+      <small>Data from grapqhl query</small>
+      <small>{JSON.stringify(data)}</small>
+      <Form method="post" action="/resources/logout">
+        <button className="test-button">Logout</button>
+      </Form>
+    </main>
   );
 }
 
