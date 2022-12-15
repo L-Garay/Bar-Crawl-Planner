@@ -1,15 +1,17 @@
+import BeerIcon from '../../assets/basicBeerSvg';
+
 export const BasicHeader = () => {
   return (
     <div id="header-container">
       <div className="logo-wrapper">
-        <div className="logo">image here</div>
+        <BeerIcon />
       </div>
       <div className="links-wrapper">
         <div className="links">
-          <p>Link 1</p>
-          <p>Link 2</p>
-          <p>Link 3</p>
-          <p>Link 4</p>
+          <p className="link">Link 1</p>
+          <p className="link">Link 2</p>
+          <p className="link">Link 3</p>
+          <p className="link">Link 4</p>
         </div>
       </div>
     </div>
