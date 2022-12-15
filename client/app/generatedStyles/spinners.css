@@ -1,0 +1,143 @@
+/* SHARED */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loading-spinner-wrapper {
+  isolation: isolate;
+  position: relative;
+  width: 15rem;
+  height: 15rem;
+  animation: spin 3s linear infinite;
+}
+
+.circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.inner-circle {
+  position: absolute;
+  width: 85%;
+  height: 85%;
+  border-radius: 50%;
+  background: white;
+}
+
+.segment {
+  position: absolute;
+  background: linear-gradient(165deg, #1f005c, #31006b, #6f0092, #c600a1, #ff015a, #ff4435, #ff9a5c, #ffb56b);
+  width: 100%;
+  height: 100%;
+}
+
+/* SHARED */
+/* STYLE 1 */
+.segment.one {
+  top: -75%;
+  right: 0;
+}
+
+.segment.two {
+  top: 40%;
+  left: 60%;
+}
+
+.segment.three {
+  top: 40%;
+  left: -60%;
+}
+
+/* STYLE 1 */
+/* STYLE 2  */
+.color-canvas {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(165deg, #1f005c, #31006b, #6f0092, #af00ff, #c600a1, #ff015a, #ff4435, #ff9a5c, #ffb56b);
+  /* Rainbow colors, will need to tweek the gradient to ensure all colors are visible  */
+  /* background-image: linear-gradient(#ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000); */
+}
+
+.loading-spinner-wrapper.S2 {
+  isolation: isolate;
+  /* this position is absolute so it can sit 'underneath' the clipping layer */
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  animation: spin 3s linear infinite;
+}
+
+.circle-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.segmentS2 {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: white;
+}
+
+.segmentS2.oneS2 {
+  top: -95%;
+  right: 0;
+  transform: rotate(45deg);
+}
+
+.segmentS2.twoS2 {
+  top: 55%;
+  left: 80%;
+  transform: rotate(-10deg);
+}
+
+.segmentS2.threeS2 {
+  top: 55%;
+  left: -80%;
+  transform: rotate(10deg);
+}
+
+.clipping-wrapper {
+  /* this position is absolute so it can sit 'on top' of the spinner wrapper */
+  /* however we still need the actual clipping layer to be relatively positioned for the ::after psuedo element to work properly */
+  position: absolute;
+  height: 300px;
+  width: 300px;
+}
+
+.clipping-layer {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.clipping-layer::after {
+  content: "";
+  position: absolute;
+  width: 238px;
+  height: 238px;
+  border-radius: 50%;
+  left: 31px;
+  top: 31px;
+  box-shadow: 0px 0px 0px 300px white;
+}
+
+/* STYLE 2 */
+
+/*# sourceMappingURL=spinners.css.map */

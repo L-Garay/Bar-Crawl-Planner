@@ -4,6 +4,8 @@ import { logout } from '~/auth/authenticator';
 import { useQuery, gql } from '@apollo/client';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 import homepageStyles from '../../generatedStyles/homepage.css';
+import spinnerStyles from '../../generatedStyles/spinners.css';
+import { Dynamic } from '~/components/animated/loadingSpinners';
 
 const testQuery = gql`
   query accounts {
@@ -19,6 +21,10 @@ export const links: LinksFunction = () => {
     {
       rel: 'stylesheet',
       href: homepageStyles,
+    },
+    {
+      rel: 'stylesheet',
+      href: spinnerStyles,
     },
   ];
 };
@@ -38,7 +44,9 @@ export default function HomePage() {
 
   const { loading, error, data } = useQuery(testQuery);
 
-  if (loading) return <h1>Loading...</h1>;
+  if (loading) {
+    return <Dynamic />;
+  }
   if (error) throw error;
 
   return (
