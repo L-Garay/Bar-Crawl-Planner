@@ -1,13 +1,19 @@
 #header-container {
   display: flex;
   justify-content: space-between;
+  min-height: 60px;
+  background: lightpink;
+  border-bottom: 2px solid black;
 }
 
 .logo-wrapper {
   padding-top: 10px;
+  padding-left: 10px;
 }
 
 .links-wrapper {
+  display: flex;
+  align-items: center;
   .links {
     display: flex;
     padding: 3px;
@@ -20,8 +26,33 @@
   font-size: 1.2rem;
   font-weight: 600;
   transition: all 0.3s ease-in-out;
+  color: black;
   &:hover {
     color: lightseagreen;
     cursor: pointer;
   }
+}
+
+.menuToggle {
+  position: relative;
+}
+
+.menu-container {
+  position: absolute;
+  top: 120%;
+  right: 5%;
+  height: 150px;
+  width: 100px;
+  background: lightgrey;
+  outline: 1px solid darkgray;
+}
+
+.menu-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.menuLink {
+  @extend .link;
+  padding: 5px 5px;
 }

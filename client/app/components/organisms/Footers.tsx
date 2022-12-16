@@ -6,9 +6,9 @@ export const BasicFooter = () => {
       </div>
       <div className="link-list list1">
         <ul>
-          <li>Link to one page</li>
-          <li>Link to a second page</li>
-          <li>Link to a third page</li>
+          <li>Home</li>
+          <li>Account</li>
+          <li>FAQ</li>
         </ul>
       </div>
       <div className="link-list list2">
