@@ -4,10 +4,10 @@ import type { LoaderFunction, MetaFunction } from '@remix-run/node';
 import {
   Links,
   LiveReload,
-  Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useCatch,
   useLoaderData,
 } from '@remix-run/react';
 import useGetApolloClient from './apollo/getClient';
@@ -81,6 +81,47 @@ export function ErrorBoundary({ error }: { error: Error }) {
         <h1>App Error</h1>
         <pre>{error.message}</pre>
       </div>
+    </Document>
+  );
+}
+
+export function CatchBoundary() {
+  const caught = useCatch();
+
+  let message;
+  switch (caught.status) {
+    case 401:
+      message = (
+        <p>
+          Oops! Looks like you tried to visit a page that you do not have access
+          to.
+        </p>
+      );
+      break;
+    case 404:
+      message = (
+        <p>Oops! Looks like you tried to visit a page that does not exist.</p>
+      );
+      break;
+    case 500:
+      message = (
+        <p>
+          Oops! Looks like our server had a little too much to drink. We're
+          working on it!
+        </p>
+      );
+      break;
+
+    default:
+      throw new Error(caught.data || caught.statusText);
+  }
+
+  return (
+    <Document title={`${caught.status} ${caught.statusText}`}>
+      <h1>
+        {caught.status}: {caught.statusText}
+      </h1>
+      {message}
     </Document>
   );
 }
