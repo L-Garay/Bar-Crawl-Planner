@@ -23,7 +23,6 @@ const NavMenu = () => {
 
 export const BasicHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
-  console.log(isMenuOpen);
   const menuRef = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
 

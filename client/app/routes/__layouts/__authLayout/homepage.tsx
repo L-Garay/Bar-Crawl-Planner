@@ -1,10 +1,9 @@
 import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import { Form, useLoaderData } from '@remix-run/react';
-import { logout } from '~/auth/authenticator';
+import { authenticator } from '~/auth/authenticator';
 import { useQuery, gql } from '@apollo/client';
-import { validateUserAndSession } from '~/utils/validateUserAndSession';
-import homepageStyles from '../../generatedStyles/homepage.css';
-import spinnerStyles from '../../generatedStyles/spinners.css';
+import homepageStyles from '../../../generatedStyles/homepage.css';
+import spinnerStyles from '../../../generatedStyles/spinners.css';
 import { Dynamic } from '~/components/animated/loadingSpinners';
 
 const testQuery = gql`
@@ -30,13 +29,8 @@ export const links: LinksFunction = () => {
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
-  const { valid, user, session } = await validateUserAndSession(request);
-
-  if (valid) {
-    return { session, user, valid };
-  } else {
-    return logout(request, true);
-  }
+  const user = await authenticator.isAuthenticated(request);
+  return { user };
 };
 
 export default function HomePage() {
