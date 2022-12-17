@@ -1,22 +1,22 @@
-// import { gql, useQuery } from '@apollo/client';
-// import { Dynamic } from '~/components/animated/loadingSpinners';
+import { gql, useQuery } from '@apollo/client';
+import { Dynamic } from '~/components/animated/loadingSpinners';
 
-// TODO need to set up a query to get the user's account data in server
-// const getAccount = gql`
-//   query account {
-//     account {
-//       email
-//     }
-//   }
-// `;
+const getAccount = gql`
+  query getUserAccount {
+    getUserAccount {
+      email
+      email_verified
+    }
+  }
+`;
 
 export default function AccountIndex() {
-  // const { loading, error, data } = useQuery(getAccount);
+  const { loading, error, data } = useQuery(getAccount);
 
-  // if (loading) {
-  //   return <Dynamic />;
-  // }
-  // if (error) throw error;
+  if (loading) {
+    return <Dynamic />;
+  }
+  if (error) throw error;
 
   return (
     <>
@@ -27,6 +27,10 @@ export default function AccountIndex() {
         }}
       >
         <h1>This will be the Account page</h1>
+        <small>
+          {data.getUserAccount.email + ' '}
+          {data.getUserAccount.email_verified + ''}
+        </small>
         <p>
           This will probably be a pretty simple page content wise, as in it will
           only really edit the user's account data. Nothing else that I can
