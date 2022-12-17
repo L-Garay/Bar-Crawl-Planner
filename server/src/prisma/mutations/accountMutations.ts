@@ -25,6 +25,31 @@ export async function CreateAccount(
   }
 }
 
+export async function UpdateUserAccount(
+  originalUserEmail: string,
+  phone?: string | null,
+  email?: string | null
+) {
+  // We want to make sure these are undefined (and not null) so that way Prisma will not try to update the field
+  const phoneOrUndefinded = phone ? phone : undefined;
+  const emailOrUndefined = email ? email : undefined;
+  try {
+    const updatedUser = await prismaClient.account.update({
+      where: {
+        email: originalUserEmail,
+      },
+      data: {
+        phone_number: phoneOrUndefinded,
+        email: emailOrUndefined,
+      },
+    });
+    return { status: 'Success', data: updatedUser };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
 // TESTING/SEEDING
 // export async function CreateAccountAndProfile() {
 //   const now = new Date().toISOString();

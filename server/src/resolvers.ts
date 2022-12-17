@@ -6,6 +6,7 @@ import {
   GetAccountByEmail,
   GetAllAccounts,
 } from './prisma/querries/accountQuerries';
+import { UpdateUserAccount } from './prisma/mutations/accountMutations';
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
@@ -88,6 +89,34 @@ const resolvers: Resolvers = {
         });
       } else {
         return data.data;
+      }
+    },
+  },
+  Mutation: {
+    updateUserAccount: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const originalUserEmail = user.data.email;
+      const { phone_number, email } = args;
+      const updatedUser = await UpdateUserAccount(
+        originalUserEmail,
+        phone_number,
+        email
+      );
+      if (updatedUser.status === 'Failure') {
+        throw new GraphQLError('Cannot update user account', {
+          extensions: {
+            code: updatedUser.error?.name,
+            message: updatedUser.error?.message,
+          },
+        });
+      } else {
+        return updatedUser.data;
       }
     },
   },
