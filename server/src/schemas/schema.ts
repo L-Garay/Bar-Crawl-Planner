@@ -9,6 +9,9 @@ const typeDefs = `#graphql
     email_verified: Boolean
     created_at: String
     profile: Profile
+    deleted: Boolean
+    deleted_at: String
+    phone_number: String
   }
 
   type Profile {
