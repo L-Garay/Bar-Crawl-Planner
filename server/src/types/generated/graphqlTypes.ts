@@ -30,6 +30,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createAccount?: Maybe<Account>;
   createProfile?: Maybe<Profile>;
+  updateUserAccount?: Maybe<Account>;
 };
 
 
@@ -43,6 +44,12 @@ export type MutationCreateProfileArgs = {
   account_id?: InputMaybe<Scalars['Int']>;
   name?: InputMaybe<Scalars['String']>;
   profile_img?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationUpdateUserAccountArgs = {
+  email?: InputMaybe<Scalars['String']>;
+  phone_number?: InputMaybe<Scalars['String']>;
 };
 
 export type Outing = {
@@ -189,6 +196,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationCreateAccountArgs>>;
   createProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, Partial<MutationCreateProfileArgs>>;
+  updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
 }>;
 
 export type OutingResolvers<ContextType = any, ParentType extends ResolversParentTypes['Outing'] = ResolversParentTypes['Outing']> = ResolversObject<{
