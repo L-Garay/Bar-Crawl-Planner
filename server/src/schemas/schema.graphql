@@ -26,7 +26,8 @@ type Outing {
 }
 
 type Query {
-  account: Account
+  getAccountByEmail(email: String!): Account
+  getUserAccount: Account
   profile: Profile
   outing: Outing
   accounts: [Account]

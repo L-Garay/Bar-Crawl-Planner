@@ -4,6 +4,7 @@ export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -64,12 +65,18 @@ export type Profile = {
 
 export type Query = {
   __typename?: 'Query';
-  account?: Maybe<Account>;
   accounts?: Maybe<Array<Maybe<Account>>>;
+  getAccountByEmail?: Maybe<Account>;
+  getUserAccount?: Maybe<Account>;
   outing?: Maybe<Outing>;
   outings?: Maybe<Array<Maybe<Outing>>>;
   profile?: Maybe<Profile>;
   profiles?: Maybe<Array<Maybe<Profile>>>;
+};
+
+
+export type QueryGetAccountByEmailArgs = {
+  email: Scalars['String'];
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -200,8 +207,9 @@ export type ProfileResolvers<ContextType = any, ParentType extends ResolversPare
 }>;
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   accounts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Account']>>>, ParentType, ContextType>;
+  getAccountByEmail?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountByEmailArgs, 'email'>>;
+  getUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   outing?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType>;
   outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;

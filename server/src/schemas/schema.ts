@@ -34,7 +34,8 @@ const typeDefs = `#graphql
   # clients can execute, along with the return type for each. In this
   # case, the "basicUsers" query returns an array of zero or more BasicUsers (defined above).
   type Query {
-    account: Account
+    getAccountByEmail(email: String!): Account
+    getUserAccount: Account
     profile: Profile
     outing: Outing
     accounts: [Account]
