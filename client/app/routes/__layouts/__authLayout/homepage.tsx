@@ -20,10 +20,12 @@ export const links: LinksFunction = () => {
     {
       rel: 'stylesheet',
       href: homepageStyles,
+      as: 'style',
     },
     {
       rel: 'stylesheet',
       href: spinnerStyles,
+      as: 'style',
     },
   ];
 };

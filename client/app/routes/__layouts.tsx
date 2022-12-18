@@ -10,10 +10,12 @@ export const links: LinksFunction = () => {
     {
       rel: 'stylesheet',
       href: headerStyles,
+      as: 'style',
     },
     {
       rel: 'stylesheet',
       href: footerStyles,
+      as: 'style',
     },
   ];
 };

@@ -19,10 +19,12 @@ export const links: LinksFunction = () => {
     {
       rel: 'stylesheet',
       href: landingPageStyles,
+      as: 'style',
     },
     {
       rel: 'stylesheet',
       href: footerStyles,
+      as: 'style',
     },
   ];
 };
