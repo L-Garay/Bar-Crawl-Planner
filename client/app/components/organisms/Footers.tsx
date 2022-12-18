@@ -1,3 +1,5 @@
+import { Link } from '@remix-run/react';
+
 export const BasicFooter = () => {
   return (
     <div id="footer-container">
@@ -6,7 +8,7 @@ export const BasicFooter = () => {
       </div>
       <div className="link-list list1">
         <ul>
-          <li>Home</li>
+          <Link to="/homepage">Home</Link>
           <li>Account</li>
           <li>FAQ</li>
         </ul>

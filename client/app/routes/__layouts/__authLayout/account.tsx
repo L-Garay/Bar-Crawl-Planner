@@ -3,6 +3,7 @@ import type { ActionFunction } from '@remix-run/node';
 import { Form, useTransition } from '@remix-run/react';
 import React from 'react';
 import { getNewClient } from '~/apollo/getClient';
+import { logout } from '~/auth/authenticator';
 import { Dynamic } from '~/components/animated/loadingSpinners';
 
 // TODO need to investigate extraneous graphql calls I'm seeing in the network tab when visiting this Account page
@@ -19,6 +20,7 @@ const getAccount = gql`
       phone_number
       created_at
       deleted
+      id
     }
   }
 `;
@@ -32,20 +34,60 @@ const updateAccount = gql`
   }
 `;
 
+// NOTE while this works on our end, still need to figure out how this will work with Auth0
+// Even if we delete the profile and 'soft delete' the account, the user creds will still be in Auth0
+// So then when/if they return and try to sign in with the same email/creds, they'll successfully get authenticated by Auth0 have an associated account in the app but no profile (which will presumably trigger issues if not handled properly)
+// And so then we have really have two options, although I'm not sure if the end result will be any different
+// Do we delete the user information from Auth0 DB?
+// Inclination is yes, for storage in general and security
+// The end result will be the same in that, regardless of whether we do or don't, the user will have an associated account but no profile
+// Which means we'll need to add logic to server to determine when a person is first signing up (create 2), logging in (create 0), or returning (create 1)
+const deleteAccount = gql`
+  mutation deleteUserAccount($id: Int!) {
+    deleteUserAccount(id: $id) {
+      id
+      email
+      deleted
+      deleted_at
+    }
+  }
+`;
+
 export const action: ActionFunction = async ({ request }) => {
   const client = await getNewClient(request);
   const formData = await request.formData();
-  const phone_number = formData.get('phone_number')?.toString();
 
-  const updatedUser = await client.mutate({
-    mutation: updateAccount,
-    variables: {
-      phone_number: phone_number,
-    },
-  });
-  const userData = updatedUser.data.updateUserAccount;
+  switch (request.method) {
+    case 'PATCH':
+      const phone_number = formData.get('phone_number')?.toString();
 
-  return { userData };
+      const updatedUser = await client.mutate({
+        mutation: updateAccount,
+        variables: {
+          phone_number: phone_number,
+        },
+      });
+      const userData = updatedUser.data.updateUserAccount;
+
+      return { userData };
+
+    case 'DELETE':
+      const id = Number(formData.get('account_id'));
+      try {
+        await client.mutate({
+          mutation: deleteAccount,
+          variables: {
+            id,
+          },
+        });
+        return logout(request);
+      } catch (error) {
+        throw error;
+      }
+
+    default:
+      return null;
+  }
 };
 
 export default function AccountIndex() {
@@ -98,12 +140,23 @@ export default function AccountIndex() {
             both.
           </p>
           <div className="form-container">
-            <Form method="post" action="/account">
+            <Form method="patch" action="/account">
               <label htmlFor="email">Email</label>
               <input type="text" name="email" ref={emailRef} />
               <label htmlFor="phone_number">Phone</label>
               <input type="text" name="phone_number" ref={phoneRef} />
               <button type="submit">Submit</button>
+            </Form>
+          </div>
+          <div className="delete-button">
+            <Form method="delete" action="/account">
+              <input
+                hidden
+                type="number"
+                name="account_id"
+                defaultValue={accountData.getUserAccount.id}
+              />
+              <button>Delete Account</button>
             </Form>
           </div>
         </div>
