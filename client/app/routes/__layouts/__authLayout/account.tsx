@@ -1,6 +1,8 @@
-import { gql, useMutation, useQuery } from '@apollo/client';
-import { Form } from '@remix-run/react';
+import { gql, useQuery } from '@apollo/client';
+import type { ActionFunction } from '@remix-run/node';
+import { Form, useTransition } from '@remix-run/react';
 import React from 'react';
+import { getNewClient } from '~/apollo/getClient';
 import { Dynamic } from '~/components/animated/loadingSpinners';
 
 // TODO need to investigate extraneous graphql calls I'm seeing in the network tab when visiting this Account page
@@ -30,29 +32,47 @@ const updateAccount = gql`
   }
 `;
 
+export const action: ActionFunction = async ({ request }) => {
+  const client = await getNewClient(request);
+  const formData = await request.formData();
+  const phone_number = formData.get('phone_number')?.toString();
+
+  const updatedUser = await client.mutate({
+    mutation: updateAccount,
+    variables: {
+      phone_number: phone_number,
+    },
+  });
+  const userData = updatedUser.data.updateUserAccount;
+
+  return { userData };
+};
+
 export default function AccountIndex() {
   const { loading, error, data: accountData } = useQuery(getAccount);
+  const transition = useTransition();
 
   const phoneRef = React.useRef<HTMLInputElement>(null);
   const emailRef = React.useRef<HTMLInputElement>(null);
-
-  const [updateUserAccount, { data: mutationData }] =
-    useMutation(updateAccount);
 
   if (loading) {
     return <Dynamic />;
   }
   if (error) throw error;
 
-  const handleSubmit = (event: any) => {
-    event.preventDefault();
-    const phone = phoneRef.current?.value;
-    const email = emailRef.current?.value;
-    console.log(phone);
-
-    updateUserAccount({ variables: { email, phone_number: phone } });
-    event.target.reset();
-  };
+  // Not super thrilled with this
+  // Optimistically show the user's updated values, or their current value
+  // Then once the sumbission process is over, the updated value should have then become their current value and it will remain in the UI
+  const emailToShow = transition.submission
+    ? transition.submission?.formData.get('email')
+    : accountData
+    ? accountData.getUserAccount.email
+    : null;
+  const phoneToShow = transition.submission
+    ? transition.submission?.formData.get('phone_number')
+    : accountData
+    ? accountData.getUserAccount.phone_number
+    : null;
 
   return (
     <>
@@ -64,10 +84,8 @@ export default function AccountIndex() {
           }}
         >
           <h1>This will be the Account page</h1>
-          <small>{'Email: ' + accountData.getUserAccount.email + ' '}</small>
-          <small>
-            {'Phone: ' + accountData.getUserAccount.phone_number + ' '}
-          </small>
+          <small>{'Email: ' + emailToShow + ' '}</small>
+          <small>{'Phone: ' + phoneToShow + ' '}</small>
           <p>
             This will probably be a pretty simple page content wise, as in it
             will only really edit the user's account data. Nothing else that I
@@ -80,13 +98,12 @@ export default function AccountIndex() {
             both.
           </p>
           <div className="form-container">
-            {/* TODO need to figure out how to have data auto update after submission */}
-            <Form replace onSubmit={handleSubmit}>
+            <Form method="post" action="/account">
               <label htmlFor="email">Email</label>
               <input type="text" name="email" ref={emailRef} />
-              <label htmlFor="phone">Phone</label>
-              <input type="text" name="phone" ref={phoneRef} />
-              <button type="submit">Update</button>
+              <label htmlFor="phone_number">Phone</label>
+              <input type="text" name="phone_number" ref={phoneRef} />
+              <button type="submit">Submit</button>
             </Form>
           </div>
         </div>
