@@ -6,7 +6,10 @@ import {
   GetAccountByEmail,
   GetAllAccounts,
 } from './prisma/querries/accountQuerries';
-import { UpdateUserAccount } from './prisma/mutations/accountMutations';
+import {
+  DeleteUserAccount,
+  UpdateUserAccount,
+} from './prisma/mutations/accountMutations';
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
@@ -117,6 +120,28 @@ const resolvers: Resolvers = {
         });
       } else {
         return updatedUser.data;
+      }
+    },
+    deleteUserAccount: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id } = args;
+      const deletedAccount = await DeleteUserAccount(id);
+
+      if (deletedAccount.status === 'Failure') {
+        throw new GraphQLError('Cannot delete user account', {
+          extensions: {
+            code: deletedAccount.error?.name,
+            message: deletedAccount.error?.message,
+          },
+        });
+      } else {
+        return deletedAccount.data;
       }
     },
   },

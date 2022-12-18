@@ -50,6 +50,35 @@ export async function UpdateUserAccount(
   }
 }
 
+export async function DeleteUserAccount(id: number) {
+  try {
+    const deletedUser = await prismaClient.account.update({
+      where: {
+        id,
+      },
+      data: {
+        deleted: true,
+        deleted_at: new Date().toISOString(),
+        // TODO need to determine if this is necessary or not (doesn't seem likt it)
+        // profile: {
+        //   disconnect: true,
+        // },
+      },
+    });
+
+    await prismaClient.profile.delete({
+      where: {
+        account_Id: id,
+      },
+    });
+    // what do we return in this situation?
+    return { status: 'Success', data: deletedUser };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
 // TESTING/SEEDING
 // export async function CreateAccountAndProfile() {
 //   const now = new Date().toISOString();
