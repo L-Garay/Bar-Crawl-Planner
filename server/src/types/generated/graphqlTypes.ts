@@ -30,6 +30,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createAccount?: Maybe<Account>;
   createProfile?: Maybe<Profile>;
+  deleteUserAccount?: Maybe<Account>;
   updateUserAccount?: Maybe<Account>;
 };
 
@@ -44,6 +45,11 @@ export type MutationCreateProfileArgs = {
   account_id?: InputMaybe<Scalars['Int']>;
   name?: InputMaybe<Scalars['String']>;
   profile_img?: InputMaybe<Scalars['String']>;
+};
+
+
+export type MutationDeleteUserAccountArgs = {
+  id: Scalars['Int'];
 };
 
 
@@ -196,6 +202,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationCreateAccountArgs>>;
   createProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, Partial<MutationCreateProfileArgs>>;
+  deleteUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationDeleteUserAccountArgs, 'id'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
 }>;
 
