@@ -12,8 +12,8 @@ export async function CreateAccount(
         email,
         email_verified,
         created_at: new Date().toISOString(), // NOTE may want to pass in user's timezone here?
-        deleted: false,
-        deleted_at: '',
+        deactivated: false,
+        deactivated_at: '',
         phone_number: '',
       },
     });
@@ -50,29 +50,19 @@ export async function UpdateUserAccount(
   }
 }
 
-export async function DeleteUserAccount(id: number) {
+export async function DeactivateUserAccount(id: number) {
   try {
-    const deletedUser = await prismaClient.account.update({
+    const deactivatedUser = await prismaClient.account.update({
       where: {
         id,
       },
       data: {
-        deleted: true,
-        deleted_at: new Date().toISOString(),
-        // TODO need to determine if this is necessary or not (doesn't seem likt it)
-        // profile: {
-        //   disconnect: true,
-        // },
+        deactivated: true,
+        deactivated_at: new Date().toISOString(),
       },
     });
 
-    await prismaClient.profile.delete({
-      where: {
-        account_Id: id,
-      },
-    });
-    // what do we return in this situation?
-    return { status: 'Success', data: deletedUser };
+    return { status: 'Success', data: deactivatedUser };
   } catch (error) {
     const newError = GetPrismaError(error);
     return { status: 'Failure', data: null, error: newError };

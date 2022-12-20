@@ -7,7 +7,7 @@ import {
   GetAllAccounts,
 } from './prisma/querries/accountQuerries';
 import {
-  DeleteUserAccount,
+  DeactivateUserAccount,
   UpdateUserAccount,
 } from './prisma/mutations/accountMutations';
 
@@ -122,7 +122,7 @@ const resolvers: Resolvers = {
         return updatedUser.data;
       }
     },
-    deleteUserAccount: async (parent, args, context, info) => {
+    deactivateUserAccount: async (parent, args, context, info) => {
       const { authError, user } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -131,17 +131,17 @@ const resolvers: Resolvers = {
       }
 
       const { id } = args;
-      const deletedAccount = await DeleteUserAccount(id);
+      const deactivatedUser = await DeactivateUserAccount(id);
 
-      if (deletedAccount.status === 'Failure') {
+      if (deactivatedUser.status === 'Failure') {
         throw new GraphQLError('Cannot delete user account', {
           extensions: {
-            code: deletedAccount.error?.name,
-            message: deletedAccount.error?.message,
+            code: deactivatedUser.error?.name,
+            message: deactivatedUser.error?.message,
           },
         });
       } else {
-        return deletedAccount.data;
+        return deactivatedUser.data;
       }
     },
   },

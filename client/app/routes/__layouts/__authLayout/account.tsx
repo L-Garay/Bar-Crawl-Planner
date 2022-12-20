@@ -19,7 +19,7 @@ const getAccount = gql`
       email_verified
       phone_number
       created_at
-      deleted
+      deactivated
       id
     }
   }
@@ -34,21 +34,13 @@ const updateAccount = gql`
   }
 `;
 
-// NOTE while this works on our end, still need to figure out how this will work with Auth0
-// Even if we delete the profile and 'soft delete' the account, the user creds will still be in Auth0
-// So then when/if they return and try to sign in with the same email/creds, they'll successfully get authenticated by Auth0 have an associated account in the app but no profile (which will presumably trigger issues if not handled properly)
-// And so then we have really have two options, although I'm not sure if the end result will be any different
-// Do we delete the user information from Auth0 DB?
-// Inclination is yes, for storage in general and security
-// The end result will be the same in that, regardless of whether we do or don't, the user will have an associated account but no profile
-// Which means we'll need to add logic to server to determine when a person is first signing up (create 2), logging in (create 0), or returning (create 1)
-const deleteAccount = gql`
-  mutation deleteUserAccount($id: Int!) {
-    deleteUserAccount(id: $id) {
+const deactivateAccount = gql`
+  mutation deactivateUserAccount($id: Int!) {
+    deactivateUserAccount(id: $id) {
       id
       email
-      deleted
-      deleted_at
+      deactivated
+      deactivated_at
     }
   }
 `;
@@ -71,11 +63,11 @@ export const action: ActionFunction = async ({ request }) => {
 
       return { userData };
 
-    case 'DELETE':
+    case 'DELETE': // NOTE even though this is actually calls an update on the server, is it okay to use the DELETE method here?
       const id = Number(formData.get('account_id'));
       try {
         await client.mutate({
-          mutation: deleteAccount,
+          mutation: deactivateAccount,
           variables: {
             id,
           },
@@ -156,7 +148,7 @@ export default function AccountIndex() {
                 name="account_id"
                 defaultValue={accountData.getUserAccount.id}
               />
-              <button>Delete Account</button>
+              <button>Deactivate Account</button>
             </Form>
           </div>
         </div>
