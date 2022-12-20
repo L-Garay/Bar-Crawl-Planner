@@ -17,8 +17,8 @@ export type Scalars = {
 export type Account = {
   __typename?: 'Account';
   created_at?: Maybe<Scalars['String']>;
-  deleted?: Maybe<Scalars['Boolean']>;
-  deleted_at?: Maybe<Scalars['String']>;
+  deactivated?: Maybe<Scalars['Boolean']>;
+  deactivated_at?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   email_verified?: Maybe<Scalars['Boolean']>;
   id?: Maybe<Scalars['Int']>;
@@ -30,7 +30,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createAccount?: Maybe<Account>;
   createProfile?: Maybe<Profile>;
-  deleteUserAccount?: Maybe<Account>;
+  deactivateUserAccount?: Maybe<Account>;
   updateUserAccount?: Maybe<Account>;
 };
 
@@ -48,7 +48,7 @@ export type MutationCreateProfileArgs = {
 };
 
 
-export type MutationDeleteUserAccountArgs = {
+export type MutationDeactivateUserAccountArgs = {
   id: Scalars['Int'];
 };
 
@@ -189,8 +189,8 @@ export type ResolversParentTypes = ResolversObject<{
 
 export type AccountResolvers<ContextType = any, ParentType extends ResolversParentTypes['Account'] = ResolversParentTypes['Account']> = ResolversObject<{
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  deleted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  deleted_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  deactivated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  deactivated_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email_verified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -202,7 +202,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   createAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationCreateAccountArgs>>;
   createProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, Partial<MutationCreateProfileArgs>>;
-  deleteUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationDeleteUserAccountArgs, 'id'>>;
+  deactivateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationDeactivateUserAccountArgs, 'id'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
 }>;
 

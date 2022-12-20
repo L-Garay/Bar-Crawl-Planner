@@ -9,8 +9,8 @@ const typeDefs = `#graphql
     email_verified: Boolean
     created_at: String
     profile: Profile
-    deleted: Boolean
-    deleted_at: String
+    deactivated: Boolean
+    deactivated_at: String
     phone_number: String
   }
 
@@ -50,7 +50,7 @@ const typeDefs = `#graphql
     createAccount(email: String, email_verified: Boolean): Account
     createProfile(name: String, profile_img: String, account_id: Int): Profile
     updateUserAccount(email: String, phone_number: String): Account
-    deleteUserAccount(id: Int!): Account
+    deactivateUserAccount(id: Int!): Account
   }
 `;
 

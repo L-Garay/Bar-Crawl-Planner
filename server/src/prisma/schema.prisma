@@ -22,8 +22,8 @@ model Account {
   email_verified Boolean  @default(false)
   created_at     String   @db.VarChar(255)
   profile        Profile?
-  deleted        Boolean  @default(false)
-  deleted_at     String   @default("") @db.VarChar(255)
+  deactivated    Boolean  @default(false)
+  deactivated_at String   @default("") @db.VarChar(255)
   phone_number   String   @default("") @db.VarChar(255)
 }
 
