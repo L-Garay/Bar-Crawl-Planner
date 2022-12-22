@@ -94,6 +94,7 @@ async function StartServer() {
     const userData = await GetAccountWithProfileData(email);
 
     // Indicates that an account could not be found, but no errors occurred
+    // At this point since we know they are creating a new account, we'll need to assign them their 'User' role in auth0 too
     let newUser;
     if (userData.status === 'Success' && userData.data === null) {
       try {
@@ -111,6 +112,28 @@ async function StartServer() {
           name: profile.data.name,
           email: account.data.email,
         };
+
+        if (account && profile) {
+          console.log(
+            'should be hitting auth0 api to add new user to user role'
+          );
+          // TODO need to find a node library for making http requests so I can hit the auth0 endpoint from here
+          const response = await fetch(
+            `${process.env.AUTH_ISSUER_URL}/api/v2/users/${decodedToken.decoded.sub}/roles`,
+            {
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+                'cache-control': 'no-cache',
+                authorization: `Bearer ${decodedToken.decoded}`,
+              },
+              body: JSON.stringify({
+                roles: [process.env.AUTH_USER_ROLE_ID],
+              }),
+            }
+          );
+          console.log(response.json());
+        }
 
         return res.status(200).send(newUser);
       } catch (error) {
@@ -166,6 +189,7 @@ async function StartServer() {
         // Should we treat it as an error?
         // When an empty object is returned, all auth based gql requests will fail (which is all of them)
         if (typeof decodedToken.decoded === 'string') return {};
+        console.log(decodedToken.decoded);
 
         const email = decodedToken.decoded?.email;
         const user = await GetAccountByEmail(email);

@@ -34,6 +34,7 @@ export async function UpdateUserAccount(
   const phoneOrUndefinded = phone ? phone : undefined;
   const emailOrUndefined = email ? email : undefined;
   try {
+    // update data in our DB
     const updatedUser = await prismaClient.account.update({
       where: {
         email: originalUserEmail,
@@ -43,6 +44,8 @@ export async function UpdateUserAccount(
         email: emailOrUndefined,
       },
     });
+    // update data in Auth0 DB
+
     return { status: 'Success', data: updatedUser };
   } catch (error) {
     const newError = GetPrismaError(error);
