@@ -6,6 +6,7 @@
   "dependencies": {
     "@apollo/server": "^4.0.1",
     "@prisma/client": "^4.5.0",
+    "auth0": "^3.0.1",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -38,6 +39,7 @@
     "@graphql-codegen/cli": "2.13.8",
     "@graphql-codegen/typescript": "2.8.0",
     "@graphql-codegen/typescript-resolvers": "2.7.5",
+    "@types/auth0": "^2.35.8",
     "@types/cors": "^2.8.12",
     "@types/node": "^18.11.2",
     "nodemon": "^2.0.20",
