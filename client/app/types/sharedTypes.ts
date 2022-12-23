@@ -5,8 +5,9 @@ export type UserInfo = {
   email: string;
 };
 
+// TODO figure out how to properly type authData
 export type User = {
-  token: string;
+  authData: any;
   info: UserInfo;
 };
 

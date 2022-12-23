@@ -22,16 +22,14 @@ let auth0Strategy = new Auth0Strategy(
   },
   // Sets the token header
   async (authData) => {
-    console.log(authData.extraParams);
-    console.log(authData.accessToken);
     // TODO will likely want to include all information stored in original token
     // not just the id token itself
     // however, this may cause downstream issues with consumers expecting the token to be just the id token
-    const token = authData.extraParams.id_token;
+    const idToken = authData.extraParams.id_token;
 
     const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
       headers: {
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${idToken}`,
       },
     });
 
@@ -45,7 +43,7 @@ let auth0Strategy = new Auth0Strategy(
 
     const userData = await response.json();
 
-    return { info: { ...userData }, token };
+    return { info: { ...userData }, authData };
   }
 );
 

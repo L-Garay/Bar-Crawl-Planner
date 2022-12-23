@@ -22,7 +22,7 @@ export const validateUserAndSession = async (
   // Run token validation
   const data = await fetch(`${config.SERVER.ADDRESS}/validate`, {
     headers: {
-      Authorization: `Bearer ${user?.token}`,
+      Authorization: `Bearer ${user?.authData.extraParams.id_token}`,
     },
   });
   const isTokenValid: boolean = await data.json();
