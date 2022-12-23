@@ -21,6 +21,7 @@ import {
 } from './auth/helperFunctions';
 // import { readFileSync } from 'fs';
 // import path from 'path';
+import Auth0Management from 'auth0';
 
 export const prismaClient = new PrismaClient();
 
@@ -64,6 +65,8 @@ async function StartServer() {
 
     // Even though these are errors, we don't want to treat them like actual errors here
     if (decodedToken.error) {
+      console.log(decodedToken.error);
+
       return res.status(200).send(false);
     }
 
@@ -113,29 +116,7 @@ async function StartServer() {
           email: account.data.email,
         };
 
-        if (account && profile) {
-          console.log(
-            'should be hitting auth0 api to add new user to user role'
-          );
-          // TODO need to find a node library for making http requests so I can hit the auth0 endpoint from here
-          const response = await fetch(
-            `${process.env.AUTH_ISSUER_URL}/api/v2/users/${decodedToken.decoded.sub}/roles`,
-            {
-              method: 'POST',
-              headers: {
-                'content-type': 'application/json',
-                'cache-control': 'no-cache',
-                authorization: `Bearer ${decodedToken.decoded}`,
-              },
-              body: JSON.stringify({
-                roles: [process.env.AUTH_USER_ROLE_ID],
-              }),
-            }
-          );
-          console.log(response.json());
-        }
-
-        return res.status(200).send(newUser);
+        return res.status(200).send({ user: newUser, createdNewUser: true });
       } catch (error) {
         console.error('Error trying to create account or profile', error);
         res.status(500).send(null);
@@ -144,10 +125,52 @@ async function StartServer() {
 
     // Indicates that there is an error object to read
     if (userData.status === 'Failure') {
+      return res.status(500).send({ user: null, createdNewUser: false });
+    }
+
+    const user = userData.data;
+    return res.status(200).send({ user, createdNewUser: false });
+  });
+
+  app.get('/assign-user', async (req, res) => {
+    console.log('hit the /assign-user endpoint in server');
+    const token = req.headers.authorization;
+    const decodedToken = await runTokenValidation(req);
+    if (decodedToken.error) {
+      console.log(decodedToken.error);
+
+      console.log('is there a decoded token error?');
+      return res.status(400).send(null);
+    }
+
+    // TODO need to look into how to handle if the decoded token is a string
+    if (
+      typeof decodedToken.decoded === 'string' ||
+      typeof decodedToken.decoded === 'undefined'
+    ) {
       return res.status(500).send(null);
     }
 
-    return res.status(200).send(userData.data);
+    const client = new Auth0Management.ManagementClient({
+      domain: process.env.AUTH0_DOMAIN || '',
+      clientId: process.env.AUTH0_CLIENT_ID,
+      clientSecret: process.env.AUTH0_CLIENT_SECRET,
+      scope: 'read:current_user update:current_user_metadata',
+      token,
+    });
+
+    const params = { id: decodedToken.decoded.sub! };
+    const authData = { roles: [process.env.AUTH0_USER_ROLE_ID!] };
+
+    client.assignRolestoUser(params, authData, (error) => {
+      if (error) {
+        console.log('error from auth0', error);
+        return res.status(500).send(null);
+      }
+      return res.status(200).send(true);
+    });
+
+    return res.status(200);
   });
 
   // NOTE will likely need to expand/modify this going forward
@@ -189,7 +212,6 @@ async function StartServer() {
         // Should we treat it as an error?
         // When an empty object is returned, all auth based gql requests will fail (which is all of them)
         if (typeof decodedToken.decoded === 'string') return {};
-        console.log(decodedToken.decoded);
 
         const email = decodedToken.decoded?.email;
         const user = await GetAccountByEmail(email);
