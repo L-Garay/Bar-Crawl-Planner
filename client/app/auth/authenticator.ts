@@ -3,14 +3,16 @@ import { redirect } from '@remix-run/node';
 import { Authenticator } from 'remix-auth';
 import { Auth0Strategy } from 'remix-auth-auth0';
 import getConfig from '~/utils/config.server';
-import type { User } from '../types/sharedTypes';
+import type { AuthenticatorUser } from '../types/sharedTypes';
 import { getSession, destroySession, sessionStorage } from './session';
 
 const config = getConfig();
 
 // Create an instance of the authenticator, pass a generic with what your
 // strategies will return and will be stored in the session
-export const authenticator = new Authenticator<User | null>(sessionStorage);
+export const authenticator = new Authenticator<AuthenticatorUser | null>(
+  sessionStorage
+);
 
 let auth0Strategy = new Auth0Strategy(
   {
@@ -26,6 +28,9 @@ let auth0Strategy = new Auth0Strategy(
     // not just the id token itself
     // however, this may cause downstream issues with consumers expecting the token to be just the id token
     const idToken = authData.extraParams.id_token;
+    const accessToken = authData.accessToken;
+    console.log('idToken', idToken);
+    console.log('accessToken', accessToken);
 
     const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
       headers: {
@@ -42,8 +47,20 @@ let auth0Strategy = new Auth0Strategy(
     if (response.status === 400 || response.status === 500) return null;
 
     const userData = await response.json();
+    if (userData.createdNewUser) {
+      // now we know to hit the /assign-user route
+      const auth0Response = await fetch(
+        `${config.SERVER.ADDRESS}/assign-user`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      console.log('AUTH0 RESPONSE', auth0Response);
+    }
 
-    return { info: { ...userData }, authData };
+    return { info: { ...userData.user }, authData };
   }
 );
 

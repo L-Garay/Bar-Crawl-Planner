@@ -6,13 +6,13 @@ export type UserInfo = {
 };
 
 // TODO figure out how to properly type authData
-export type User = {
+export type AuthenticatorUser = {
   authData: any;
   info: UserInfo;
 };
 
 export type ValidationResponse = {
   valid: boolean;
-  user: User | null;
+  user: AuthenticatorUser | null;
   session: Session | null;
 };
