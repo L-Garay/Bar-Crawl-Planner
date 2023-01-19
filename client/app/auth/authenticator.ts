@@ -24,9 +24,7 @@ let auth0Strategy = new Auth0Strategy(
   },
   // Sets the token header
   async (authData) => {
-    // TODO will likely want to include all information stored in original token
-    // not just the id token itself
-    // however, this may cause downstream issues with consumers expecting the token to be just the id token
+    // NOTE pay attention to any missed downstream errors after including the entire authData object instead of the
     const idToken = authData.extraParams.id_token;
     const accessToken = authData.accessToken;
     console.log('idToken', idToken);
@@ -38,12 +36,6 @@ let auth0Strategy = new Auth0Strategy(
       },
     });
 
-    // NOTE it seems if the authenticator callback itself returns null, the authenticator can't be used (which makes sense I guess)
-    // However, this then leads to potentiall issues where there is a legitimate error in which no user can be fetched/found
-    // And so then how do we want to handle those situations?
-    // Having the authenticator just not work doesn't seem like the right choice
-    // HOWEVER, it seems that if userData === null yet we still return 'something' from the callback...things still 'work'
-    // As in, the authenticator just invalidates the user and in will redirect them to wherever is configured in the .authenticate() method
     if (response.status === 400 || response.status === 500) return null;
 
     const userData = await response.json();

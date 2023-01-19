@@ -44,7 +44,7 @@ export async function UpdateUserAccount(
         email: emailOrUndefined,
       },
     });
-    // update data in Auth0 DB
+    // TODO update data in Auth0 DB
 
     return { status: 'Success', data: updatedUser };
   } catch (error) {
