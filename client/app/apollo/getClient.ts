@@ -31,18 +31,19 @@ const useGetApolloClient = (serverAddress: string, idToken?: string) => {
 
 export default useGetApolloClient;
 
-// NOTE for testing on the Account page, to see if I can send mutation from Remix action
-// NOTE this did not work, it was producing 400 bad request errors
+// NOTE This is currently only being used on the Account page, as a way to test getting a new client on every gql request
 export const getNewClient = async (request: Request) => {
   const config = getConfig();
   const session = await getSession(request.headers.get('Cookie'));
   const user = session.get('user');
+  const idToken = user.authData.extraParams.id_token;
+
   return new ApolloClient({
     uri: `${config.SERVER.ADDRESS}/graphql`,
     cache: new InMemoryCache(),
     credentials: 'include',
     headers: {
-      authorization: `Bearer ${user.token}`,
+      authorization: `Bearer ${idToken}`,
     },
   });
 };
