@@ -47,6 +47,9 @@ const typeDefs = `#graphql
     accounts: [Account]
     profiles: [Profile]
     outings: [Outing]
+    getAllFriends: [Profile]
+    findFriendById(id: Int!): Profile
+    findFriendByPin(social_pin: String!): Profile
   }
 
   type Mutation {
@@ -54,6 +57,8 @@ const typeDefs = `#graphql
     createProfile(name: String, profile_img: String, account_id: Int): Profile
     updateUserAccount(email: String, phone_number: String): Account
     deactivateUserAccount(id: Int!): Account
+    addFriend(id: Int!, friend_id: Int!): Profile
+    removeFriend(id: Int!, friend_id: Int!): Profile
   }
 `;
 

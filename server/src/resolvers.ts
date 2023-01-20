@@ -1,5 +1,10 @@
 import { GetAllOutings } from './prisma/querries/outingsQuerries';
-import { GetAllProfiles } from './prisma/querries/profileQuerries';
+import {
+  FindFriendById,
+  FindFriendByPin,
+  GetAllFriends,
+  GetAllProfiles,
+} from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
 import {
@@ -10,6 +15,7 @@ import {
   DeactivateUserAccount,
   UpdateUserAccount,
 } from './prisma/mutations/accountMutations';
+import { AddFriend, RemoveFriend } from './prisma/mutations/profileMutations';
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
@@ -94,6 +100,57 @@ const resolvers: Resolvers = {
         return data.data;
       }
     },
+    getAllFriends: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const data = await GetAllFriends(user.data.id);
+      if (data.status === 'Failure') {
+        throw new GraphQLError('Cannot get all friends', {
+          extensions: { code: data.error?.name, message: data.error?.message },
+        });
+      } else {
+        return data.data;
+      }
+    },
+    findFriendById: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const data = await FindFriendById(args.id);
+      if (data.status === 'Failure') {
+        throw new GraphQLError('Cannot get friend by id', {
+          extensions: { code: data.error?.name, message: data.error?.message },
+        });
+      } else {
+        return data.data;
+      }
+    },
+    findFriendByPin: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const data = await FindFriendByPin(args.social_pin);
+      if (data.status === 'Failure') {
+        throw new GraphQLError('Cannot get friend by pin', {
+          extensions: { code: data.error?.name, message: data.error?.message },
+        });
+      } else {
+        return data.data;
+      }
+    },
   },
   Mutation: {
     updateUserAccount: async (parent, args, context, info) => {
@@ -142,6 +199,48 @@ const resolvers: Resolvers = {
         });
       } else {
         return deactivatedUser.data;
+      }
+    },
+    addFriend: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id, friend_id } = args;
+      const addedFriend = await AddFriend(id, friend_id);
+      if (addedFriend.status === 'Failure') {
+        throw new GraphQLError('Cannot add friend', {
+          extensions: {
+            code: addedFriend.error?.name,
+            message: addedFriend.error?.message,
+          },
+        });
+      } else {
+        return addedFriend.data;
+      }
+    },
+    removeFriend: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id, friend_id } = args;
+      const removedFriend = await RemoveFriend(id, friend_id);
+      if (removedFriend.status === 'Failure') {
+        throw new GraphQLError('Cannot remove friend', {
+          extensions: {
+            code: removedFriend.error?.name,
+            message: removedFriend.error?.message,
+          },
+        });
+      } else {
+        return removedFriend.data;
       }
     },
   },
