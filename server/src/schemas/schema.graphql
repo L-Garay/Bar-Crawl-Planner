@@ -7,7 +7,6 @@ type Account {
   deactivated: Boolean
   deactivated_at: String
   phone_number: String
-  friends: [Profile]
 }
 
 type Profile {
@@ -19,7 +18,8 @@ type Profile {
   account_id: Int
   outings: [Outing]
   social_pin: String
-  friends: [Account]
+  friends: [Profile]
+  friendsRelation: [Profile]
 }
 
 type Outing {

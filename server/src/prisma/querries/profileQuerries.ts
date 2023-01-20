@@ -30,10 +30,16 @@ export async function GetAllFriends(id: number): Promise<QueryData> {
   try {
     const friends = await prismaClient.profile.findMany({
       where: {
-        id,
+        id: id,
       },
       select: {
-        friends: true,
+        friends: {
+          select: {
+            name: true,
+            profile_img: true,
+            social_pin: true,
+          },
+        },
       },
     });
     return { status: 'Success', data: friends };
@@ -43,7 +49,9 @@ export async function GetAllFriends(id: number): Promise<QueryData> {
   }
 }
 
-// NOTE probably don't need all 3 findfriend methods, need to determine which ones I 'should' be using and clean up other(s)
+// NOTE probably don't need both findfriend methods, may get rid of one
+// these methods will be used to search for a specific person to then send a request to
+// they are not meant to find a friend WITHIN a list of friends
 export async function FindFriendById(friend_id: number): Promise<QueryData> {
   try {
     const friend = await prismaClient.profile.findFirst({

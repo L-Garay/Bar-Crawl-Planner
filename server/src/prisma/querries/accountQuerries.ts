@@ -53,15 +53,3 @@ export async function GetAccountWithProfileData(
     return { status: 'Failure', data: null, error: newError };
   }
 }
-
-export async function FindFriendByEmail(email: string): Promise<QueryData> {
-  try {
-    const friend = await prismaClient.account.findFirst({
-      where: { email },
-    });
-    return { status: 'Success', data: friend };
-  } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
-  }
-}
