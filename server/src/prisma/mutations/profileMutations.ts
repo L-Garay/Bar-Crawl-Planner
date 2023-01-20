@@ -24,3 +24,47 @@ export async function CreateProfile(
     return { status: 'Failure', data: null, error: newError };
   }
 }
+
+export async function AddFriend(
+  id: number,
+  friend_id: number
+): Promise<QueryData> {
+  try {
+    const profile = await prismaClient.profile.update({
+      where: { id },
+      data: {
+        friends: {
+          connect: {
+            id: friend_id,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: profile };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
+export async function RemoveFriend(
+  id: number,
+  friend_id: number
+): Promise<QueryData> {
+  try {
+    const profile = await prismaClient.profile.update({
+      where: { id },
+      data: {
+        friends: {
+          disconnect: {
+            id: friend_id,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: profile };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}

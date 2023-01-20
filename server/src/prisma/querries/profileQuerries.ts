@@ -26,6 +26,48 @@ export async function GetAllProfiles(): Promise<QueryData> {
   }
 }
 
+export async function GetAllFriends(id: number): Promise<QueryData> {
+  try {
+    const friends = await prismaClient.profile.findMany({
+      where: {
+        id,
+      },
+      select: {
+        friends: true,
+      },
+    });
+    return { status: 'Success', data: friends };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
+// NOTE probably don't need all 3 findfriend methods, need to determine which ones I 'should' be using and clean up other(s)
+export async function FindFriendById(friend_id: number): Promise<QueryData> {
+  try {
+    const friend = await prismaClient.profile.findFirst({
+      where: { id: friend_id },
+    });
+    return { status: 'Success', data: friend };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
+export async function FindFriendByPin(social_pin: string): Promise<QueryData> {
+  try {
+    const friend = await prismaClient.profile.findFirst({
+      where: { social_pin },
+    });
+    return { status: 'Success', data: friend };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
 // GetAllProfiles()
 //   .then(async () => {
 //     await prismaClient.$disconnect();
