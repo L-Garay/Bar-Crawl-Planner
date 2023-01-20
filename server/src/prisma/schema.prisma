@@ -17,24 +17,27 @@ datasource db {
 // Then when someone logs in we can fire a 'GetProfileByAccountEmail' query to fetch the user's profile data based on the email we get from Auth0 to fetch the Account, and then find the linked/associated user's Profile
 
 model Account {
-  id             Int      @id @default(autoincrement())
-  email          String   @unique @db.VarChar(255)
-  email_verified Boolean  @default(false)
-  created_at     String   @db.VarChar(255)
+  id             Int       @id @default(autoincrement())
+  email          String    @unique @db.VarChar(255)
+  email_verified Boolean   @default(false)
+  created_at     String    @db.VarChar(255)
   profile        Profile?
-  deactivated    Boolean  @default(false)
-  deactivated_at String   @default("") @db.VarChar(255)
-  phone_number   String   @default("") @db.VarChar(255)
+  deactivated    Boolean   @default(false)
+  deactivated_at String    @default("") @db.VarChar(255)
+  phone_number   String    @default("") @db.VarChar(255)
+  friends        Profile[] @relation(name: "Friends")
 }
 
 model Profile {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  profile_img String   @db.VarChar(255)
-  updated_at  String   @db.VarChar(255)
-  account     Account  @relation(fields: [account_Id], references: [id])
-  account_Id  Int      @unique
-  outings     Outing[] @relation(name: "Profiles_In_Outing")
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(255)
+  profile_img String    @db.VarChar(255)
+  updated_at  String    @db.VarChar(255)
+  account     Account   @relation(fields: [account_Id], references: [id])
+  account_Id  Int       @unique
+  outings     Outing[]  @relation(name: "Profiles_In_Outing")
+  social_pin  String    @unique @default("") @db.VarChar(255)
+  friends     Account[] @relation(name: "Friends")
 }
 
 model Outing {

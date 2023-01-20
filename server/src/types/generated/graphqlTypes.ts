@@ -21,6 +21,7 @@ export type Account = {
   deactivated_at?: Maybe<Scalars['String']>;
   email?: Maybe<Scalars['String']>;
   email_verified?: Maybe<Scalars['Boolean']>;
+  friends?: Maybe<Array<Maybe<Profile>>>;
   id?: Maybe<Scalars['Int']>;
   phone_number?: Maybe<Scalars['String']>;
   profile?: Maybe<Profile>;
@@ -72,10 +73,12 @@ export type Profile = {
   __typename?: 'Profile';
   account?: Maybe<Account>;
   account_id?: Maybe<Scalars['Int']>;
+  friends?: Maybe<Array<Maybe<Account>>>;
   id?: Maybe<Scalars['Int']>;
   name?: Maybe<Scalars['String']>;
   outings?: Maybe<Array<Maybe<Outing>>>;
   profile_img?: Maybe<Scalars['String']>;
+  social_pin?: Maybe<Scalars['String']>;
   updated_at?: Maybe<Scalars['String']>;
 };
 
@@ -193,6 +196,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
   deactivated_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   email_verified?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  friends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   phone_number?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
@@ -219,10 +223,12 @@ export type OutingResolvers<ContextType = any, ParentType extends ResolversParen
 export type ProfileResolvers<ContextType = any, ParentType extends ResolversParentTypes['Profile'] = ResolversParentTypes['Profile']> = ResolversObject<{
   account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   account_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  friends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Account']>>>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   profile_img?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  social_pin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updated_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;

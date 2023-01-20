@@ -12,6 +12,7 @@ const typeDefs = `#graphql
     deactivated: Boolean
     deactivated_at: String
     phone_number: String
+    friends: [Profile]
   }
 
   type Profile {
@@ -22,6 +23,8 @@ const typeDefs = `#graphql
     account: Account
     account_id: Int
     outings: [Outing]
+    social_pin: String
+    friends: [Account]
   }
 
   type Outing {
