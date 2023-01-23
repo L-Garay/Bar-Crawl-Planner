@@ -22,6 +22,10 @@ const getConfig = () => {
   invariant(process.env.COOKIE_SECRET, 'COOKIE_SECRET is undefined');
   invariant(process.env.AUTH0_CALLBACK_URL, 'AUTH0_CALLBACK_URL is undefined');
   invariant(process.env.LOGIN_PAGE, 'LOGIN_PAGE is undefined');
+  invariant(
+    process.env.GOOGLE_MAPS_API_KEY,
+    'GOOGLE_MAPS_API_KEY is undefined'
+  );
 
   const SERVER_ADDRESS = process.env.SERVER_ADDRESS!;
   const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID!;
@@ -35,6 +39,7 @@ const getConfig = () => {
   const COOKIE_SECRET = process.env.COOKIE_SECRET!;
   const AUTH0_CALLBACK_URL = process.env.AUTH0_CALLBACK_URL!;
   const LOGIN_PAGE = process.env.LOGIN_PAGE!;
+  const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY!;
 
   const config = {
     AUTH0: {
@@ -52,6 +57,9 @@ const getConfig = () => {
     },
     SERVER: {
       ADDRESS: SERVER_ADDRESS,
+    },
+    GOOGLE: {
+      API_KEY: GOOGLE_MAPS_API_KEY,
     },
   } as const;
 

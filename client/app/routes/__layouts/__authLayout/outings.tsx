@@ -1,22 +1,33 @@
 // import { gql, useQuery } from '@apollo/client';
-// import { Dynamic } from '~/components/animated/loadingSpinners';
+import { Dynamic } from '~/components/animated/loadingSpinners';
+import type { LoaderFunction } from '@remix-run/node';
+import { useLoaderData } from '@remix-run/react';
+import type { Status } from '@googlemaps/react-wrapper';
+import { Wrapper } from '@googlemaps/react-wrapper';
+import getConfig from '~/utils/config.server';
+import BasicMap from '~/components/maps/basicMap';
 
-// TODO need to set up a query to get the user's profile data in server
-// const getProfile = gql`
-//   query profile {
-//     profile {
-//       name
-//     }
-//   }
-// `;
+export const loader: LoaderFunction = async ({ request }) => {
+  return getConfig();
+};
 
 export default function OutingsIndex() {
-  // const { loading, error, data } = useQuery(getProfile);
+  const loaderData = useLoaderData();
+  const mapsApiKey = loaderData.GOOGLE.API_KEY;
 
-  // if (loading) {
-  //   return <Dynamic />;
-  // }
-  // if (error) throw error;
+  const mapsRenderComponent = (status: Status) => {
+    return (
+      <>
+        <h1>{status}</h1>
+        <Dynamic />
+      </>
+    );
+  };
+
+  const basicMapStyle = {
+    height: '500px',
+    width: '500px',
+  };
 
   return (
     <>
@@ -50,7 +61,14 @@ export default function OutingsIndex() {
           A tab (which will really just either open a modal or link to a new
           page) to create a new outing
         </p>
-        <p></p>
+        <Wrapper
+          apiKey={mapsApiKey}
+          render={mapsRenderComponent}
+          libraries={['places', 'marker', 'localContext']}
+          version="weekly"
+        >
+          <BasicMap style={basicMapStyle} />
+        </Wrapper>
       </div>
     </>
   );
