@@ -21,7 +21,6 @@ import {
 } from './auth/helperFunctions';
 // import { readFileSync } from 'fs';
 // import path from 'path';
-import Auth0Management from 'auth0';
 
 export const prismaClient = new PrismaClient();
 
@@ -65,8 +64,6 @@ async function StartServer() {
 
     // Even though these are errors, we don't want to treat them like actual errors here
     if (decodedToken.error) {
-      console.log(decodedToken.error);
-
       return res.status(200).send(false);
     }
 
@@ -130,47 +127,6 @@ async function StartServer() {
 
     const user = userData.data;
     return res.status(200).send({ user, createdNewUser: false });
-  });
-
-  app.get('/assign-user', async (req, res) => {
-    console.log('hit the /assign-user endpoint in server');
-    const token = req.headers.authorization;
-    const decodedToken = await runTokenValidation(req);
-    if (decodedToken.error) {
-      console.log(decodedToken.error);
-
-      console.log('is there a decoded token error?');
-      return res.status(400).send(null);
-    }
-
-    // TODO need to look into how to handle if the decoded token is a string
-    if (
-      typeof decodedToken.decoded === 'string' ||
-      typeof decodedToken.decoded === 'undefined'
-    ) {
-      return res.status(500).send(null);
-    }
-
-    const client = new Auth0Management.ManagementClient({
-      domain: process.env.AUTH0_DOMAIN || '',
-      clientId: process.env.AUTH0_CLIENT_ID,
-      clientSecret: process.env.AUTH0_CLIENT_SECRET,
-      scope: 'read:current_user update:current_user_metadata',
-      token,
-    });
-
-    const params = { id: decodedToken.decoded.sub! };
-    const authData = { roles: [process.env.AUTH0_USER_ROLE_ID!] };
-
-    client.assignRolestoUser(params, authData, (error) => {
-      if (error) {
-        console.log('error from auth0', error);
-        return res.status(500).send(null);
-      }
-      return res.status(200).send(true);
-    });
-
-    return res.status(200);
   });
 
   // NOTE will likely need to expand/modify this going forward

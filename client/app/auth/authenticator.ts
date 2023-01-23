@@ -26,9 +26,6 @@ let auth0Strategy = new Auth0Strategy(
   async (authData) => {
     // NOTE pay attention to any missed downstream errors after including the entire authData object instead of the
     const idToken = authData.extraParams.id_token;
-    const accessToken = authData.accessToken;
-    console.log('idToken', idToken);
-    console.log('accessToken', accessToken);
 
     const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
       headers: {
@@ -39,18 +36,6 @@ let auth0Strategy = new Auth0Strategy(
     if (response.status === 400 || response.status === 500) return null;
 
     const userData = await response.json();
-    if (userData.createdNewUser) {
-      // now we know to hit the /assign-user route
-      const auth0Response = await fetch(
-        `${config.SERVER.ADDRESS}/assign-user`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-      console.log('AUTH0 RESPONSE', auth0Response);
-    }
 
     return { info: { ...userData.user }, authData };
   }

@@ -21,7 +21,6 @@ const isTokenValid = async (
   const audiences = [
     process.env.AUTH0_CLIENT_ID,
     process.env.AUTH0_API,
-    `${process.env.AUTH0_ISSUER_URL}/userinfo`,
   ] as string[];
 
   return new Promise((resolve, reject): any => {
