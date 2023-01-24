@@ -1,33 +1,15 @@
 // import { gql, useQuery } from '@apollo/client';
-import { Dynamic } from '~/components/animated/loadingSpinners';
+import { Map as GoogleMap } from '~/components/maps';
 import type { LoaderFunction } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import type { Status } from '@googlemaps/react-wrapper';
-import { Wrapper } from '@googlemaps/react-wrapper';
+// import { useLoaderData } from '@remix-run/react';
 import getConfig from '~/utils/config.server';
-import BasicMap from '~/components/maps/basicMap';
 
 export const loader: LoaderFunction = async ({ request }) => {
   return getConfig();
 };
 
 export default function OutingsIndex() {
-  const loaderData = useLoaderData();
-  const mapsApiKey = loaderData.GOOGLE.API_KEY;
-
-  const mapsRenderComponent = (status: Status) => {
-    return (
-      <>
-        <h1>{status}</h1>
-        <Dynamic />
-      </>
-    );
-  };
-
-  const basicMapStyle = {
-    height: '500px',
-    width: '500px',
-  };
+  // const loaderData = useLoaderData();
 
   return (
     <>
@@ -61,14 +43,7 @@ export default function OutingsIndex() {
           A tab (which will really just either open a modal or link to a new
           page) to create a new outing
         </p>
-        <Wrapper
-          apiKey={mapsApiKey}
-          render={mapsRenderComponent}
-          libraries={['places', 'marker', 'localContext']}
-          version="weekly"
-        >
-          <BasicMap style={basicMapStyle} />
-        </Wrapper>
+        <GoogleMap />
       </div>
     </>
   );
