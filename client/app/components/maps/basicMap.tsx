@@ -1,17 +1,10 @@
 import React, { useRef, useState } from 'react';
+import type { MapProps } from '~/types/sharedTypes';
 import {
   useCheckEnvironmentAndSetMap,
   useSetMapEventListeners,
   useSetMapOptions,
 } from '~/utils/maps';
-
-interface MapProps extends google.maps.MapOptions {
-  style: { [key: string]: string };
-  children?: React.ReactNode;
-  onClick?: (event: google.maps.MapMouseEvent) => void;
-  onIdle?: (map: google.maps.Map) => void;
-  mapOptions?: google.maps.MapOptions;
-}
 
 export default function BasicMap({
   style,
