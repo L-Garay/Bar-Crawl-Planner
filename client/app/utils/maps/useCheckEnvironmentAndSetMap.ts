@@ -12,7 +12,7 @@ const useCheckEnvironmentAndSetMap = (
     if (validWindow && ref.current && !map) {
       setMap(
         new window.google.maps.Map(ref.current, {
-          center: { lat: 43.590112, lng: -116.3527013 },
+          center: { lat: 43.6141397, lng: -116.2155451 },
           zoom: 13,
           backgroundColor: 'lightpink',
         })
