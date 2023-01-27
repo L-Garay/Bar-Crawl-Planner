@@ -19,6 +19,7 @@ import {
   checkTokenExpiration,
   runTokenValidation,
 } from './auth/helperFunctions';
+import { testJob } from './scheduledJobs/testJob';
 // import { readFileSync } from 'fs';
 // import path from 'path';
 
@@ -181,6 +182,9 @@ async function StartServer() {
     })
   );
   app.set('trust proxy', true);
+
+  // NOTE testing scheduler
+  await testJob();
 
   // Modified server startup
   await new Promise((resolve) =>
