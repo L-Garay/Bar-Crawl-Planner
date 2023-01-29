@@ -31,3 +31,4 @@ export interface MapProps extends google.maps.MapOptions {
 // Only ever use ONE of either: address, location, or placeId. NEVER use two or more in the same request
 export interface GeocoderRequest extends google.maps.GeocoderRequest {}
 export interface GeocoderResult extends google.maps.GeocoderResult {}
+export interface PlaceResult extends google.maps.places.PlaceResult {}

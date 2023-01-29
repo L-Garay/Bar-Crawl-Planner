@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import type { MapProps } from '~/types/sharedTypes';
+import type { MapProps, PlaceResult } from '~/types/sharedTypes';
 import {
   useCheckEnvironmentAndSetMap,
   useSetMapEventListeners,
@@ -25,7 +25,7 @@ export default function BasicMap({
   const PlaceService = new google.maps.places.PlacesService(map!);
 
   const textSearchCallback = (
-    results: google.maps.places.PlaceResult[] | null,
+    results: PlaceResult[] | null,
     status: google.maps.places.PlacesServiceStatus
   ) => {
     setClicks([]); // clear on every new search
