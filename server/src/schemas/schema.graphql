@@ -57,6 +57,7 @@ type LocationDetails {
   url: String
   website: String
   utc_offset_minutes: Float
+  price_level: Int
 }
 
 type Query {

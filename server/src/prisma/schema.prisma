@@ -55,24 +55,25 @@ model LocationDetails {
   formatted_address      String?  @default("") @db.VarChar(255)
   lat                    Decimal?
   lng                    Decimal?
-  html_attributions      String[]
+  plus_compound_code     String?  @default("") @db.VarChar(255)
+  plus_global_code       String?  @default("") @db.VarChar(255)
+  vicinity               String?  @default("") @db.VarChar(255)
   icon                   String?  @default("") @db.VarChar(255)
   icon_mask_base_uri     String?  @default("") @db.VarChar(255)
   icon_background_color  String?  @default("") @db.VarChar(255)
   name                   String?  @default("") @db.VarChar(255)
   place_id               String?  @unique @default("") @db.VarChar(255)
+  types                  String[]
   rating                 Decimal?
   user_ratings_total     Int?
-  types                  String[]
-  vicinity               String?  @default("") @db.VarChar(255)
   formatted_phone_number String?  @default("") @db.VarChar(255)
-  plus_compound_code     String?  @default("") @db.VarChar(255)
-  plus_global_code       String?  @default("") @db.VarChar(255)
   open_periods           String[]
   weekday_text           String[]
+  utc_offset_minutes     Int?
   photos                 String[]
   reviews                String[]
+  price_level            Int?
   url                    String?  @default("") @db.VarChar(255)
   website                String?  @default("") @db.VarChar(255)
-  utc_offset_minutes     Int?
+  html_attributions      String[]
 }

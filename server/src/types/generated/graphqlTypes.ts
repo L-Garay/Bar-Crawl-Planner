@@ -44,6 +44,7 @@ export type LocationDetails = {
   place_id?: Maybe<Scalars['String']>;
   plus_compound_code?: Maybe<Scalars['String']>;
   plus_global_code?: Maybe<Scalars['String']>;
+  price_level?: Maybe<Scalars['Int']>;
   rating?: Maybe<Scalars['Float']>;
   reviews?: Maybe<Array<Maybe<Scalars['String']>>>;
   types?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -279,6 +280,7 @@ export type LocationDetailsResolvers<ContextType = any, ParentType extends Resol
   place_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   plus_compound_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   plus_global_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  price_level?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   rating?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   reviews?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   types?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
