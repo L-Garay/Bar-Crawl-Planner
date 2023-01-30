@@ -26,6 +26,35 @@ export type Account = {
   profile?: Maybe<Profile>;
 };
 
+export type LocationDetails = {
+  __typename?: 'LocationDetails';
+  business_status?: Maybe<Scalars['String']>;
+  formatted_address?: Maybe<Scalars['String']>;
+  formatted_phone_number?: Maybe<Scalars['String']>;
+  html_attributions?: Maybe<Array<Maybe<Scalars['String']>>>;
+  icon?: Maybe<Scalars['String']>;
+  icon_background_color?: Maybe<Scalars['String']>;
+  icon_mask_base_uri?: Maybe<Scalars['String']>;
+  id?: Maybe<Scalars['Int']>;
+  lat?: Maybe<Scalars['Float']>;
+  lng?: Maybe<Scalars['Float']>;
+  name?: Maybe<Scalars['String']>;
+  open_periods?: Maybe<Array<Maybe<Scalars['String']>>>;
+  photos?: Maybe<Array<Maybe<Scalars['String']>>>;
+  place_id?: Maybe<Scalars['String']>;
+  plus_compound_code?: Maybe<Scalars['String']>;
+  plus_global_code?: Maybe<Scalars['String']>;
+  rating?: Maybe<Scalars['Float']>;
+  reviews?: Maybe<Array<Maybe<Scalars['String']>>>;
+  types?: Maybe<Array<Maybe<Scalars['String']>>>;
+  url?: Maybe<Scalars['String']>;
+  user_ratings_total?: Maybe<Scalars['Int']>;
+  utc_offset_minutes?: Maybe<Scalars['Float']>;
+  vicinity?: Maybe<Scalars['String']>;
+  website?: Maybe<Scalars['String']>;
+  weekday_text?: Maybe<Array<Maybe<Scalars['String']>>>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addFriend?: Maybe<Profile>;
@@ -197,7 +226,9 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = ResolversObject<{
   Account: ResolverTypeWrapper<Account>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  Float: ResolverTypeWrapper<Scalars['Float']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
+  LocationDetails: ResolverTypeWrapper<LocationDetails>;
   Mutation: ResolverTypeWrapper<{}>;
   Outing: ResolverTypeWrapper<Outing>;
   Profile: ResolverTypeWrapper<Profile>;
@@ -209,7 +240,9 @@ export type ResolversTypes = ResolversObject<{
 export type ResolversParentTypes = ResolversObject<{
   Account: Account;
   Boolean: Scalars['Boolean'];
+  Float: Scalars['Float'];
   Int: Scalars['Int'];
+  LocationDetails: LocationDetails;
   Mutation: {};
   Outing: Outing;
   Profile: Profile;
@@ -226,6 +259,35 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   phone_number?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type LocationDetailsResolvers<ContextType = any, ParentType extends ResolversParentTypes['LocationDetails'] = ResolversParentTypes['LocationDetails']> = ResolversObject<{
+  business_status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  formatted_address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  formatted_phone_number?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  html_attributions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  icon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  icon_background_color?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  icon_mask_base_uri?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  lat?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  lng?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  open_periods?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  photos?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  place_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  plus_compound_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  plus_global_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  rating?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  reviews?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  types?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  user_ratings_total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  utc_offset_minutes?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  vicinity?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  website?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  weekday_text?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -277,6 +339,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 
 export type Resolvers<ContextType = any> = ResolversObject<{
   Account?: AccountResolvers<ContextType>;
+  LocationDetails?: LocationDetailsResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Outing?: OutingResolvers<ContextType>;
   Profile?: ProfileResolvers<ContextType>;

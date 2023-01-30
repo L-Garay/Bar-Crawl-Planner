@@ -31,6 +31,34 @@ type Outing {
   start_date_and_time: String
 }
 
+type LocationDetails {
+  id: Int
+  business_status: String
+  formatted_address: String
+  lat: Float
+  lng: Float
+  html_attributions: [String]
+  icon: String
+  icon_mask_base_uri: String
+  icon_background_color: String
+  name: String
+  place_id: String
+  rating: Float
+  user_ratings_total: Int
+  types: [String]
+  vicinity: String
+  formatted_phone_number: String
+  plus_compound_code: String
+  plus_global_code: String
+  open_periods: [String]
+  weekday_text: [String]
+  photos: [String]
+  reviews: [String]
+  url: String
+  website: String
+  utc_offset_minutes: Float
+}
+
 type Query {
   getAccountByEmail(email: String!): Account
   getUserAccount: Account
