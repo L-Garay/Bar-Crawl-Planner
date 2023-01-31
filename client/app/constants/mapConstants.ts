@@ -1,4 +1,4 @@
-export const cityCoordinates = {
+export const CITY_COORDINATES = {
   boise: {
     lat: 43.6141397,
     lng: -116.2155451,
@@ -19,4 +19,14 @@ export const cityCoordinates = {
     lat: 47.6053827,
     lng: -122.3530897,
   },
+};
+
+export const LOCATION_TYPES = {
+  bars: 'bars',
+  taverns: 'taverns',
+  breweries: 'breweries',
+  wineries: 'wineries',
+  restaurants: 'restaurants',
+  pubs: 'pubs',
+  hotels: 'hotel bars',
 };

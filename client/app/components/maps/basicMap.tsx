@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import type {
   CitySelectOptions,
+  LocationSelectOptions,
   MapProps,
   PlaceResult,
 } from '~/types/sharedTypes';
@@ -9,7 +10,7 @@ import {
   useSetMapEventListeners,
   useSetMapOptions,
 } from '~/utils/maps';
-import { cityCoordinates } from '~/constants/mapConstants';
+import { CITY_COORDINATES, LOCATION_TYPES } from '~/constants/mapConstants';
 
 export default function BasicMap({
   style,
@@ -23,6 +24,8 @@ export default function BasicMap({
   const [map, setMap] = useState<google.maps.Map>();
   const textSearchRef = useRef<HTMLInputElement | null>(null);
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('boise');
+  const [selectedType, setSelectedType] =
+    useState<LocationSelectOptions>('bars');
 
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
@@ -50,10 +53,10 @@ export default function BasicMap({
 
   const executeSearch = () => {
     const request = {
-      query: textSearchRef.current?.value,
+      query: LOCATION_TYPES[selectedType],
       location: {
-        lat: cityCoordinates[selectedCity].lat,
-        lng: cityCoordinates[selectedCity].lng,
+        lat: CITY_COORDINATES[selectedCity].lat,
+        lng: CITY_COORDINATES[selectedCity].lng,
       }, // downtown of each city according to google
       radius: 8045, // 5 miles
     };
@@ -61,6 +64,7 @@ export default function BasicMap({
     // the callback properly handles the result of the search
     // so the next step is to make a call to our server from here, which will handle returning the location cache or making the call to google from the server
     // we'll need to make sure that we return all the data we need to still render the map (obviously logan)
+    // we'll need to pass in the selected type and the selected city
     PlaceService.textSearch(request, textSearchCallback);
   };
 
@@ -75,7 +79,7 @@ export default function BasicMap({
           onChange={(e) => {
             const city = e.target.value as CitySelectOptions;
             setSelectedCity(city);
-            map?.setCenter(cityCoordinates[city]);
+            map?.setCenter(CITY_COORDINATES[city]);
           }}
         >
           <option value="boise">Boise</option>
@@ -84,8 +88,23 @@ export default function BasicMap({
           <option value="denver">Denver</option>
           <option value="portland">Portland</option>
         </select>
-        <label htmlFor="locationSearch">Search:</label>
-        <input type="text" name="locationSearch" ref={textSearchRef} />
+        <label htmlFor="locations">Search:</label>
+        <select
+          name="locations"
+          id="locations"
+          onChange={(e) => {
+            const type = e.target.value as LocationSelectOptions;
+            setSelectedType(type);
+          }}
+        >
+          <option value="bars">Bars</option>
+          <option value="taverns">Taverns</option>
+          <option value="breweries">Breweries</option>
+          <option value="wineries">Wineries</option>
+          <option value="pubs">Pubs</option>
+          <option value="restaurants">Restaurants</option>
+          <option value="hotels">Hotels</option>
+        </select>
         <button type="button" onClick={() => executeSearch()}>
           Submit
         </button>
