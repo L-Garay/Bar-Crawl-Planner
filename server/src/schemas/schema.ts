@@ -42,7 +42,9 @@ const typeDefs = `#graphql
     formatted_address: String
     lat: Float
     lng: Float
-    html_attributions: [String]
+    # the Google Maps Services Node Client does not return any html_attributions for a place search (or even a photo search FFS)
+    # but if we ever do get them, we will just concatenate them into a single string
+    html_attributions: String
     icon: String
     icon_mask_base_uri: String
     icon_background_color: String
@@ -67,7 +69,9 @@ const typeDefs = `#graphql
     # This will already be formatted, and can be localized
     # However it seems we can't control exactly how it will be formatted, so we'll need open_periods if we want to display it differently
     weekday_text: [String]
-    # For photos, we will just append the attributions to the photo's url (photo.url + '?credits=' + photo.attributions) and then save it as an array of strings
+    # For photos, the google maps API returns a blob object; which we will store in the DB using the Bytes type for Prisma
+    # however we can read the contents of the blobs and convert them to strings before sending the data to the client
+    # NOTE there is no built in/easy way to send byte data through GraphQL, so we'd have to do this transformation on the server anyway
     photos: [String]
     # Same as the open_periods data, we will take each review object and serialize it into a string, upload to DB, and the parse as needed
     reviews: [String]

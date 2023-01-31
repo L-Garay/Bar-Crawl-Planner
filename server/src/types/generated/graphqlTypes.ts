@@ -31,7 +31,7 @@ export type LocationDetails = {
   business_status?: Maybe<Scalars['String']>;
   formatted_address?: Maybe<Scalars['String']>;
   formatted_phone_number?: Maybe<Scalars['String']>;
-  html_attributions?: Maybe<Array<Maybe<Scalars['String']>>>;
+  html_attributions?: Maybe<Scalars['String']>;
   icon?: Maybe<Scalars['String']>;
   icon_background_color?: Maybe<Scalars['String']>;
   icon_mask_base_uri?: Maybe<Scalars['String']>;
@@ -267,7 +267,7 @@ export type LocationDetailsResolvers<ContextType = any, ParentType extends Resol
   business_status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   formatted_address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   formatted_phone_number?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  html_attributions?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  html_attributions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   icon?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   icon_background_color?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   icon_mask_base_uri?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

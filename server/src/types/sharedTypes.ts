@@ -16,3 +16,38 @@ export type TokenValidationResponse = {
   error?: jwt.VerifyErrors | Error;
   decoded?: jwt.JwtPayload | string;
 };
+
+export type CitySelectOptions =
+  | 'boise'
+  | 'denver'
+  | 'portland'
+  | 'seattle'
+  | 'slc';
+
+export type PlaceResult = {
+  business_status?: string;
+  formatted_address?: string;
+  lat?: number;
+  lng?: number;
+  html_attributions?: string;
+  icon?: string;
+  icon_mask_base_uri?: string;
+  icon_background_color?: string;
+  name?: string;
+  place_id?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  types?: string[];
+  vicinity?: string;
+  formatted_phone_number?: string;
+  plus_compound_code?: string;
+  plus_global_code?: string;
+  open_periods?: string[];
+  weekday_text?: string[];
+  photos?: string[] | any[];
+  reviews?: string[];
+  url?: string;
+  website?: string;
+  utc_offset_minutes?: number;
+  price_level?: number;
+};

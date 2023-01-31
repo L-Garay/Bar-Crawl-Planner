@@ -70,10 +70,10 @@ model LocationDetails {
   open_periods           String[]
   weekday_text           String[]
   utc_offset_minutes     Int?
-  photos                 String[]
+  photos                 Bytes[]
   reviews                String[]
   price_level            Int?
   url                    String?  @default("") @db.VarChar(255)
   website                String?  @default("") @db.VarChar(255)
-  html_attributions      String[]
+  html_attributions      String?
 }
