@@ -1,6 +1,6 @@
 import { prismaClient } from '../../index';
 import { QueryData } from '../../types/sharedTypes';
-import GetPrismaError from '../../utilities/getPrismaError';
+import { GetPrismaError } from '../../utilities/';
 
 export async function GetProfileByAccountId(id: number): Promise<QueryData> {
   try {
