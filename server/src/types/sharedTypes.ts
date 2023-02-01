@@ -27,6 +27,8 @@ export type CitySelectOptions =
 export type PlaceResult = {
   business_status?: string;
   formatted_address?: string;
+  city?: string;
+  state?: string;
   lat?: number;
   lng?: number;
   html_attributions?: string;

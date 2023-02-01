@@ -53,6 +53,8 @@ model LocationDetails {
   id                     Int      @id @default(autoincrement())
   business_status        String?  @default("") @db.VarChar(255)
   formatted_address      String?  @default("") @db.VarChar(255)
+  city                   String?  @default("") @db.VarChar(255)
+  state                  String?  @default("") @db.VarChar(255)
   lat                    Decimal?
   lng                    Decimal?
   plus_compound_code     String?  @default("") @db.VarChar(255)

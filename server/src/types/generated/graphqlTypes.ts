@@ -29,6 +29,7 @@ export type Account = {
 export type LocationDetails = {
   __typename?: 'LocationDetails';
   business_status?: Maybe<Scalars['String']>;
+  city?: Maybe<Scalars['String']>;
   expiration_date?: Maybe<Scalars['String']>;
   formatted_address?: Maybe<Scalars['String']>;
   formatted_phone_number?: Maybe<Scalars['String']>;
@@ -48,6 +49,7 @@ export type LocationDetails = {
   price_level?: Maybe<Scalars['Int']>;
   rating?: Maybe<Scalars['Float']>;
   reviews?: Maybe<Array<Maybe<Scalars['String']>>>;
+  state?: Maybe<Scalars['String']>;
   types?: Maybe<Array<Maybe<Scalars['String']>>>;
   url?: Maybe<Scalars['String']>;
   user_ratings_total?: Maybe<Scalars['Int']>;
@@ -266,6 +268,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 
 export type LocationDetailsResolvers<ContextType = any, ParentType extends ResolversParentTypes['LocationDetails'] = ResolversParentTypes['LocationDetails']> = ResolversObject<{
   business_status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  city?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   expiration_date?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   formatted_address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   formatted_phone_number?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -285,6 +288,7 @@ export type LocationDetailsResolvers<ContextType = any, ParentType extends Resol
   price_level?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   rating?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   reviews?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   types?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   user_ratings_total?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;

@@ -40,6 +40,8 @@ const typeDefs = `#graphql
     id: Int
     business_status: String
     formatted_address: String
+    city: String
+    state: String
     lat: Float
     lng: Float
     # the Google Maps Services Node Client does not return any html_attributions for a place search (or even a photo search FFS)

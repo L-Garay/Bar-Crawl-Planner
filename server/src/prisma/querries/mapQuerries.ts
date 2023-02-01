@@ -1,4 +1,8 @@
-import { Client, PlaceData } from '@googlemaps/google-maps-services-js';
+import {
+  Client,
+  PlaceData,
+  PlaceType2,
+} from '@googlemaps/google-maps-services-js';
 import axios from 'axios';
 import dotenv from 'dotenv';
 import {
@@ -105,6 +109,22 @@ export const SearchCity = async (
         );
         // serialize the reviews and save as string
         const reviews = result.reviews?.map((review) => JSON.stringify(review));
+
+        // get the city and state from the address_components array
+        // need to check each component's types array to see if it includes the type we are looking for
+        const cityType = 'locality' as PlaceType2;
+        const city = result.address_components
+          ? result.address_components.find((component) =>
+              component.types.includes(cityType)
+            )?.long_name
+          : '';
+        const stateType = 'administrative_area_level_1' as PlaceType2;
+        const state = result.address_components
+          ? result.address_components.find((component) =>
+              component.types.includes(stateType)
+            )?.long_name
+          : '';
+
         // have to make separate call to get each individual photo
         // use each photo's photo_reference and dimensions
         // specify return type as blob
@@ -143,6 +163,8 @@ export const SearchCity = async (
         const formattedResult = {
           business_status: result.business_status,
           formatted_address: result.formatted_address,
+          city,
+          state,
           lat: result.geometry?.location.lat,
           lng: result.geometry?.location.lng,
           icon: result.icon,

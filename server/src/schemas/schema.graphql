@@ -35,6 +35,8 @@ type LocationDetails {
   id: Int
   business_status: String
   formatted_address: String
+  city: String
+  state: String
   lat: Float
   lng: Float
   html_attributions: String
