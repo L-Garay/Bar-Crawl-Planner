@@ -75,7 +75,7 @@ const typeDefs = `#graphql
     # For photos, the google maps API returns a blob object; which we will store in the DB using the Bytes type for Prisma
     # however we can read the contents of the blobs and convert them to strings before sending the data to the client
     # NOTE there is no built in/easy way to send byte data through GraphQL, so we'd have to do this transformation on the server anyway
-    photos: [String]
+    photos_references: [String]
     # Same as the open_periods data, we will take each review object and serialize it into a string, upload to DB, and the parse as needed
     reviews: [String]
     url: String

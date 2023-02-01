@@ -104,37 +104,15 @@ export const SearchCity = async (
   if (locationResults.length > 0) {
     const formattedResults: Promise<LocationDetails>[] = locationResults.map(
       async (result) => {
-        // have to make separate call to get each individual photo
-        // use each photo's photo_reference and dimensions
-        // specify return type as blob
-
-        const blobPhotos = result.photos?.map(async (photo) => {
-          const image: PlacePhotoResponse = await googleClient.placePhoto({
-            params: {
-              photoreference: photo.photo_reference,
-              maxheight: photo.height,
-              maxwidth: photo.width,
-              key: process.env.GOOGLE_MAPS_API_KEY!,
-            },
-            responseType: 'blob',
-          });
-          return Promise.resolve(image.data as Blob);
-        });
-        // read the contents of each blob and convert to string
-        const resolvedBlobPhotos = blobPhotos
-          ? await Promise.all(blobPhotos)
+        const photoReferences = result.photos
+          ? result.photos.map(
+              (photo) =>
+                photo.photo_reference +
+                `&maxwidth=${photo.width}&maxheight=${
+                  photo.height
+                }&attributions=${JSON.stringify(photo.html_attributions)}`
+            )
           : [];
-
-        const convertedBlobStringsPromises = resolvedBlobPhotos.map(
-          async (blobPhoto) => {
-            const text = await new Response(blobPhoto).text();
-            return Promise.resolve(text);
-          }
-        );
-        const convertedBlobStrings = await Promise.all(
-          convertedBlobStringsPromises
-        );
-        console.log(convertedBlobStrings[0], 'CONVERTED BLOB STRINGS');
 
         const textSearchResult = {
           business_status: result.business_status,
@@ -151,10 +129,9 @@ export const SearchCity = async (
           types: result.types,
           plus_compound_code: result.plus_code?.compound_code,
           plus_global_code: result.plus_code?.global_code,
-          photos: convertedBlobStrings,
+          photos_references: photoReferences,
         };
 
-        // AT THIS POINT WE NEED TO MAKE A PLACE DETAILS REQUEST
         const detailsRequest = {
           place_id: result.place_id!,
           fields: DETAILS_FIELDS_TO_RETURN,
@@ -223,6 +200,7 @@ export const SearchCity = async (
 
     const resolvedFormattedResults = await Promise.all(formattedResults);
 
+    // TODO figure out how to handle all thee errors and possible returns
     try {
       await prismaClient.locationDetails.createMany({
         data: resolvedFormattedResults,

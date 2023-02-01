@@ -55,7 +55,7 @@ type LocationDetails {
   plus_global_code: String
   open_periods: [String]
   weekday_text: [String]
-  photos: [String]
+  photos_references: [String]
   reviews: [String]
   url: String
   website: String

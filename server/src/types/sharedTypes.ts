@@ -47,7 +47,7 @@ export type LocationDetails = {
   plus_global_code?: string;
   open_periods?: string[];
   weekday_text?: string[];
-  photos?: string[] | any[];
+  photos_references?: string[] | any[];
   reviews?: string[];
   url?: string;
   website?: string;
