@@ -22,3 +22,14 @@ export const CITY_COORDINATES = {
 };
 
 export const LOCATION_DATA_EXPIRATION_DAYS = 3;
+export const DETAILS_FIELDS_TO_RETURN = [
+  'reviews',
+  'url',
+  'website',
+  'price_level',
+  'utc_offset',
+  'opening_hours',
+  'vicinity',
+  'formatted_phone_number',
+  'address_components',
+];

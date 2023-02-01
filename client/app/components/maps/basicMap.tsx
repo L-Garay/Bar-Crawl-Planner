@@ -11,6 +11,46 @@ import {
   useSetMapOptions,
 } from '~/utils/maps';
 import { CITY_COORDINATES, LOCATION_TYPES } from '~/constants/mapConstants';
+import { gql, useLazyQuery } from '@apollo/client';
+
+// TODO figure out a better way to handle this
+// maybe have multiple small queries that fetch certain properties only when they are needed?
+const CITY_SEARCH = gql`
+  query searchCity($city: String!, $locationType: String!) {
+    searchCity(city: $city, locationType: $locationType) {
+      id
+      business_status
+      formatted_address
+      city
+      state
+      lat
+      lng
+      html_attributions
+      icon
+      icon_mask_base_uri
+      icon_background_color
+      name
+      place_id
+      rating
+      user_ratings_total
+      types
+      main_type
+      vicinity
+      formatted_phone_number
+      plus_compound_code
+      plus_global_code
+      open_periods
+      weekday_text
+      photos
+      reviews
+      url
+      website
+      utc_offset_minutes
+      price_level
+      expiration_date
+    }
+  }
+`;
 
 export default function BasicMap({
   style,
@@ -26,6 +66,7 @@ export default function BasicMap({
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('boise');
   const [selectedType, setSelectedType] =
     useState<LocationSelectOptions>('bars');
+  const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH);
 
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
@@ -33,40 +74,42 @@ export default function BasicMap({
 
   const PlaceService = new google.maps.places.PlacesService(map!);
 
-  const textSearchCallback = (
-    results: PlaceResult[] | null,
-    status: google.maps.places.PlacesServiceStatus
-  ) => {
-    setClicks([]); // clear on every new search
-    // TODO handle errors
-    if (
-      status === google.maps.places.PlacesServiceStatus.OK &&
-      results?.length
-    ) {
-      for (let i = 0; i < results.length; i++) {
-        const place = results[i];
-        console.log(place);
-        setClicks?.((prev) => [...prev, place.geometry?.location!]);
-      }
-    }
-  };
+  console.log(data);
 
-  const executeSearch = () => {
-    const request = {
-      query: LOCATION_TYPES[selectedType],
-      location: {
-        lat: CITY_COORDINATES[selectedCity].lat,
-        lng: CITY_COORDINATES[selectedCity].lng,
-      }, // downtown of each city according to google
-      radius: 8045, // 5 miles
-    };
-    // TODO we know this works, the request is formatted properly and the user inputs are valid
-    // the callback properly handles the result of the search
-    // so the next step is to make a call to our server from here, which will handle returning the location cache or making the call to google from the server
-    // we'll need to make sure that we return all the data we need to still render the map (obviously logan)
-    // we'll need to pass in the selected type and the selected city
-    PlaceService.textSearch(request, textSearchCallback);
-  };
+  // const textSearchCallback = (
+  //   results: PlaceResult[] | null,
+  //   status: google.maps.places.PlacesServiceStatus
+  // ) => {
+  //   setClicks([]); // clear on every new search
+  //   // TODO handle errors
+  //   if (
+  //     status === google.maps.places.PlacesServiceStatus.OK &&
+  //     results?.length
+  //   ) {
+  //     for (let i = 0; i < results.length; i++) {
+  //       const place = results[i];
+  //       console.log(place);
+  //       setClicks?.((prev) => [...prev, place.geometry?.location!]);
+  //     }
+  //   }
+  // };
+
+  // const executeSearch = () => {
+  //   const request = {
+  //     query: LOCATION_TYPES[selectedType],
+  //     location: {
+  //       lat: CITY_COORDINATES[selectedCity].lat,
+  //       lng: CITY_COORDINATES[selectedCity].lng,
+  //     }, // downtown of each city according to google
+  //     radius: 8045, // 5 miles
+  //   };
+  //   // TODO we know this works, the request is formatted properly and the user inputs are valid
+  //   // the callback properly handles the result of the search
+  //   // so the next step is to make a call to our server from here, which will handle returning the location cache or making the call to google from the server
+  //   // we'll need to make sure that we return all the data we need to still render the map (obviously logan)
+  //   // we'll need to pass in the selected type and the selected city
+  //   PlaceService.textSearch(request, textSearchCallback);
+  // };
 
   return (
     <>
@@ -105,7 +148,14 @@ export default function BasicMap({
           <option value="restaurants">Restaurants</option>
           <option value="hotels">Hotels</option>
         </select>
-        <button type="button" onClick={() => executeSearch()}>
+        <button
+          type="button"
+          onClick={() =>
+            searchCity({
+              variables: { city: selectedCity, locationType: selectedType },
+            })
+          }
+        >
           Submit
         </button>
       </div>
