@@ -16,6 +16,8 @@ import {
   UpdateUserAccount,
 } from './prisma/mutations/accountMutations';
 import { AddFriend, RemoveFriend } from './prisma/mutations/profileMutations';
+import { SearchCity } from './prisma/querries/mapQuerries';
+import { CitySelectOptions } from './types/sharedTypes';
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
@@ -145,6 +147,23 @@ const resolvers: Resolvers = {
       const data = await FindFriendByPin(args.social_pin);
       if (data.status === 'Failure') {
         throw new GraphQLError('Cannot get friend by pin', {
+          extensions: { code: data.error?.name, message: data.error?.message },
+        });
+      } else {
+        return data.data;
+      }
+    },
+    searchCity: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const city = args.city as CitySelectOptions;
+      const data = await SearchCity(city, args.locationType);
+      if (data.status === 'Failure') {
+        throw new GraphQLError('Cannot search city', {
           extensions: { code: data.error?.name, message: data.error?.message },
         });
       } else {

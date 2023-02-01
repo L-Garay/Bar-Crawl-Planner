@@ -75,6 +75,7 @@ type Query {
   getAllFriends: [Profile]
   findFriendById(id: Int!): Profile
   findFriendByPin(social_pin: String!): Profile
+  searchCity(city: String!, locationType: String!): [LocationDetails]
 }
 
 type Mutation {

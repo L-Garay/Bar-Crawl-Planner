@@ -40,6 +40,7 @@ export type LocationDetails = {
   id?: Maybe<Scalars['Int']>;
   lat?: Maybe<Scalars['Float']>;
   lng?: Maybe<Scalars['Float']>;
+  main_type?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   open_periods?: Maybe<Array<Maybe<Scalars['String']>>>;
   photos?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -141,6 +142,7 @@ export type Query = {
   outings?: Maybe<Array<Maybe<Outing>>>;
   profile?: Maybe<Profile>;
   profiles?: Maybe<Array<Maybe<Profile>>>;
+  searchCity?: Maybe<Array<Maybe<LocationDetails>>>;
 };
 
 
@@ -156,6 +158,12 @@ export type QueryFindFriendByPinArgs = {
 
 export type QueryGetAccountByEmailArgs = {
   email: Scalars['String'];
+};
+
+
+export type QuerySearchCityArgs = {
+  city: Scalars['String'];
+  locationType: Scalars['String'];
 };
 
 export type WithIndex<TObject> = TObject & Record<string, any>;
@@ -279,6 +287,7 @@ export type LocationDetailsResolvers<ContextType = any, ParentType extends Resol
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   lat?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   lng?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  main_type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   open_periods?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   photos?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
@@ -343,6 +352,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
+  searchCity?: Resolver<Maybe<Array<Maybe<ResolversTypes['LocationDetails']>>>, ParentType, ContextType, RequireFields<QuerySearchCityArgs, 'city' | 'locationType'>>;
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{

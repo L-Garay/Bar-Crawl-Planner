@@ -24,7 +24,7 @@ export type CitySelectOptions =
   | 'seattle'
   | 'slc';
 
-export type PlaceResult = {
+export type LocationDetails = {
   business_status?: string;
   formatted_address?: string;
   city?: string;

@@ -36,7 +36,7 @@ const typeDefs = `#graphql
     start_date_and_time: String
   }
 
-  type PlaceResult {
+  type LocationDetails {
     id: Int
     business_status: String
     formatted_address: String
@@ -100,6 +100,7 @@ const typeDefs = `#graphql
     getAllFriends: [Profile]
     findFriendById(id: Int!): Profile
     findFriendByPin(social_pin: String!): Profile
+    searchCity(city: String!, locationType: String!): [LocationDetails]
   }
 
   type Mutation {
