@@ -125,6 +125,10 @@ export const SearchCity = async (
             )?.long_name
           : '';
 
+        // it would seem that the first type in the array is the one that matches the search query
+        // so we can safely assume that these establishments are classified primarily as or associated with this first type
+        const mainType = result.types ? result.types[0] : '';
+
         // have to make separate call to get each individual photo
         // use each photo's photo_reference and dimensions
         // specify return type as blob
@@ -175,6 +179,7 @@ export const SearchCity = async (
           rating: result.rating,
           user_ratings_total: result.user_ratings_total,
           types: result.types,
+          main_type: mainType,
           vicinity: result.vicinity,
           formatted_phone_number: result.formatted_phone_number,
           plus_compound_code: result.plus_code?.compound_code,

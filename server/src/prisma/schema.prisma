@@ -65,6 +65,7 @@ model LocationDetails {
   icon_background_color  String?  @default("") @db.VarChar(255)
   name                   String?  @default("") @db.VarChar(255)
   place_id               String?  @unique @default("") @db.VarChar(255)
+  main_type              String?  @default("") @db.VarChar(255)
   types                  String[]
   rating                 Decimal?
   user_ratings_total     Int?

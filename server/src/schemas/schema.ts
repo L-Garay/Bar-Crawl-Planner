@@ -60,6 +60,7 @@ const typeDefs = `#graphql
     rating: Float
     user_ratings_total: Int
     types: [String]
+    main_type: String
     vicinity: String
     formatted_phone_number: String
     plus_compound_code: String
