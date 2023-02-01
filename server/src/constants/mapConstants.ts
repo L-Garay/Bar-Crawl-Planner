@@ -20,3 +20,5 @@ export const CITY_COORDINATES = {
     lng: -122.3530897,
   },
 };
+
+export const LOCATION_DATA_EXPIRATION_DAYS = 3;

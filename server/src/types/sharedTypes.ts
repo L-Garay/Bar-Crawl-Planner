@@ -50,4 +50,5 @@ export type PlaceResult = {
   website?: string;
   utc_offset_minutes?: number;
   price_level?: number;
+  expiration_date: string;
 };

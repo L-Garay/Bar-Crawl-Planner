@@ -79,6 +79,8 @@ const typeDefs = `#graphql
     website: String
     utc_offset_minutes: Float
     price_level: Int
+    # This will be the date that each object will need to be refreshed/refetched
+    expiration_date: String
   }
 
   # The "Query" type is special: it lists all of the available queries that

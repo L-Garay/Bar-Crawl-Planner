@@ -58,6 +58,7 @@ type LocationDetails {
   website: String
   utc_offset_minutes: Float
   price_level: Int
+  expiration_date: String
 }
 
 type Query {

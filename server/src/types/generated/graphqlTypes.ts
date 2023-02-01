@@ -29,6 +29,7 @@ export type Account = {
 export type LocationDetails = {
   __typename?: 'LocationDetails';
   business_status?: Maybe<Scalars['String']>;
+  expiration_date?: Maybe<Scalars['String']>;
   formatted_address?: Maybe<Scalars['String']>;
   formatted_phone_number?: Maybe<Scalars['String']>;
   html_attributions?: Maybe<Scalars['String']>;
@@ -265,6 +266,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 
 export type LocationDetailsResolvers<ContextType = any, ParentType extends ResolversParentTypes['LocationDetails'] = ResolversParentTypes['LocationDetails']> = ResolversObject<{
   business_status?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  expiration_date?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   formatted_address?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   formatted_phone_number?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   html_attributions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

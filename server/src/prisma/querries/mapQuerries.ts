@@ -1,7 +1,10 @@
 import { Client, PlaceData } from '@googlemaps/google-maps-services-js';
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { CITY_COORDINATES } from '../../constants/mapConstants';
+import {
+  CITY_COORDINATES,
+  LOCATION_DATA_EXPIRATION_DAYS,
+} from '../../constants/mapConstants';
 import { CitySelectOptions, PlaceResult } from '../../types/sharedTypes';
 import { Sleep } from '../../utilities';
 
@@ -162,6 +165,11 @@ export const SearchCity = async (
           website: result.website,
           price_level: result.price_level,
           utc_offset_minutes: result.utc_offset,
+          // Set the expiration date for the data to be X amount of days from when it is created
+          expiration_date: new Date(
+            new Date().getTime() +
+              LOCATION_DATA_EXPIRATION_DAYS * 24 * 60 * 60 * 1000
+          ).toISOString(),
         };
         formattedResults.push(formattedResult);
       });
