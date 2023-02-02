@@ -18,7 +18,6 @@ import { gql, useLazyQuery } from '@apollo/client';
 const CITY_SEARCH = gql`
   query searchCity($city: String!, $locationType: String!) {
     searchCity(city: $city, locationType: $locationType) {
-      id
       business_status
       formatted_address
       city
@@ -41,7 +40,7 @@ const CITY_SEARCH = gql`
       plus_global_code
       open_periods
       weekday_text
-      photos
+      photos_references
       reviews
       url
       website

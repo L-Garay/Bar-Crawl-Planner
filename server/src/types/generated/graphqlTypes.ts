@@ -40,7 +40,6 @@ export type LocationDetails = {
   id?: Maybe<Scalars['Int']>;
   lat?: Maybe<Scalars['Float']>;
   lng?: Maybe<Scalars['Float']>;
-  main_type?: Maybe<Scalars['String']>;
   name?: Maybe<Scalars['String']>;
   open_periods?: Maybe<Array<Maybe<Scalars['String']>>>;
   photos_references?: Maybe<Array<Maybe<Scalars['String']>>>;
@@ -287,7 +286,6 @@ export type LocationDetailsResolvers<ContextType = any, ParentType extends Resol
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   lat?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
   lng?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  main_type?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   open_periods?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   photos_references?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;

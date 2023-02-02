@@ -40,7 +40,6 @@ export type LocationDetails = {
   rating?: number;
   user_ratings_total?: number;
   types?: string[];
-  main_type?: string;
   vicinity?: string;
   formatted_phone_number?: string;
   plus_compound_code?: string;
