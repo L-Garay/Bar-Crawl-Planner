@@ -33,7 +33,6 @@ const CITY_SEARCH = gql`
       rating
       user_ratings_total
       types
-      main_type
       vicinity
       formatted_phone_number
       plus_compound_code

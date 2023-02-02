@@ -21,62 +21,74 @@ dotenv.config();
 const ExecuteSearch = async (searchParams: any) => {
   const googleClient = new Client({});
 
+  // NOTE
+  // TODO
+  // NOTE
+  // TODO will need to think about how to implement retry logic here
+  // I'm thinking we retry each request once
+  // if it fails on the third request, we can still send the results from the first two
   let locationResults: Partial<PlaceData>[] = [];
   const response: TextSearchResponse = await googleClient.textSearch({
     params: searchParams,
     timeout: 5000,
   });
 
-  if (response.status !== 200) {
+  if (response.status === 200) {
+    locationResults.push(...response.data.results);
+  } else {
     const error = {
       status: response.data.status,
       message: response.data.error_message,
+      headers: response.headers,
     };
-    throw error;
+    console.error('Error fetching first page of search results', error);
+    // TODO ideally log this in some sort of monitoring service
   }
-  locationResults.push(...response.data.results);
+  let secondResponse;
+  if (response.data.next_page_token) {
+    await Sleep(2000); // it is known that Google imposes a 2sec delay between pagintation calls
+    secondResponse = await googleClient.textSearch({
+      params: {
+        ...searchParams,
+        pagetoken: response.data.next_page_token,
+      },
+      timeout: 5000,
+    });
+  }
+  if (secondResponse && secondResponse.status === 200) {
+    locationResults.push(...secondResponse.data.results);
+  } else {
+    const error = {
+      status: response.data.status,
+      message: response.data.error_message,
+      headers: response.headers,
+    };
+    console.error('Error fetching second page of search results', error);
+    // TODO ideally log this in some sort of monitoring service
+  }
 
-  // let secondResponse;
-  // if (response.data.next_page_token) {
-  //   await Sleep(2000); // it is known that Google imposes a 2sec delay between pagintation calls
-  //   secondResponse = await googleClient.textSearch({
-  //     params: {
-  //       ...searchParams,
-  //       pagetoken: response.data.next_page_token,
-  //     },
-  //     timeout: 5000,
-  //   });
-  // }
-  // if (secondResponse && secondResponse.status !== 200) {
-  //   // is this the right way to handle an error for the second call?
-  //   const error = {
-  //     status: secondResponse.data.status,
-  //     message: secondResponse.data.error_message,
-  //   };
-  //   throw error;
-  // }
-
-  // let thirdResponse;
-  // if (secondResponse && secondResponse.data.next_page_token) {
-  //   locationResults.push(...secondResponse.data.results);
-  //   await Sleep(2000);
-  //   thirdResponse = await googleClient.textSearch({
-  //     params: {
-  //       ...searchParams,
-  //       pagetoken: secondResponse.data.next_page_token,
-  //     },
-  //     timeout: 5000,
-  //   });
-  // }
-  // if (thirdResponse && thirdResponse.status !== 200) {
-  //   const error = {
-  //     status: thirdResponse.data.status,
-  //     message: thirdResponse.data.error_message,
-  //   };
-  //   throw error;
-  // } else if (thirdResponse) {
-  //   locationResults.push(...thirdResponse.data.results);
-  // }
+  let thirdResponse;
+  if (secondResponse && secondResponse.data.next_page_token) {
+    await Sleep(2000);
+    thirdResponse = await googleClient.textSearch({
+      params: {
+        ...searchParams,
+        pagetoken: secondResponse.data.next_page_token,
+      },
+      timeout: 5000,
+    });
+  }
+  if (thirdResponse && thirdResponse.status === 200) {
+    locationResults.push(...thirdResponse.data.results);
+  } else {
+    const error = {
+      status: response.data.status,
+      message: response.data.error_message,
+      headers: response.headers,
+    };
+    console.error('Error fetching third page of search results', error);
+    // TODO ideally log this in some sort of monitoring service
+  }
   return locationResults;
 };
 
@@ -102,8 +114,8 @@ export const SearchCity = async (
   const locationResults = await ExecuteSearch(searchParams);
 
   if (locationResults.length > 0) {
-    const formattedResults: Promise<LocationDetails>[] = locationResults.map(
-      async (result) => {
+    const formattedResults: Promise<LocationDetails | null>[] =
+      locationResults.map(async (result) => {
         const photoReferences = result.photos
           ? result.photos.map(
               (photo) =>
@@ -138,17 +150,57 @@ export const SearchCity = async (
           key: process.env.GOOGLE_MAPS_API_KEY!,
         };
 
-        const detailsData = await googleClient.placeDetails({
+        let detailsData;
+        detailsData = await googleClient.placeDetails({
           params: detailsRequest,
         });
 
-        if (detailsData.status !== 200) {
+        // if the request status is one of these, there is no point in retrying at this time
+        if (
+          detailsData.data.status === 'NOT_FOUND' ||
+          'ZERO_RESULTS' ||
+          'OVER_QUERY_LIMIT' ||
+          'REQUEST_DENIED'
+        ) {
+          return Promise.resolve(null);
+        } else if (
+          /* if the request status is one of these two, we can try to make another request. Although, I'm not sure what could be invalid for this simple request. */
+          detailsData.data.status === 'INVALID_REQUEST' ||
+          'UNKNOWN_ERROR'
+        ) {
+          detailsData = await googleClient.placeDetails({
+            params: {
+              place_id: result.place_id!,
+              fields: [
+                'reviews',
+                'url',
+                'website',
+                'price_level',
+                'utc_offset',
+                'opening_hours',
+                'vicinity',
+                'formatted_phone_number',
+                'address_components',
+              ],
+              key: process.env.GOOGLE_MAPS_API_KEY!,
+            },
+          });
+        }
+        // if after the retry, the status is still not OK, we can't do anything with this result so we return null and log the error
+        if (detailsData.data.status !== 'OK') {
           const error = {
             status: detailsData.data.status,
             message: detailsData.data.error_message,
+            headers: detailsData.headers,
           };
-          throw error;
+          console.error(
+            `Error fetching details for location: ${result.place_id}`,
+            error
+          );
+          // TODO ideally log this in some sort of monitoring service
+          return Promise.resolve(null);
         }
+
         const detailsResult = detailsData.data.result;
 
         const openPeriods = detailsResult.opening_hours?.periods.map((period) =>
@@ -174,7 +226,7 @@ export const SearchCity = async (
 
         const formattedDetailsResponse = {
           price_level: detailsResult.price_level,
-          // reviews,
+          reviews,
           formatted_phone_number: detailsResult.formatted_phone_number,
           open_periods: openPeriods,
           weekday_text: detailsResult.opening_hours?.weekday_text,
@@ -195,15 +247,18 @@ export const SearchCity = async (
           ).toISOString(),
         };
         return Promise.resolve(formattedResult);
-      }
-    );
+      });
 
     const resolvedFormattedResults = await Promise.all(formattedResults);
+    // Since we are returning null for locations that don't have location details, we need to filter those out before we try to insert them into the DB
+    const filteredResolvedFormattedResults = resolvedFormattedResults.filter(
+      (result) => result !== null
+    ) as LocationDetails[];
 
     // TODO figure out how to handle all thee errors and possible returns
     try {
       await prismaClient.locationDetails.createMany({
-        data: resolvedFormattedResults,
+        data: filteredResolvedFormattedResults,
         skipDuplicates: true,
       });
     } catch (error) {
