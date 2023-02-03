@@ -1,9 +1,14 @@
 import jwt from 'jsonwebtoken';
 
+export interface GoogleError extends Error {
+  status: number;
+  headers?: any;
+}
+
 export type QueryData = {
   status: string;
   data: any;
-  error?: PrismaError;
+  error?: PrismaError | Error | GoogleError;
 };
 
 export type PrismaError = {

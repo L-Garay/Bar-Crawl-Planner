@@ -11,85 +11,195 @@ import {
   DETAILS_FIELDS_TO_RETURN,
   LOCATION_DATA_EXPIRATION_DAYS,
 } from '../../constants/mapConstants';
-import { CitySelectOptions, LocationDetails } from '../../types/sharedTypes';
+import {
+  CitySelectOptions,
+  GoogleError,
+  LocationDetails,
+} from '../../types/sharedTypes';
 import { Sleep, GetPrismaError } from '../../utilities';
 import { prismaClient } from '../../index';
 import { QueryData } from '../../types/sharedTypes';
 
 dotenv.config();
 
-const ExecuteSearch = async (searchParams: any) => {
+// NOTE not sure how I feel about this, I'm sure it can be refactored to be cleaner/more efficient
+const ExecuteSearch = async (searchParams: any, city: string) => {
   const googleClient = new Client({});
 
-  // NOTE
-  // TODO
-  // NOTE
-  // TODO will need to think about how to implement retry logic here
-  // I'm thinking we retry each request once
-  // if it fails on the third request, we can still send the results from the first two
+  // variable to hold all results
   let locationResults: Partial<PlaceData>[] = [];
-  const response: TextSearchResponse = await googleClient.textSearch({
+
+  let response: TextSearchResponse = {} as TextSearchResponse;
+  response = await googleClient.textSearch({
     params: searchParams,
     timeout: 5000,
   });
 
-  if (response.status === 200) {
-    locationResults.push(...response.data.results);
-  } else {
-    const error = {
-      status: response.data.status,
+  console.log(response.data.status);
+
+  // if it's any one of these statuses, no point in retrying
+  if (
+    response.data.status === 'NOT_FOUND' ||
+    response.data.status === 'ZERO_RESULTS' ||
+    response.data.status === 'OVER_QUERY_LIMIT' ||
+    response.data.status === 'REQUEST_DENIED'
+  ) {
+    const error: GoogleError = {
+      name: response.data.status,
+      status: response.status,
       message: response.data.error_message,
-      headers: response.headers,
     };
-    console.error('Error fetching first page of search results', error);
-    // TODO ideally log this in some sort of monitoring service
-  }
-  let secondResponse;
-  if (response.data.next_page_token) {
-    await Sleep(2000); // it is known that Google imposes a 2sec delay between pagintation calls
-    secondResponse = await googleClient.textSearch({
-      params: {
-        ...searchParams,
-        pagetoken: response.data.next_page_token,
-      },
+    console.error(
+      `Error fetching first page of search results for city: ${city} and location type: ${searchParams.query}`,
+      error
+    );
+    return { locationResults, error };
+  } else if (
+    response.data.status === 'INVALID_REQUEST' ||
+    response.data.status === 'UNKNOWN_ERROR'
+  ) {
+    //retry only once
+    response = await googleClient.textSearch({
+      params: searchParams,
       timeout: 5000,
     });
+  } else if (response.data.status === 'OK') {
+    // otherwise we know the status is 'OK' so we can push the results
+    locationResults.push(...response.data.results);
   }
-  if (secondResponse && secondResponse.status === 200) {
-    locationResults.push(...secondResponse.data.results);
-  } else {
-    const error = {
-      status: response.data.status,
+
+  // if after the retry, the status is still not 'OK'
+  // log the error and return the 0 results
+  if (response.data.status !== 'OK') {
+    const error: GoogleError = {
+      name: response.data.status,
+      status: response.status,
       message: response.data.error_message,
-      headers: response.headers,
     };
-    console.error('Error fetching second page of search results', error);
+    console.error(
+      `Error re-fetching first page of search results for city: ${city} and location type: ${searchParams.query}`,
+      error
+    );
+    return { locationResults, error };
     // TODO ideally log this in some sort of monitoring service
   }
 
-  let thirdResponse;
-  if (secondResponse && secondResponse.data.next_page_token) {
-    await Sleep(2000);
-    thirdResponse = await googleClient.textSearch({
-      params: {
-        ...searchParams,
-        pagetoken: secondResponse.data.next_page_token,
-      },
-      timeout: 5000,
-    });
-  }
-  if (thirdResponse && thirdResponse.status === 200) {
-    locationResults.push(...thirdResponse.data.results);
-  } else {
-    const error = {
-      status: response.data.status,
-      message: response.data.error_message,
-      headers: response.headers,
-    };
-    console.error('Error fetching third page of search results', error);
-    // TODO ideally log this in some sort of monitoring service
-  }
-  return locationResults;
+  // repeat the same process for the second and third pages
+  // let secondResponse: TextSearchResponse = {} as TextSearchResponse;
+  // if (response.data.next_page_token) {
+  //   // it is known that Google imposes a 2sec delay between pagintation calls
+  //   await Sleep(2000);
+  //   secondResponse = await googleClient.textSearch({
+  //     params: {
+  //       ...searchParams,
+  //       pagetoken: response.data.next_page_token,
+  //     },
+  //     timeout: 5000,
+  //   });
+  // }
+  // if (
+  //   (secondResponse && secondResponse.data.status === 'NOT_FOUND') ||
+  //   'ZERO_RESULTS' ||
+  //   'OVER_QUERY_LIMIT' ||
+  //   'REQUEST_DENIED'
+  // ) {
+  //   // at this point we know the first request was successful
+  //   // so return those results
+  //   const error: GoogleError = {
+  //     status: secondResponse.status,
+  //     name: secondResponse.data.status,
+  //     message: secondResponse.data.error_message,
+  //   };
+  //   console.error(
+  //     `Error fetching second page of search results for city: ${city} and location type: ${searchParams.query}`,
+  //     error
+  //   );
+  //   return { locationResults, error };
+  // } else if (
+  //   (secondResponse && secondResponse.data.status === 'INVALID_REQUEST') ||
+  //   'UNKNOWN_ERROR'
+  // ) {
+  //   await Sleep(2000);
+  //   secondResponse = await googleClient.textSearch({
+  //     params: searchParams,
+  //     timeout: 5000,
+  //   });
+  // } else if (secondResponse && secondResponse.data.status === 'OK') {
+  //   locationResults.push(...secondResponse.data.results);
+  // }
+
+  // if (secondResponse.data.status !== 'OK') {
+  //   const error: GoogleError = {
+  //     name: secondResponse.data.status,
+  //     status: secondResponse.status,
+  //     message: secondResponse.data.error_message,
+  //   };
+  //   console.error(
+  //     `Error re-fetching second page of search results for city: ${city} and location type: ${searchParams.query}`,
+  //     error
+  //   );
+  //   return { locationResults, error };
+  //   // TODO ideally log this in some sort of monitoring service
+  // }
+
+  // let thirdResponse: TextSearchResponse = {} as TextSearchResponse;
+  // if (secondResponse && secondResponse.data.next_page_token) {
+  //   await Sleep(2000);
+  //   thirdResponse = await googleClient.textSearch({
+  //     params: {
+  //       ...searchParams,
+  //       pagetoken: secondResponse.data.next_page_token,
+  //     },
+  //     timeout: 5000,
+  //   });
+  // }
+
+  // if (
+  //   (thirdResponse && thirdResponse.data.status === 'NOT_FOUND') ||
+  //   'ZERO_RESULTS' ||
+  //   'OVER_QUERY_LIMIT' ||
+  //   'REQUEST_DENIED'
+  // ) {
+  //   const error: GoogleError = {
+  //     name: thirdResponse.data.status,
+  //     status: thirdResponse.status,
+  //     message: thirdResponse.data.error_message,
+  //   };
+  //   console.error(
+  //     `Error fetching third page of search results for city: ${city} and location type: ${searchParams.query}`,
+  //     error
+  //   );
+  //   return { locationResults, error };
+  // } else if (
+  //   (thirdResponse && thirdResponse.data.status === 'INVALID_REQUEST') ||
+  //   'UNKNOWN_ERROR'
+  // ) {
+  //   await Sleep(2000);
+  //   thirdResponse = await googleClient.textSearch({
+  //     params: searchParams,
+  //     timeout: 5000,
+  //   });
+  // } else if (thirdResponse && thirdResponse.data.status === 'OK') {
+  //   locationResults.push(...thirdResponse.data.results);
+  // }
+
+  // if (thirdResponse && thirdResponse.data.status !== 'OK') {
+  //   const error: GoogleError = {
+  //     name: thirdResponse.data.status,
+  //     status: thirdResponse.status,
+  //     message: thirdResponse.data.error_message,
+  //   };
+  //   console.error(
+  //     `Error re-fetching third page of search results for city: ${city} and location type: ${searchParams.query}`,
+  //     error
+  //   );
+  //   return { locationResults, error };
+  //   // TODO ideally log this in some sort of monitoring service
+  // }
+
+  // this will capture all results from the 3 pages if all requests are successful
+  // otherwise, the second and third pages handle sending the known results if their requests fails
+  return { locationResults, error: undefined };
 };
 
 export const SearchCity = async (
@@ -111,9 +221,9 @@ export const SearchCity = async (
     key: process.env.GOOGLE_MAPS_API_KEY!,
   };
 
-  const locationResults = await ExecuteSearch(searchParams);
+  const { locationResults, error } = await ExecuteSearch(searchParams, city);
 
-  if (locationResults.length > 0) {
+  if (locationResults.length > 0 && !error) {
     const formattedResults: Promise<LocationDetails | null>[] =
       locationResults.map(async (result) => {
         const photoReferences = result.photos
@@ -158,15 +268,15 @@ export const SearchCity = async (
         // if the request status is one of these, there is no point in retrying at this time
         if (
           detailsData.data.status === 'NOT_FOUND' ||
-          'ZERO_RESULTS' ||
-          'OVER_QUERY_LIMIT' ||
-          'REQUEST_DENIED'
+          detailsData.data.status === 'ZERO_RESULTS' ||
+          detailsData.data.status === 'OVER_QUERY_LIMIT' ||
+          detailsData.data.status === 'REQUEST_DENIED'
         ) {
           return Promise.resolve(null);
         } else if (
           /* if the request status is one of these two, we can try to make another request. Although, I'm not sure what could be invalid for this simple request. */
           detailsData.data.status === 'INVALID_REQUEST' ||
-          'UNKNOWN_ERROR'
+          detailsData.data.status === 'UNKNOWN_ERROR'
         ) {
           detailsData = await googleClient.placeDetails({
             params: {
@@ -188,10 +298,10 @@ export const SearchCity = async (
         }
         // if after the retry, the status is still not OK, we can't do anything with this result so we return null and log the error
         if (detailsData.data.status !== 'OK') {
-          const error = {
-            status: detailsData.data.status,
+          const error: GoogleError = {
+            status: detailsData.status,
+            name: detailsData.data.status,
             message: detailsData.data.error_message,
-            headers: detailsData.headers,
           };
           console.error(
             `Error fetching details for location: ${result.place_id}`,
@@ -268,6 +378,7 @@ export const SearchCity = async (
     }
 
     return { status: 'Success', data: resolvedFormattedResults };
+  } else {
+    return { status: 'Error', data: [], error: error };
   }
-  return { status: 'Error', data: [] };
 };

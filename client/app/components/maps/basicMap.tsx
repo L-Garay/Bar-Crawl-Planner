@@ -64,7 +64,9 @@ export default function BasicMap({
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('boise');
   const [selectedType, setSelectedType] =
     useState<LocationSelectOptions>('bars');
-  const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH);
+  const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH, {
+    fetchPolicy: 'no-cache', // testing purposes only
+  });
 
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
