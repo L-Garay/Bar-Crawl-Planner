@@ -33,3 +33,15 @@ export const DETAILS_FIELDS_TO_RETURN = [
   'formatted_phone_number',
   'address_components',
 ];
+export const CronJobData = {
+  querries: [
+    'bars',
+    'taverns',
+    'breweries',
+    'wineries',
+    'restaurants',
+    'pubs',
+    'hotel bars',
+  ],
+  cities: ['boise', 'denver', 'portland', 'seattle', 'slc'],
+};
