@@ -37,3 +37,12 @@ export const CRON_JOB_DATA = {
   querries: ['bars', 'taverns', 'breweries', 'wineries', 'restaurants', 'pubs'],
   cities: ['denver', 'boise', 'slc', 'portland', 'seattle'],
 };
+
+export const LOCATION_FILTER_TERMS = {
+  bars: ['bar'],
+  taverns: ['tavern'],
+  breweries: ['brew'],
+  wineries: ['wine', 'vine'],
+  restaurants: ['restaurant', 'eat', 'grill'],
+  pubs: ['pub'],
+};
