@@ -16,7 +16,7 @@ import { GetPrismaError } from '../utilities';
 import { prismaClient } from '..';
 import {
   CITY_COORDINATES,
-  CronJobData,
+  CRON_JOB_DATA,
   DETAILS_FIELDS_TO_RETURN,
   LOCATION_DATA_EXPIRATION_DAYS,
 } from '../constants/mapConstants';
@@ -61,7 +61,7 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
         message: response.data.error_message,
       };
       console.log(
-        `Error fetching first page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error}`
+        `Error fetching first page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
       );
       return { locationResults, error };
     } else if (
@@ -87,7 +87,7 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
         message: response.data.error_message,
       };
       console.log(
-        `Error re-fetching first page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error}`
+        `Error re-fetching first page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
       );
       return { locationResults, error };
       // TODO ideally log this in some sort of monitoring service
@@ -122,7 +122,7 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
         message: secondResponse.data.error_message,
       };
       console.log(
-        `Error fetching second page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.message}`
+        `Error fetching second page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
       );
       return { locationResults, error };
     } else if (
@@ -146,7 +146,7 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
         message: secondResponse.data.error_message,
       };
       console.log(
-        `Error re-fetching second page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error}`
+        `Error re-fetching second page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
       );
       return { locationResults, error };
       // TODO ideally log this in some sort of monitoring service
@@ -177,7 +177,7 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
         message: thirdResponse.data.error_message,
       };
       console.log(
-        `Error fetching third page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error}`
+        `Error fetching third page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
       );
       return { locationResults, error };
     } else if (
@@ -200,7 +200,7 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
         message: thirdResponse.data.error_message,
       };
       console.log(
-        `Error re-fetching third page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error}`
+        `Error re-fetching third page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
       );
       return { locationResults, error };
       // TODO ideally log this in some sort of monitoring service
@@ -217,8 +217,9 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
   const SearchCity = async (
     city: CitySelectOptions,
     locationType: string
-  ): Promise<LocationDetails[] | null> => {
+  ): Promise<LocationDetails[]> => {
     const googleClient = new Client({});
+    console.log('SEARCH PARAMS', city, locationType);
 
     const searchParams = {
       query: locationType,
@@ -265,53 +266,44 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
             photos_references: photoReferences,
           };
 
-          const detailsRequest = {
-            place_id: result.place_id!,
-            fields: DETAILS_FIELDS_TO_RETURN,
-            key: process.env.GOOGLE_MAPS_API_KEY!,
-          };
-
           let detailsData;
           console.log('ABOUT TO FETCH DETAILS');
 
           detailsData = await googleClient.placeDetails({
-            params: detailsRequest,
+            params: {
+              place_id: result.place_id!,
+              fields: DETAILS_FIELDS_TO_RETURN,
+              key: process.env.GOOGLE_MAPS_API_KEY!,
+            },
           });
+          console.log('JUST FETCHED DETAILS');
 
           // if the request status is one of these, there is no point in retrying at this time
           if (
-            detailsData.data.status === 'NOT_FOUND' ||
-            detailsData.data.status === 'ZERO_RESULTS' ||
-            detailsData.data.status === 'OVER_QUERY_LIMIT' ||
-            detailsData.data.status === 'REQUEST_DENIED'
+            (detailsData.data && detailsData.data.status === 'NOT_FOUND') ||
+            (detailsData.data && detailsData.data.status === 'ZERO_RESULTS') ||
+            (detailsData.data &&
+              detailsData.data.status === 'OVER_QUERY_LIMIT') ||
+            (detailsData.data && detailsData.data.status === 'REQUEST_DENIED')
           ) {
             job.log(`Error fetching details for place: ${result.place_id}`);
             return Promise.resolve(null);
           } else if (
             /* if the request status is one of these two, we can try to make another request. Although, I'm not sure what could be invalid for this simple request. */
-            detailsData.data.status === 'INVALID_REQUEST' ||
-            detailsData.data.status === 'UNKNOWN_ERROR'
+            (detailsData.data &&
+              detailsData.data.status === 'INVALID_REQUEST') ||
+            (detailsData.data && detailsData.data.status === 'UNKNOWN_ERROR')
           ) {
             detailsData = await googleClient.placeDetails({
               params: {
                 place_id: result.place_id!,
-                fields: [
-                  'reviews',
-                  'url',
-                  'website',
-                  'price_level',
-                  'utc_offset',
-                  'opening_hours',
-                  'vicinity',
-                  'formatted_phone_number',
-                  'address_components',
-                ],
+                fields: DETAILS_FIELDS_TO_RETURN,
                 key: process.env.GOOGLE_MAPS_API_KEY!,
               },
             });
           }
           // if after the retry, the status is still not OK, we can't do anything with this result so we return null and log the error
-          if (detailsData.data.status !== 'OK') {
+          if (detailsData.data && detailsData.data.status !== 'OK') {
             const error: GoogleError = {
               status: detailsData.status,
               name: detailsData.data.status,
@@ -399,25 +391,29 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
     allQueryCombos.map((combo) => SearchCity(combo.city, combo.query))
   )
     .then(async (results) => {
-      console.log('RESOLVED FORMATTED RESULTS', results[0]);
+      console.log('RESOLVED FORMATTED RESULTS', results[0][0]);
       console.log(results.length);
 
       console.log('ABOUT TO SAVE TO DB');
-
+      const flatResults = results.flat();
       try {
         const recordsCreated = await prismaClient.locationDetails.createMany({
-          data: results[0] ? results[0] : [],
+          data: results ? flatResults : [],
           skipDuplicates: true,
         });
         done(null, recordsCreated);
       } catch (error) {
         const newError = GetPrismaError(error);
-        console.log('ERROR', error.message);
+        job.log(
+          `Job failed uploading data to DB with error ${error.message}\nError: ${newError}`
+        );
         done(newError);
       }
     })
     .catch((error) => {
-      job.log(`Job failed with error ${error.message}\nError: ${error}`);
+      job.log(
+        `Job failed in Promise.All() catch with error ${error.message}\nError: ${error}`
+      );
     });
 });
 
@@ -428,7 +424,9 @@ testGoogleQueue.on('completed', (job, result) => {
 
 testGoogleQueue.on('failed', (job, err) => {
   console.error('job failed', err);
-  job.log(`Job failed with error ${err.message}\nError: ${err}`);
+  job.log(
+    `Job failed with error ${err.message}\nError: ${err}\nStack: ${err.stack}`
+  );
 });
 
 testGoogleQueue.on('stalled', (job) => {
@@ -445,7 +443,7 @@ testGoogleQueue.on('error', (error) => {
 export const testGoogleJob = async () => {
   await testGoogleQueue.add(
     'Fetch all location data',
-    { data: CronJobData },
-    { attempts: 3, backoff: 1000, repeat: { cron: '00 1 * * 6' } }
+    { data: CRON_JOB_DATA },
+    { attempts: 3, backoff: 1000, repeat: { cron: '18 9 * * 2' } }
   );
 };
