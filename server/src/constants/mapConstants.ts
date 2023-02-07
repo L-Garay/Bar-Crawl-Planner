@@ -46,3 +46,14 @@ export const LOCATION_FILTER_TERMS = {
   restaurants: ['restaurant', 'eat', 'grill'],
   pubs: ['pub'],
 };
+
+export const TOTAL_RATINGS_CUTOFFS = [2000, 1500, 1000, 500, 100, 50];
+
+export const RATINGS_VALUE_CUTOFFS = {
+  2000: 4.5,
+  1500: 4.6,
+  1000: 4.7,
+  500: 4.8,
+  100: 4.9,
+  50: 5,
+};

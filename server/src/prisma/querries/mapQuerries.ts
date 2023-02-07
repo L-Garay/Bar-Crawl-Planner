@@ -65,15 +65,60 @@ export const SearchCity = async (
     checkTypes(location)
   );
 
-  // 3. Sort by average rating
-  // at this point they SHOULD be sorted by total number of reviews, but we'll sort again just to be sure
+  // 3. Sort by total ratings
+  // at this point they SHOULD be sorted by total number of ratings, but we'll sort again just to be sure
   const sortedLocationsByTotalRatings = filteredLocations.sort((a, b) => {
     if (!a.user_ratings_total || !b.user_ratings_total) {
-      return 0;
+      return 0; // not sure what to do here
     } else if (a.user_ratings_total < b.user_ratings_total) {
-      return 1; // place a has less reviews than place be, so sort a after b
+      return 1; // place a has less reviews than place b, so sort a after b
     } else {
-      return -1; // place a has more reviews than place be, so sort before b
+      return -1; // place a has more reviews than place b, so sort a before b
+    }
+  });
+
+  // 4. Filter by average rating AND total number of reviews
+  // We'll create the array beforehand because we'll need a swtich statement to evalutate the cutoffs and return the matching locations
+  // We'll need to itterate through the array of sorted locations, and then for each location we'll switch on it's total number of reviews
+  // each case will then be checking one of the cutoffs from USER_RATINGS_CUTOFFS
+  // and so if the case evalutes to true, we'll know that the location meets the required number of reviews
+  // then we can simply check if that location's rating then matches that's cuttoff's rating
+  // if it does, we'll add it to the array of locations to return
+  // then once that first switch finishes, we'll count the length of the array and if it's less than the number of locations we want to return we will then we'll repeat the switch
+  // except this time for each cutoff, we'll lower the corresponding rating by 1 (or 2)
+  // that should be enough to capture the desired amount of locations (which still needs TBD)
+
+  const topLocations: any[] = sortedLocationsByTotalRatings.map((location) => {
+    switch (location.user_ratings_total) {
+      case 2000:
+        if (location.rating && Number(location.rating) > 4.5) {
+          return location;
+        } else return;
+      case 1500:
+        if (location.rating && Number(location.rating) > 4.6) {
+          return location;
+        } else return;
+      case 1000:
+        if (location.rating && Number(location.rating) > 4.7) {
+          return location;
+        } else return;
+      case 500:
+        if (location.rating && Number(location.rating) > 4.8) {
+          return location;
+        } else return;
+      case 100:
+        if (location.rating && Number(location.rating) > 4.9) {
+          return location;
+        } else return;
+      case 50:
+        if (location.rating && Number(location.rating) > 5.0) {
+          return location;
+        } else return;
+
+      default:
+        return;
     }
   });
 };
+
+// Check topLocations length and repeat switch with reduced ratings if needed
