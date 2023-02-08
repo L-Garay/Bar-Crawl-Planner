@@ -27,11 +27,11 @@ export interface MapProps extends google.maps.MapOptions {
 }
 
 export type CitySelectOptions =
-  | 'boise'
-  | 'denver'
-  | 'portland'
-  | 'seattle'
-  | 'slc';
+  | 'Boise'
+  | 'Denver'
+  | 'Portland'
+  | 'Seattle'
+  | 'Slc';
 
 export type LocationSelectOptions =
   | 'bars'

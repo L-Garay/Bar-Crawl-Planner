@@ -1,25 +1,14 @@
-import {
-  Client,
-  PlaceData,
-  PlacePhotoResponse,
-  PlaceType2,
-  TextSearchResponse,
-} from '@googlemaps/google-maps-services-js';
 import dotenv from 'dotenv';
 import {
-  CITY_COORDINATES,
-  DETAILS_FIELDS_TO_RETURN,
-  LOCATION_DATA_EXPIRATION_DAYS,
   LOCATION_FILTER_TERMS,
+  NEARBY_CITIES,
+  TOTAL_RATINGS_CUTOFFS,
 } from '../../constants/mapConstants';
-import {
-  CitySelectOptions,
-  GoogleError,
-  LocationDetails,
-} from '../../types/sharedTypes';
-import { Sleep, GetPrismaError } from '../../utilities';
+import { CitySelectOptions } from '../../types/sharedTypes';
+import { GetPrismaError } from '../../utilities';
 import { prismaClient } from '../../index';
 import { QueryData } from '../../types/sharedTypes';
+import { Prisma } from '@prisma/client';
 
 dotenv.config();
 
@@ -39,22 +28,73 @@ export const SearchCity = async (
   locationType: string
 ): Promise<QueryData> => {
   // 1. Get all locations in the city sorted by total number of reviews
-  const allLocationsInCity = await prismaClient.locationDetails.findMany({
-    where: {
-      city: city,
-    },
-    orderBy: {
-      user_ratings_total: 'desc',
-    },
+  // Since each city search can span multiple municipalities, we need to search for all locations near the main city
+
+  const fullCityName = city === 'Slc' ? 'Salt Lake City' : city;
+
+  const allCities = Prisma.validator<Prisma.LocationDetailsWhereInput>()({
+    city: fullCityName,
+    OR: [
+      {
+        city: NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][0],
+      },
+      {
+        city: NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][1],
+      },
+      {
+        city: NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][2],
+      },
+    ],
   });
+  let allLocationsInCity: any[] = [];
+  try {
+    console.log('city: ', city);
+    console.log(NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][0]);
+    console.log(NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][1]);
+    console.log(NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][2]);
+
+    allLocationsInCity = await prismaClient.locationDetails.findMany({
+      where: {
+        OR: [
+          {
+            city: fullCityName,
+          },
+          {
+            city: NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][0],
+          },
+          {
+            city: NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][1],
+          },
+          {
+            city: NEARBY_CITIES[city as keyof typeof NEARBY_CITIES][2],
+          },
+        ],
+      },
+      orderBy: {
+        user_ratings_total: 'desc',
+      },
+    });
+    console.log(allLocationsInCity.length);
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Error', data: null, error: newError };
+  }
+
+  if (allLocationsInCity.length === 0) {
+    return { status: 'Success', data: [] };
+  }
 
   // 2. Filter the results by location type
+  // right now we are just checking for names
+  // TODO also want to search the location's types array
   const checkTypes = (location: any) => {
-    if (
-      LOCATION_FILTER_TERMS[
-        locationType as keyof typeof LOCATION_FILTER_TERMS
-      ].some((term) => location.name?.includes(term))
-    ) {
+    const nameIncludesType = LOCATION_FILTER_TERMS[
+      locationType as keyof typeof LOCATION_FILTER_TERMS
+    ].some((term) => {
+      return location.name?.toLowerCase().includes(term);
+    });
+
+    if (nameIncludesType) {
       return true;
     } else {
       return false;
@@ -64,6 +104,12 @@ export const SearchCity = async (
   const filteredLocations = allLocationsInCity.filter((location) =>
     checkTypes(location)
   );
+
+  if (filteredLocations.length === 0) {
+    console.log('filtered locations empty');
+
+    return { status: 'Success', data: [] };
+  }
 
   // 3. Sort by total ratings
   // at this point they SHOULD be sorted by total number of ratings, but we'll sort again just to be sure
@@ -88,37 +134,150 @@ export const SearchCity = async (
   // except this time for each cutoff, we'll lower the corresponding rating by 1 (or 2)
   // that should be enough to capture the desired amount of locations (which still needs TBD)
 
-  const topLocations: any[] = sortedLocationsByTotalRatings.map((location) => {
-    switch (location.user_ratings_total) {
-      case 2000:
-        if (location.rating && Number(location.rating) > 4.5) {
-          return location;
-        } else return;
-      case 1500:
-        if (location.rating && Number(location.rating) > 4.6) {
-          return location;
-        } else return;
-      case 1000:
-        if (location.rating && Number(location.rating) > 4.7) {
-          return location;
-        } else return;
-      case 500:
-        if (location.rating && Number(location.rating) > 4.8) {
-          return location;
-        } else return;
-      case 100:
-        if (location.rating && Number(location.rating) > 4.9) {
-          return location;
-        } else return;
-      case 50:
-        if (location.rating && Number(location.rating) > 5.0) {
-          return location;
-        } else return;
+  //NOTE
+  // NOTE
+  // TODO
+  // TODO the rating cutoffs will have to be significantly lowered, for Boise there supposedly only 3 locations that meet the current criteria for both itterations
+  // NOTE I'm thinking we may want to greatly simplify the total ratings/average rating system
+  // maybe just have a cutoff of a 4.0 rating for locations with over 2000 reviews
+  // have a cutoff of 4.3 rating for locations with over 1000 reviews
+  // have a cutoff of 4.5 rating for locations with over 500 reviews
+  // have a 4.7 rating for any locations below 500 reviews
+  // TODO also need to investigate why some results are being returned/saved in the array as just null while some are being returned as full LocationDetails objects but with every field null
+  // ideally we don't return anything that is null but since we are in maps, we may just have to filter out the null results once we escape the map()
+  // however, having a mix of nulls and objects will null fields will just add an extra layer of complexity to the cleanup
+  const checkTotalRatings = (totalRatings: number, cutoff: number) => {
+    if (totalRatings >= cutoff) {
+      return true;
+    } else {
+      return false;
+    }
+  };
 
-      default:
-        return;
+  const topLocations: any[] = sortedLocationsByTotalRatings.map((location) => {
+    const totalRatings = location.user_ratings_total
+      ? location.user_ratings_total
+      : 0;
+    console.log(totalRatings);
+
+    if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[0])) {
+      if (location.rating && Number(location.rating) > 4.5) {
+        console.log(location, 4.5);
+        return location;
+      } else {
+        return 'test';
+      }
+    }
+    if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[1])) {
+      if (location.rating && Number(location.rating) > 4.6) {
+        console.log(location, 4.6);
+        return location;
+      } else {
+        return 'test';
+      }
+    }
+    if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[2])) {
+      if (location.rating && Number(location.rating) > 4.7) {
+        console.log(location, 4.7);
+        return location;
+      } else {
+        return 'test';
+      }
+    }
+    if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[3])) {
+      if (location.rating && Number(location.rating) > 4.8) {
+        console.log(location, 4.8);
+        return location;
+      } else {
+        return 'test';
+      }
+    }
+    if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[4])) {
+      if (location.rating && Number(location.rating) > 4.9) {
+        console.log(location, 4.9);
+        return location;
+      } else {
+        return 'test';
+      }
+    }
+    if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[5])) {
+      if (location.rating && Number(location.rating) > 5.0) {
+        console.log(location, 5);
+        return location;
+      } else {
+        return 'test';
+      }
     }
   });
-};
 
-// Check topLocations length and repeat switch with reduced ratings if needed
+  // Check topLocations length and repeat switch with reduced ratings if needed
+  let extraTopLocations: any[] = [];
+  if (topLocations.length < 100) {
+    extraTopLocations = sortedLocationsByTotalRatings.map((location) => {
+      const totalRatings = location.user_ratings_total
+        ? location.user_ratings_total
+        : 0;
+
+      if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[0])) {
+        if (location.rating && Number(location.rating) > 4.4) {
+          return location;
+        } else {
+          return 'test';
+        }
+      }
+      if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[1])) {
+        if (location.rating && Number(location.rating) > 4.5) {
+          return location;
+        } else {
+          return 'test';
+        }
+      }
+      if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[2])) {
+        if (location.rating && Number(location.rating) > 4.6) {
+          return location;
+        } else {
+          return 'test';
+        }
+      }
+      if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[3])) {
+        if (location.rating && Number(location.rating) > 4.7) {
+          return location;
+        } else {
+          return 'test';
+        }
+      }
+      if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[4])) {
+        if (location.rating && Number(location.rating) > 4.8) {
+          return location;
+        } else {
+          return 'test';
+        }
+      }
+      if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[5])) {
+        if (location.rating && Number(location.rating) > 4.9) {
+          return location;
+        } else {
+          return 'test';
+        }
+      }
+    });
+  } else {
+    return { status: 'Success', data: topLocations };
+  }
+
+  // If we reach here we need to combine the two arrays and check their length again
+  const combinedTopLocations = topLocations.concat(extraTopLocations);
+
+  if (combinedTopLocations.length < 100) {
+    // we need to do another switch with even lower ratings
+    // NOTE for testing purposes I want to return here to see how many locations we have usually after two swtiches
+    console.log(
+      'Still less than 100 after second switch',
+      combinedTopLocations.length
+    );
+
+    return { status: 'Success', data: combinedTopLocations };
+  } else {
+    return { status: 'Success', data: combinedTopLocations };
+  }
+};

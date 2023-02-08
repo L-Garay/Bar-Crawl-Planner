@@ -61,7 +61,7 @@ export default function BasicMap({
   const mapsRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map>();
   const textSearchRef = useRef<HTMLInputElement | null>(null);
-  const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('boise');
+  const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('Boise');
   const [selectedType, setSelectedType] =
     useState<LocationSelectOptions>('bars');
   const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH, {
@@ -125,11 +125,11 @@ export default function BasicMap({
             map?.setCenter(CITY_COORDINATES[city]);
           }}
         >
-          <option value="boise">Boise</option>
-          <option value="slc">Salt Lake City</option>
-          <option value="seattle">Seattle</option>
-          <option value="denver">Denver</option>
-          <option value="portland">Portland</option>
+          <option value="Boise">Boise</option>
+          <option value="Slc">Salt Lake City</option>
+          <option value="Seattle">Seattle</option>
+          <option value="Denver">Denver</option>
+          <option value="Portland">Portland</option>
         </select>
         <label htmlFor="locations">Search:</label>
         <select

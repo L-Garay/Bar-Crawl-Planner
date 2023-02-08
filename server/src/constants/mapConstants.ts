@@ -1,21 +1,21 @@
 export const CITY_COORDINATES = {
-  boise: {
+  Boise: {
     lat: 43.6141397,
     lng: -116.2155451,
   },
-  denver: {
+  Denver: {
     lat: 39.7465108,
     lng: -104.9968927,
   },
-  slc: {
+  Slc: {
     lat: 40.762807,
     lng: -111.9084849,
   },
-  portland: {
+  Portland: {
     lat: 45.5142438,
     lng: -122.6879714,
   },
-  seattle: {
+  Seattle: {
     lat: 47.6053827,
     lng: -122.3530897,
   },
@@ -35,7 +35,7 @@ export const DETAILS_FIELDS_TO_RETURN = [
 ];
 export const CRON_JOB_DATA = {
   querries: ['bars', 'taverns', 'breweries', 'wineries', 'restaurants', 'pubs'],
-  cities: ['denver', 'boise', 'slc', 'portland', 'seattle'],
+  cities: ['Denver', 'Boise', 'Slc', 'Portland', 'Seattle'],
 };
 
 export const LOCATION_FILTER_TERMS = {
@@ -56,4 +56,12 @@ export const RATINGS_VALUE_CUTOFFS = {
   500: 4.8,
   100: 4.9,
   50: 5,
+};
+
+export const NEARBY_CITIES = {
+  Boise: ['Garden City', 'Meridian', 'Eagle'],
+  Denver: ['Edgewater', 'Lakewood', 'Wheat Ridge'],
+  Slc: ['South Salt Lake', 'Murray', 'Millcreek'],
+  Portland: ['Vancouver', 'Milwaukie', 'Beaverton'],
+  Seattle: ['Bainbridge Island', 'Kirkland', 'Bellevue'],
 };

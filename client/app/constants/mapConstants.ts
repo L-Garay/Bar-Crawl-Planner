@@ -1,21 +1,21 @@
 export const CITY_COORDINATES = {
-  boise: {
+  Boise: {
     lat: 43.6141397,
     lng: -116.2155451,
   },
-  denver: {
+  Denver: {
     lat: 39.7465108,
     lng: -104.9968927,
   },
-  slc: {
+  Slc: {
     lat: 40.762807,
     lng: -111.9084849,
   },
-  portland: {
+  Portland: {
     lat: 45.5142438,
     lng: -122.6879714,
   },
-  seattle: {
+  Seattle: {
     lat: 47.6053827,
     lng: -122.3530897,
   },

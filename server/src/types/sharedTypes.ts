@@ -23,11 +23,11 @@ export type TokenValidationResponse = {
 };
 
 export type CitySelectOptions =
-  | 'boise'
-  | 'denver'
-  | 'portland'
-  | 'seattle'
-  | 'slc';
+  | 'Boise'
+  | 'Denver'
+  | 'Portland'
+  | 'Seattle'
+  | 'Slc';
 
 export type LocationDetails = {
   business_status?: string;
