@@ -38,7 +38,7 @@ export const CRON_JOB_DATA = {
   cities: ['Denver', 'Boise', 'Slc', 'Portland', 'Seattle'],
 };
 
-export const LOCATION_FILTER_TERMS = {
+export const LOCATION_FILTER_NAMES = {
   bars: ['bar'],
   taverns: ['tavern'],
   breweries: ['brew'],
@@ -47,7 +47,16 @@ export const LOCATION_FILTER_TERMS = {
   pubs: ['pub'],
 };
 
-export const TOTAL_RATINGS_CUTOFFS = [2000, 1500, 1000, 500, 100, 50];
+export const LOCATION_FILTER_TYPES = {
+  bars: ['bar', 'night_club'],
+  taverns: ['bar', 'food'],
+  breweries: ['liquor_store', 'bar'],
+  wineries: ['liquor_store', 'point_of_interest'],
+  restaurants: ['restaurant', 'bar'],
+  pubs: ['bar', 'food'],
+};
+
+export const TOTAL_RATINGS_CUTOFFS = [2000, 1000, 100];
 
 export const RATINGS_VALUE_CUTOFFS = {
   2000: 4.5,
