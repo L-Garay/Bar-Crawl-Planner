@@ -170,6 +170,7 @@ export const SearchCity = async (
   const combinedTopLocations = noNullTopLocations.concat(
     noNullExtraTopLocations
   );
+  console.log('combinedTopLocations', combinedTopLocations.length);
 
   if (combinedTopLocations.length < 60) {
     // at this point we would likely need to do another round with even lower ratings

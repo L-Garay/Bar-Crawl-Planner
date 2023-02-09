@@ -54,16 +54,7 @@ export default function Map() {
       version="weekly"
     >
       {/* NOTE I have a feeling that we'll either greatly extend and just use this one map OR we will have multiple different maps with different configs that we'll then need to conditionally render here */}
-      <BasicMap
-        style={basicMapStyle}
-        onClick={onClick}
-        onIdle={onIdle}
-        setClicks={setClicks}
-      >
-        {clicks.map((latLng, i) => (
-          <MapMarker key={i} position={latLng} draggable />
-        ))}
-      </BasicMap>
+      <BasicMap style={basicMapStyle} onIdle={onIdle} />
     </Wrapper>
   );
 }

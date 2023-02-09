@@ -28,7 +28,6 @@ export const LOCATION_TYPES = {
   wineries: 'wineries',
   restaurants: 'restaurants',
   pubs: 'pubs',
-  hotels: 'hotel bars',
 };
 
 export const ALL_LOCATION_PROPERTIES = [

@@ -19,7 +19,7 @@ export type ValidationResponse = {
 
 export interface MapProps extends google.maps.MapOptions {
   style: { [key: string]: string };
-  setClicks: React.Dispatch<React.SetStateAction<google.maps.LatLng[]>>;
+  setClicks?: React.Dispatch<React.SetStateAction<google.maps.LatLng[]>>;
   children?: React.ReactNode;
   onClick?: (event: google.maps.MapMouseEvent) => void;
   onIdle?: (map: google.maps.Map) => void;
@@ -39,8 +39,7 @@ export type LocationSelectOptions =
   | 'restaurants'
   | 'wineries'
   | 'taverns'
-  | 'pubs'
-  | 'hotels';
+  | 'pubs';
 
 // NOTE is this considered bad practice? Really I just don't want to have to type out 'google.maps.GeocoderRequest' every time I want to use it
 // and it allows me to extend in future if needed
@@ -48,3 +47,34 @@ export type LocationSelectOptions =
 export interface GeocoderRequest extends google.maps.GeocoderRequest {}
 export interface GeocoderResult extends google.maps.GeocoderResult {}
 export interface PlaceResult extends google.maps.places.PlaceResult {}
+
+export type LocationDetails = {
+  business_status?: string;
+  formatted_address?: string;
+  city?: string;
+  state?: string;
+  lat?: number;
+  lng?: number;
+  html_attributions?: string;
+  icon?: string;
+  icon_mask_base_uri?: string;
+  icon_background_color?: string;
+  name?: string;
+  place_id?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  types?: string[];
+  vicinity?: string;
+  formatted_phone_number?: string;
+  plus_compound_code?: string;
+  plus_global_code?: string;
+  open_periods?: string[];
+  weekday_text?: string[];
+  photos_references?: string[] | any[];
+  reviews?: string[];
+  url?: string;
+  website?: string;
+  utc_offset_minutes?: number;
+  price_level?: number;
+  expiration_date: string;
+};

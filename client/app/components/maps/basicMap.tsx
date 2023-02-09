@@ -1,16 +1,16 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type {
   CitySelectOptions,
+  LocationDetails,
   LocationSelectOptions,
   MapProps,
-  PlaceResult,
 } from '~/types/sharedTypes';
 import {
   useCheckEnvironmentAndSetMap,
   useSetMapEventListeners,
   useSetMapOptions,
 } from '~/utils/maps';
-import { CITY_COORDINATES, LOCATION_TYPES } from '~/constants/mapConstants';
+import { CITY_COORDINATES } from '~/constants/mapConstants';
 import { gql, useLazyQuery } from '@apollo/client';
 
 // TODO figure out a better way to handle this
@@ -52,64 +52,54 @@ const CITY_SEARCH = gql`
 
 export default function BasicMap({
   style,
-  setClicks,
   children,
-  onClick,
   onIdle,
   mapOptions,
 }: MapProps) {
   const mapsRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<google.maps.Map>();
-  const textSearchRef = useRef<HTMLInputElement | null>(null);
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('Boise');
   const [selectedType, setSelectedType] =
     useState<LocationSelectOptions>('bars');
   const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH, {
     fetchPolicy: 'no-cache', // testing purposes only
   });
+  const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
 
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
-  useSetMapEventListeners(map, onClick, onIdle);
-
-  const PlaceService = new google.maps.places.PlacesService(map!);
+  useSetMapEventListeners(map, undefined, onIdle);
 
   console.log(data);
 
-  // const textSearchCallback = (
-  //   results: PlaceResult[] | null,
-  //   status: google.maps.places.PlacesServiceStatus
-  // ) => {
-  //   setClicks([]); // clear on every new search
-  //   // TODO handle errors
-  //   if (
-  //     status === google.maps.places.PlacesServiceStatus.OK &&
-  //     results?.length
-  //   ) {
-  //     for (let i = 0; i < results.length; i++) {
-  //       const place = results[i];
-  //       console.log(place);
-  //       setClicks?.((prev) => [...prev, place.geometry?.location!]);
-  //     }
-  //   }
-  // };
+  useEffect(() => {
+    if (data) {
+      const { searchCity } = data;
+      const locationCoordinates = searchCity.map(
+        (location: LocationDetails) => {
+          return {
+            lat: location.lat,
+            lng: location.lng,
+          };
+        }
+      );
+      console.log(locationCoordinates);
+      const mapMarkers = locationCoordinates.map(
+        (coord: google.maps.LatLngLiteral) => {
+          return new google.maps.Marker({
+            position: coord,
+          });
+        }
+      );
+      console.log(mapMarkers.length);
+      setMapMarkers(mapMarkers);
+    }
+  }, [data, map]);
 
-  // const executeSearch = () => {
-  //   const request = {
-  //     query: LOCATION_TYPES[selectedType],
-  //     location: {
-  //       lat: CITY_COORDINATES[selectedCity].lat,
-  //       lng: CITY_COORDINATES[selectedCity].lng,
-  //     }, // downtown of each city according to google
-  //     radius: 8045, // 5 miles
-  //   };
-  //   // TODO we know this works, the request is formatted properly and the user inputs are valid
-  //   // the callback properly handles the result of the search
-  //   // so the next step is to make a call to our server from here, which will handle returning the location cache or making the call to google from the server
-  //   // we'll need to make sure that we return all the data we need to still render the map (obviously logan)
-  //   // we'll need to pass in the selected type and the selected city
-  //   PlaceService.textSearch(request, textSearchCallback);
-  // };
+  const currentMarkers = useMemo(() => mapMarkers.slice(0, 10), [mapMarkers]);
+  console.log(currentMarkers.length);
+
+  currentMarkers.forEach((marker) => marker.setMap(map!));
 
   return (
     <>
@@ -146,7 +136,6 @@ export default function BasicMap({
           <option value="wineries">Wineries</option>
           <option value="pubs">Pubs</option>
           <option value="restaurants">Restaurants</option>
-          <option value="hotels">Hotels</option>
         </select>
         <button
           type="button"
@@ -161,14 +150,6 @@ export default function BasicMap({
       </div>
       <br />
       <div ref={mapsRef} style={style}></div>
-      {React.Children.map(children, (child) => {
-        if (React.isValidElement(child)) {
-          // This ignore comes straight from the google docs
-          // https://developers.google.com/maps/documentation/javascript/react-map#typescript_4
-          // @ts-ignore
-          return React.cloneElement(child, { map });
-        }
-      })}
     </>
   );
 }
