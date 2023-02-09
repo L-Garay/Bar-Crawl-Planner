@@ -1,0 +1,15 @@
+.locations-map-results {
+  display: flex;
+
+}
+.results {
+  min-width: 20rem;
+  margin-left: 20px;
+  background-color: lightgray;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 10px;
+}

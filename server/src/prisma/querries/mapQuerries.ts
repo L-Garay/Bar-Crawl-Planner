@@ -115,8 +115,10 @@ export const SearchCity = async (
       (filteredLocation) => location.name === filteredLocation.name
     )
   );
+  console.log('BEFORE', allLocationsInCity.length);
 
   indexArray.forEach((index) => allLocationsInCity.splice(index, 1));
+  console.log('AFTER', allLocationsInCity.length);
 
   // Now we will itterate through the allLocationsInCtiy, as we have now removed the topLocations that we already have
   // we will check the types and if they match, we will still check their average rating, and if they are good enough, we will add them to the extraTopLocations array
@@ -170,17 +172,28 @@ export const SearchCity = async (
   const combinedTopLocations = noNullTopLocations.concat(
     noNullExtraTopLocations
   );
-  console.log('combinedTopLocations', combinedTopLocations.length);
 
-  if (combinedTopLocations.length < 60) {
+  // NOTE I'm not sure how it's even possible to have duplicates
+  // since we are removing the topLocations from the allLocationsInCity array using their indexes WITHIN the allLocationsInCity array
+  // which means it should be impossible for there to be duplicates of the topLocations when iterating through the allLocationsInCity the second time based on location type
+  // if you console.log() the length of the allLocationsInCity array before and after removing the topLocations, you will see that the length does get smaller
+  // therefore there should be literally no way for the second iteration to possibly add in a duplicate of a topLocation
+  // however, the code below does the trick, just shouldn't have to do it IMO
+
+  console.log('combinedTopLocations', combinedTopLocations.length);
+  const testSet = new Set(combinedTopLocations);
+  console.log('testSet', testSet.size);
+  const noDubplicatesArray = Array.from(testSet);
+
+  if (noDubplicatesArray.length < 60) {
     // at this point we would likely need to do another round with even lower ratings
     // NOTE for testing purposes I want to return here to see how many locations we have usually after two swtiches
     console.log(
       'Still less than 60 after second switch',
-      combinedTopLocations.length
+      noDubplicatesArray.length
     );
-    return { status: 'Success', data: combinedTopLocations };
+    return { status: 'Success', data: noDubplicatesArray };
   } else {
-    return { status: 'Success', data: combinedTopLocations };
+    return { status: 'Success', data: noDubplicatesArray };
   }
 };

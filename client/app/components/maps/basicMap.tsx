@@ -64,7 +64,20 @@ export default function BasicMap({
   const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH, {
     fetchPolicy: 'no-cache', // testing purposes only
   });
+  const [locations, setLocations] = useState<LocationDetails[]>([]);
   const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
+  const [currentMapMarkers, setCurrentMapMarkers] = useState<
+    google.maps.Marker[]
+  >([]);
+  const [currentPaginationResults, setCurrentPaginationResults] = useState<
+    any[]
+  >([]);
+
+  const paginationPage = useRef<number>(1);
+  const PAGINATION_LIMIT = 10;
+  const paginationIndexRange = useRef<number[]>([0, 10]);
+  // const disableNextButton = currentLastIndex.current >= mapMarkers.length - 1;
+  // const disablePreviousButton = paginationPage.current === 1;
 
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
@@ -72,34 +85,46 @@ export default function BasicMap({
 
   console.log(data);
 
+  // Store all location data
   useEffect(() => {
-    if (data) {
-      const { searchCity } = data;
-      const locationCoordinates = searchCity.map(
-        (location: LocationDetails) => {
-          return {
-            lat: location.lat,
-            lng: location.lng,
-          };
-        }
-      );
-      console.log(locationCoordinates);
-      const mapMarkers = locationCoordinates.map(
-        (coord: google.maps.LatLngLiteral) => {
-          return new google.maps.Marker({
-            position: coord,
-          });
-        }
-      );
-      console.log(mapMarkers.length);
-      setMapMarkers(mapMarkers);
-    }
-  }, [data, map]);
+    if (data) setLocations(data.searchCity);
+  }, [data]);
 
-  const currentMarkers = useMemo(() => mapMarkers.slice(0, 10), [mapMarkers]);
-  console.log(currentMarkers.length);
+  // create and store all map markers
+  useEffect(() => {
+    const mapMarkers = locations.map((location: LocationDetails) => {
+      const lat = location.lat ? location.lat : 0;
+      const lng = location.lng ? location.lng : 0;
+      return new google.maps.Marker({ position: { lat, lng } });
+    });
+    setMapMarkers(mapMarkers);
+  }, [locations]);
 
-  currentMarkers.forEach((marker) => marker.setMap(map!));
+  // set first 10 current locations and markers
+  useEffect(() => {
+    const firstTenLocations = locations.slice(
+      paginationIndexRange.current[0],
+      paginationPage.current * PAGINATION_LIMIT
+    );
+    setCurrentPaginationResults(firstTenLocations);
+
+    const firstTenMarkers = mapMarkers.slice(
+      paginationIndexRange.current[0],
+      paginationPage.current * PAGINATION_LIMIT
+    );
+    setCurrentMapMarkers(firstTenMarkers);
+  }, [locations, mapMarkers]);
+
+  // TODO: figure out how to handle pagination
+  // At this point, the intial page loading/displaying should be good to go
+  // these useEffects() are only for handling when we first get data
+  // the dependencies for them should not change until the user makes a new search; not when dealing with pagination and the same set of data
+  // at which point they should handle displaying the new first 10 results
+
+  // to manipulate the data without triggering any of these useEffects() we should use the currentPaginationResults/currentMapMarkers state arrays
+
+  // set the current markers on the map
+  currentMapMarkers.forEach((marker) => marker.setMap(map!));
 
   return (
     <>
@@ -149,7 +174,27 @@ export default function BasicMap({
         </button>
       </div>
       <br />
-      <div ref={mapsRef} style={style}></div>
+      <div className="locations-map-results">
+        <div className="map" ref={mapsRef} style={style}></div>
+        <div className="results">
+          Current Locations: <br />
+          {currentPaginationResults ? (
+            <ul>
+              {currentPaginationResults.map(
+                (location: LocationDetails, index: number) => (
+                  <li key={location.name}>{location.name}</li>
+                )
+              )}
+            </ul>
+          ) : (
+            'Execute a search to see results!'
+          )}
+          <div className="pagination-controls">
+            {/* <button onClick={handlePreviousPagination}>Previous</button>
+            <button onClick={handleNextPagination}>Next</button> */}
+          </div>
+        </div>
+      </div>
     </>
   );
 }

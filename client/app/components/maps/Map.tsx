@@ -6,7 +6,6 @@ import { useState } from 'react';
 import getConfig from '~/utils/config.server';
 import { Dynamic } from '../animated/loadingSpinners';
 import BasicMap from './basicMap';
-import MapMarker from './mapMarker';
 
 export const loader: LoaderFunction = async ({ request }) => {
   return getConfig();
@@ -21,11 +20,6 @@ export default function Map() {
     lat: 0,
     lng: 0,
   });
-
-  const onClick = (e: google.maps.MapMouseEvent) => {
-    // avoid directly mutating state
-    setClicks([...clicks, e.latLng!]);
-  };
 
   const onIdle = (m: google.maps.Map) => {
     console.log('onIdle');
