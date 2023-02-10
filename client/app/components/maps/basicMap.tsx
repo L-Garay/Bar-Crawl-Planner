@@ -64,6 +64,7 @@ export default function BasicMap({
   const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH, {
     fetchPolicy: 'no-cache', // testing purposes only
   });
+
   const [locations, setLocations] = useState<LocationDetails[]>([]);
   const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
   const [currentMapMarkers, setCurrentMapMarkers] = useState<
@@ -76,8 +77,7 @@ export default function BasicMap({
   const paginationPage = useRef<number>(1);
   const PAGINATION_LIMIT = 10;
   const paginationIndexRange = useRef<number[]>([0, 10]);
-  // const disableNextButton = currentLastIndex.current >= mapMarkers.length - 1;
-  // const disablePreviousButton = paginationPage.current === 1;
+  const maxIndex = useRef<number>(0);
 
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
@@ -87,7 +87,10 @@ export default function BasicMap({
 
   // Store all location data
   useEffect(() => {
-    if (data) setLocations(data.searchCity);
+    if (data) {
+      setLocations(data.searchCity);
+      maxIndex.current = data.searchCity.length - 1;
+    }
   }, [data]);
 
   // create and store all map markers
@@ -115,13 +118,49 @@ export default function BasicMap({
     setCurrentMapMarkers(firstTenMarkers);
   }, [locations, mapMarkers]);
 
-  // TODO: figure out how to handle pagination
-  // At this point, the intial page loading/displaying should be good to go
-  // these useEffects() are only for handling when we first get data
-  // the dependencies for them should not change until the user makes a new search; not when dealing with pagination and the same set of data
-  // at which point they should handle displaying the new first 10 results
+  const disableNext =
+    paginationPage.current * PAGINATION_LIMIT >= maxIndex.current;
+  const disablePrevious = paginationPage.current === 1;
 
-  // to manipulate the data without triggering any of these useEffects() we should use the currentPaginationResults/currentMapMarkers state arrays
+  const handleNextPagination = () => {
+    if (paginationPage.current * PAGINATION_LIMIT < maxIndex.current) {
+      paginationPage.current += 1;
+      paginationIndexRange.current[0] += PAGINATION_LIMIT;
+      paginationIndexRange.current[1] += PAGINATION_LIMIT;
+      const nextTenLocations = locations.slice(
+        paginationIndexRange.current[0],
+        paginationIndexRange.current[1]
+      );
+      setCurrentPaginationResults(nextTenLocations);
+
+      currentMapMarkers.forEach((marker) => marker.setMap(null));
+      const nextTenMarkers = mapMarkers.slice(
+        paginationIndexRange.current[0],
+        paginationIndexRange.current[1]
+      );
+      setCurrentMapMarkers(nextTenMarkers);
+    }
+  };
+
+  const handlePreviousPagination = () => {
+    if (paginationPage.current > 1) {
+      paginationPage.current -= 1;
+      paginationIndexRange.current[0] -= PAGINATION_LIMIT;
+      paginationIndexRange.current[1] -= PAGINATION_LIMIT;
+      const previousTenLocations = locations.slice(
+        paginationIndexRange.current[0],
+        paginationIndexRange.current[1]
+      );
+      setCurrentPaginationResults(previousTenLocations);
+
+      currentMapMarkers.forEach((marker) => marker.setMap(null));
+      const previousTenMarkers = mapMarkers.slice(
+        paginationIndexRange.current[0],
+        paginationIndexRange.current[1]
+      );
+      setCurrentMapMarkers(previousTenMarkers);
+    }
+  };
 
   // set the current markers on the map
   currentMapMarkers.forEach((marker) => marker.setMap(map!));
@@ -190,8 +229,15 @@ export default function BasicMap({
             'Execute a search to see results!'
           )}
           <div className="pagination-controls">
-            {/* <button onClick={handlePreviousPagination}>Previous</button>
-            <button onClick={handleNextPagination}>Next</button> */}
+            <button
+              disabled={disablePrevious}
+              onClick={handlePreviousPagination}
+            >
+              Previous
+            </button>
+            <button disabled={disableNext} onClick={handleNextPagination}>
+              Next
+            </button>
           </div>
         </div>
       </div>
