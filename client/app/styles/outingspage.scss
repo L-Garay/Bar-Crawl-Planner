@@ -6,29 +6,29 @@
   min-width: 20rem;
   margin-left: 20px;
   background-color: lightgray;
+}
 
-  .results-list-items {
-    padding-right: 10px;
-  }
+.results-list-items {
+  padding-right: 10px;
+}
 
-  svg {
-    display: inline-block;
-    vertical-align: middle;
-    &:hover {
-      cursor: pointer;
-    }
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  &:hover {
+    cursor: pointer;
   }
+}
 
-  .results-list-name {
-    &:hover {
-      cursor: pointer;
-      color: lightcoral;
-    }
+.results-list-name {
+  &:hover {
+    cursor: pointer;
+    color: lightcoral;
   }
+}
 
-  .plus-icon-wrapper {
-    padding-left: 8px;
-  }
+.plus-icon-wrapper {
+  padding-left: 8px;
 }
 
 .pagination-controls {
@@ -40,7 +40,7 @@
 .potential-outing-container {
   min-width: 20rem;
   min-height: 10rem;
-  background-color: burlywood;
+  background-color: lightgrey;
 
   .potential-outing-header {
     display: flex;
@@ -50,6 +50,9 @@
     }
     p {
       padding-top: 4px
+    }
+    button {
+      margin-top: 5px;
     }
   }
 }

@@ -14,7 +14,7 @@ import { CITY_COORDINATES } from '~/constants/mapConstants';
 import { gql, useLazyQuery } from '@apollo/client';
 import martiniImg from '~/assets/martini32px.png';
 import LocationListItem from './locationListItem';
-import PlusCircle from '../svgs/plusCircle';
+import OutingListItem from './outingListItem';
 
 // TODO figure out a better way to handle this
 // maybe have multiple small queries that fetch certain properties only when they are needed?
@@ -297,7 +297,7 @@ export default function BasicMap({
                     index={index}
                     openInfoWindow={openInfoWindow}
                     addLocationToOutings={addLocationToOutings}
-                    removeLocationFromOutings={removeLocationFromOutings}
+                    selectedOutings={selectedOutings}
                   />
                 )
               )}
@@ -336,25 +336,21 @@ export default function BasicMap({
           <p>
             Selected {selectedOutings.length} / {MAX_SELECTED_OUTINGS}
           </p>
+          <button disabled={selectedOutings.length == 0}>Create Outing</button>
         </div>
         <div className="potential-outing-body">
           <div className="potential-outing-locations">
             {selectedOutings.length ? (
               <ol>
-                {selectedOutings.map((location) => {
+                {selectedOutings.map((location, index) => {
                   return (
-                    <li key={location.id}>
-                      <span>
-                        {location.name}
-                        {' --- '}
-                        {location.formatted_address}
-                        {' --- '}
-                        {location.rating}
-                      </span>
-                      <span>
-                        <PlusCircle pathId={location.place_id!} />
-                      </span>
-                    </li>
+                    <OutingListItem
+                      key={location.place_id}
+                      location={location}
+                      index={index}
+                      openInfoWindow={openInfoWindow}
+                      removeLocationFromOutings={removeLocationFromOutings}
+                    />
                   );
                 })}
               </ol>

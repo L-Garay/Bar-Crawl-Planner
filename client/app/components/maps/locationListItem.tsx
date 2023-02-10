@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { LocationDetails } from '~/types/sharedTypes';
 import PlusCircle from '../svgs/plusCircle';
 
@@ -7,7 +7,7 @@ export type LocationListItemProps = {
   index: number;
   openInfoWindow: (index: number, location: LocationDetails) => void;
   addLocationToOutings: (location: LocationDetails) => void;
-  removeLocationFromOutings: (locationId: number) => void;
+  selectedOutings: LocationDetails[];
 };
 
 export const LocationListItem = ({
@@ -15,10 +15,22 @@ export const LocationListItem = ({
   index,
   openInfoWindow,
   addLocationToOutings,
-  removeLocationFromOutings,
+  selectedOutings,
 }: LocationListItemProps) => {
   const [isHoveringPlus, setIsHoveringPlus] = useState<boolean>(false);
-  const [hasBeenAdded, setHasBeenAdded] = useState<boolean>(false);
+
+  const hidePlusCircle = useMemo(() => {
+    const isSelected = selectedOutings.some((selectedOuting) => {
+      return selectedOuting.id === location.id;
+    });
+    const hasMaxSelections = selectedOutings.length >= 5;
+
+    if (isSelected || hasMaxSelections) {
+      return true;
+    } else if (!isSelected && !hasMaxSelections) {
+      return false;
+    }
+  }, [selectedOutings, location.id]);
 
   return (
     <li className="results-list-items" key={location.name}>
@@ -28,28 +40,21 @@ export const LocationListItem = ({
       >
         {location.name}
       </span>
-      <span
-        className="plus-icon-wrapper"
-        onMouseEnter={() => setIsHoveringPlus(true)}
-        onMouseLeave={() => setIsHoveringPlus(false)}
-        onClick={() => {
-          if (!hasBeenAdded) {
-            console.log('adding location');
-
+      {hidePlusCircle ? null : (
+        <span
+          className="plus-icon-wrapper"
+          onMouseEnter={() => setIsHoveringPlus(true)}
+          onMouseLeave={() => setIsHoveringPlus(false)}
+          onClick={() => {
             addLocationToOutings(location);
-            setHasBeenAdded(true);
-          } else {
-            console.log('removing location');
-            removeLocationFromOutings(location.id);
-            setHasBeenAdded(false);
-          }
-        }}
-      >
-        <PlusCircle
-          pathId={location.place_id!}
-          stroke={isHoveringPlus ? 'lightcoral' : undefined}
-        />
-      </span>
+          }}
+        >
+          <PlusCircle
+            pathId={location.place_id!}
+            stroke={isHoveringPlus ? 'lightcoral' : undefined}
+          />
+        </span>
+      )}
     </li>
   );
 };

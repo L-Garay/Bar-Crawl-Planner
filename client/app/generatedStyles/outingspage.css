@@ -7,21 +7,25 @@
   margin-left: 20px;
   background-color: lightgray;
 }
-.results .results-list-items {
+
+.results-list-items {
   padding-right: 10px;
 }
-.results svg {
+
+svg {
   display: inline-block;
   vertical-align: middle;
 }
-.results svg:hover {
+svg:hover {
   cursor: pointer;
 }
-.results .results-list-name:hover {
+
+.results-list-name:hover {
   cursor: pointer;
   color: lightcoral;
 }
-.results .plus-icon-wrapper {
+
+.plus-icon-wrapper {
   padding-left: 8px;
 }
 
@@ -34,7 +38,7 @@
 .potential-outing-container {
   min-width: 20rem;
   min-height: 10rem;
-  background-color: burlywood;
+  background-color: lightgrey;
 }
 .potential-outing-container .potential-outing-header {
   display: flex;
@@ -45,6 +49,9 @@
 }
 .potential-outing-container .potential-outing-header p {
   padding-top: 4px;
+}
+.potential-outing-container .potential-outing-header button {
+  margin-top: 5px;
 }
 
 /*# sourceMappingURL=outingspage.css.map */
