@@ -20,6 +20,9 @@ import {
 import { CITY_COORDINATES } from '~/constants/mapConstants';
 import { gql, useLazyQuery } from '@apollo/client';
 import martiniImg from '~/assets/martini32px.png';
+import plusSign from '~/assets/plus-circle.svg';
+import PlusCircle from '../svgs/plusCircle';
+import LocationListItem from './locationListItem';
 
 // TODO figure out a better way to handle this
 // maybe have multiple small queries that fetch certain properties only when they are needed?
@@ -72,6 +75,8 @@ export default function BasicMap({
   const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH, {
     fetchPolicy: 'no-cache', // testing purposes only
   });
+
+  const [isHoveringPlus, setIsHoveringPlus] = useState<boolean>(false);
 
   const [locations, setLocations] = useState<LocationDetails[]>([]);
   const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
@@ -278,13 +283,12 @@ export default function BasicMap({
             <ul>
               {currentPaginationResults.map(
                 (location: LocationDetails, index: number) => (
-                  <li
-                    className="results-list-item"
-                    key={location.name}
-                    onClick={() => openInfoWindow(index, location)}
-                  >
-                    {location.name}
-                  </li>
+                  <LocationListItem
+                    key={location.place_id}
+                    location={location}
+                    index={index}
+                    openInfoWindow={openInfoWindow}
+                  />
                 )
               )}
             </ul>
@@ -314,6 +318,30 @@ export default function BasicMap({
             </div>
           ) : null}
         </div>
+      </div>
+      <div className="attributions-section">
+        <small>
+          Attributions include:
+          <br />
+          <div>
+            {' '}
+            <a href="https://www.freepik.com" title="Freepik">
+              {' '}
+              Freepik{' '}
+            </a>{' '}
+            from{' '}
+            <a href="https://www.flaticon.com/" title="Flaticon">
+              www.flaticon.com'
+            </a>
+          </div>{' '}
+          <br />
+          <a
+            href="https://www.flaticon.com/free-icons/martini"
+            title="martini icons"
+          >
+            Martini icons created by Freepik - Flaticon
+          </a>
+        </small>
       </div>
     </>
   );

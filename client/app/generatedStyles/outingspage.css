@@ -7,12 +7,22 @@
   margin-left: 20px;
   background-color: lightgray;
 }
-.results .results-list-item {
+.results .results-list-items {
   padding-right: 10px;
 }
-.results .results-list-item:hover {
+.results svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+.results svg:hover {
+  cursor: pointer;
+}
+.results .results-list-name:hover {
   cursor: pointer;
   color: lightcoral;
+}
+.results .plus-icon-wrapper {
+  padding-left: 8px;
 }
 
 .pagination-controls {

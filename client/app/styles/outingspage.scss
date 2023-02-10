@@ -7,13 +7,27 @@
   margin-left: 20px;
   background-color: lightgray;
 
-  .results-list-item {
+  .results-list-items {
     padding-right: 10px;
+  }
 
+  svg {
+    display: inline-block;
+    vertical-align: middle;
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+  .results-list-name {
     &:hover {
       cursor: pointer;
       color: lightcoral;
     }
+  }
+
+  .plus-icon-wrapper {
+    padding-left: 8px;
   }
 }
 
@@ -22,3 +36,4 @@
   justify-content: space-around;
   margin: 20px 10px;
 }
+
