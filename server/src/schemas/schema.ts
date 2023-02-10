@@ -34,6 +34,7 @@ const typeDefs = `#graphql
     creator_profile_id: String 
     created_at: String
     start_date_and_time: String
+    place_ids: [String]
   }
 
   type LocationDetails {

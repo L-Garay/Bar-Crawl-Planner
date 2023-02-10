@@ -111,6 +111,7 @@ export type Outing = {
   creator_profile_id?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['Int']>;
   name?: Maybe<Scalars['String']>;
+  place_ids?: Maybe<Array<Maybe<Scalars['String']>>>;
   profiles?: Maybe<Array<Maybe<Profile>>>;
   start_date_and_time?: Maybe<Scalars['String']>;
 };
@@ -320,6 +321,7 @@ export type OutingResolvers<ContextType = any, ParentType extends ResolversParen
   creator_profile_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  place_ids?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   start_date_and_time?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

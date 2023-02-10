@@ -48,6 +48,7 @@ export interface GeocoderRequest extends google.maps.GeocoderRequest {}
 export interface GeocoderResult extends google.maps.GeocoderResult {}
 export interface PlaceResult extends google.maps.places.PlaceResult {}
 
+// This is going to be the data that is returned from the DB
 export type LocationDetails = {
   id: number;
   business_status?: string;

@@ -29,6 +29,7 @@ export type CitySelectOptions =
   | 'Seattle'
   | 'Slc';
 
+// This is the data being sent to the DB, so there should not be an id
 export type LocationDetails = {
   business_status?: string;
   formatted_address?: string;

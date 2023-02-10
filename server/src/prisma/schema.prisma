@@ -47,6 +47,7 @@ model Outing {
   creator_profile_id  Int
   created_at          String    @db.VarChar(255)
   start_date_and_time String    @db.VarChar(255)
+  place_ids           String[]
 }
 
 model LocationDetails {
