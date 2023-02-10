@@ -7,6 +7,13 @@
   margin-left: 20px;
   background-color: lightgray;
 }
+.results .results-list-item {
+  padding-right: 10px;
+}
+.results .results-list-item:hover {
+  cursor: pointer;
+  color: lightcoral;
+}
 
 .pagination-controls {
   display: flex;

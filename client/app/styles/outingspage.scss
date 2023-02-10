@@ -6,6 +6,15 @@
   min-width: 20rem;
   margin-left: 20px;
   background-color: lightgray;
+
+  .results-list-item {
+    padding-right: 10px;
+
+    &:hover {
+      cursor: pointer;
+      color: lightcoral;
+    }
+  }
 }
 
 .pagination-controls {

@@ -94,8 +94,6 @@ export default function BasicMap({
   useSetMapOptions(map, mapOptions);
   useSetMapEventListeners(map, undefined, onIdle);
 
-  console.log(data);
-
   // Store all location data
   useEffect(() => {
     if (data) {
@@ -136,18 +134,18 @@ export default function BasicMap({
   }, [locations, mapMarkers]);
 
   const getInfoWindowContent = useCallback(
-    (index: number): string => {
-      const location = locations[index];
+    (index?: number, location?: LocationDetails): string => {
+      const locationData = index ? locations[index] : location;
       return `<div className="info-window-content-container">
           <div className="info-window-content-header">
-            <h3>${location.name}</h3>
-            <h3>${location.name}</h3>
+            <h3>${locationData?.name}</h3>
+            <h3>${locationData?.name}</h3>
           </div>
           <div className="info-window-content-body">
-            <p>${location.formatted_address}</p>
-            <p>${location.formatted_phone_number}</p>
-            <p>${location.website}</p>
-            <p>${location.rating}</p>
+            <p>${locationData?.formatted_address}</p>
+            <p>${locationData?.formatted_phone_number}</p>
+            <p>${locationData?.website}</p>
+            <p>${locationData?.rating}</p>
           </div>
         </div>`;
     },
@@ -214,6 +212,16 @@ export default function BasicMap({
   // set the current markers on the map
   currentMapMarkers.forEach((marker) => marker.setMap(map!));
 
+  const openInfoWindow = (index: number, location: LocationDetails) => {
+    const marker = currentMapMarkers[index];
+    const infoWindowContent = getInfoWindowContent(undefined, location);
+    infoWindow.setContent(infoWindowContent);
+    infoWindow.open({
+      anchor: marker,
+      map,
+    });
+  };
+
   return (
     <>
       <h3>should be map here</h3>
@@ -270,7 +278,13 @@ export default function BasicMap({
             <ul>
               {currentPaginationResults.map(
                 (location: LocationDetails, index: number) => (
-                  <li key={location.name}>{location.name}</li>
+                  <li
+                    className="results-list-item"
+                    key={location.name}
+                    onClick={() => openInfoWindow(index, location)}
+                  >
+                    {location.name}
+                  </li>
                 )
               )}
             </ul>
