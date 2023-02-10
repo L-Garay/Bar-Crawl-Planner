@@ -1,11 +1,4 @@
-import React, {
-  ReactElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type {
   CitySelectOptions,
   LocationDetails,
@@ -20,15 +13,15 @@ import {
 import { CITY_COORDINATES } from '~/constants/mapConstants';
 import { gql, useLazyQuery } from '@apollo/client';
 import martiniImg from '~/assets/martini32px.png';
-import plusSign from '~/assets/plus-circle.svg';
-import PlusCircle from '../svgs/plusCircle';
 import LocationListItem from './locationListItem';
+import PlusCircle from '../svgs/plusCircle';
 
 // TODO figure out a better way to handle this
 // maybe have multiple small queries that fetch certain properties only when they are needed?
 const CITY_SEARCH = gql`
   query searchCity($city: String!, $locationType: String!) {
     searchCity(city: $city, locationType: $locationType) {
+      id
       business_status
       formatted_address
       city
@@ -76,8 +69,6 @@ export default function BasicMap({
     fetchPolicy: 'no-cache', // testing purposes only
   });
 
-  const [isHoveringPlus, setIsHoveringPlus] = useState<boolean>(false);
-
   const [locations, setLocations] = useState<LocationDetails[]>([]);
   const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
   const [currentMapMarkers, setCurrentMapMarkers] = useState<
@@ -91,6 +82,9 @@ export default function BasicMap({
   const PAGINATION_LIMIT = 10;
   const paginationIndexRange = useRef<number[]>([0, 10]);
   const maxIndex = useRef<number>(0);
+
+  const MAX_SELECTED_OUTINGS = 5;
+  const [selectedOutings, setSelectedOutings] = useState<LocationDetails[]>([]);
 
   // create Info Window for pop ups on markers
   const infoWindow = useMemo(() => new google.maps.InfoWindow(), []);
@@ -227,6 +221,20 @@ export default function BasicMap({
     });
   };
 
+  const addLocationToOutings = (location: LocationDetails) => {
+    if (selectedOutings.length < MAX_SELECTED_OUTINGS) {
+      setSelectedOutings([...selectedOutings, location]);
+    }
+  };
+
+  const removeLocationFromOutings = (locationId: number) => {
+    const filteredOutings = selectedOutings.filter(
+      (outing) => outing.id !== locationId
+    );
+    setSelectedOutings(filteredOutings);
+  };
+  console.log('selected outings', selectedOutings);
+
   return (
     <>
       <h3>should be map here</h3>
@@ -288,6 +296,8 @@ export default function BasicMap({
                     location={location}
                     index={index}
                     openInfoWindow={openInfoWindow}
+                    addLocationToOutings={addLocationToOutings}
+                    removeLocationFromOutings={removeLocationFromOutings}
                   />
                 )
               )}
@@ -317,6 +327,41 @@ export default function BasicMap({
               </p>
             </div>
           ) : null}
+        </div>
+      </div>
+      <br />
+      <div className="potential-outing-container">
+        <div className="potential-outing-header">
+          <h3>Your currently planned outing</h3>
+          <p>
+            Selected {selectedOutings.length} / {MAX_SELECTED_OUTINGS}
+          </p>
+        </div>
+        <div className="potential-outing-body">
+          <div className="potential-outing-locations">
+            {selectedOutings.length ? (
+              <ol>
+                {selectedOutings.map((location) => {
+                  return (
+                    <li key={location.id}>
+                      <span>
+                        {location.name}
+                        {' --- '}
+                        {location.formatted_address}
+                        {' --- '}
+                        {location.rating}
+                      </span>
+                      <span>
+                        <PlusCircle pathId={location.place_id!} />
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            ) : (
+              <p>Nothing yet!</p>
+            )}
+          </div>
         </div>
       </div>
       <div className="attributions-section">

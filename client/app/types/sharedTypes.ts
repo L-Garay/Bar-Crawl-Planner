@@ -49,6 +49,7 @@ export interface GeocoderResult extends google.maps.GeocoderResult {}
 export interface PlaceResult extends google.maps.places.PlaceResult {}
 
 export type LocationDetails = {
+  id: number;
   business_status?: string;
   formatted_address?: string;
   city?: string;

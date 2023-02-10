@@ -37,3 +37,20 @@
   margin: 20px 10px;
 }
 
+.potential-outing-container {
+  min-width: 20rem;
+  min-height: 10rem;
+  background-color: burlywood;
+
+  .potential-outing-header {
+    display: flex;
+    h3, p {
+     margin: 0;
+     padding-right: 10px;
+    }
+    p {
+      padding-top: 4px
+    }
+  }
+}
+
