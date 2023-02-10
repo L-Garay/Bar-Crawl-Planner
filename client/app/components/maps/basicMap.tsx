@@ -1,4 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  ReactElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type {
   CitySelectOptions,
   LocationDetails,
@@ -12,6 +19,7 @@ import {
 } from '~/utils/maps';
 import { CITY_COORDINATES } from '~/constants/mapConstants';
 import { gql, useLazyQuery } from '@apollo/client';
+import martiniImg from '~/assets/martini32px.png';
 
 // TODO figure out a better way to handle this
 // maybe have multiple small queries that fetch certain properties only when they are needed?
@@ -79,6 +87,9 @@ export default function BasicMap({
   const paginationIndexRange = useRef<number[]>([0, 10]);
   const maxIndex = useRef<number>(0);
 
+  // create Info Window for pop ups on markers
+  const infoWindow = useMemo(() => new google.maps.InfoWindow(), []);
+
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
   useSetMapEventListeners(map, undefined, onIdle);
@@ -98,7 +109,13 @@ export default function BasicMap({
     const mapMarkers = locations.map((location: LocationDetails) => {
       const lat = location.lat ? location.lat : 0;
       const lng = location.lng ? location.lng : 0;
-      return new google.maps.Marker({ position: { lat, lng } });
+      // TODO make markers accessible
+      // https://developers.google.com/maps/documentation/javascript/markers#accessible
+      return new google.maps.Marker({
+        position: { lat, lng },
+        optimized: false,
+        icon: martiniImg,
+      });
     });
     setMapMarkers(mapMarkers);
   }, [locations]);
@@ -117,6 +134,38 @@ export default function BasicMap({
     );
     setCurrentMapMarkers(firstTenMarkers);
   }, [locations, mapMarkers]);
+
+  const getInfoWindowContent = useCallback(
+    (index: number): string => {
+      const location = locations[index];
+      return `<div className="info-window-content-container">
+          <div className="info-window-content-header">
+            <h3>${location.name}</h3>
+            <h3>${location.name}</h3>
+          </div>
+          <div className="info-window-content-body">
+            <p>${location.formatted_address}</p>
+            <p>${location.formatted_phone_number}</p>
+            <p>${location.website}</p>
+            <p>${location.rating}</p>
+          </div>
+        </div>`;
+    },
+    [locations]
+  );
+
+  useEffect(() => {
+    mapMarkers.forEach((marker, index) => {
+      const infoWindowContent = getInfoWindowContent(index);
+      marker.addListener('click', () => {
+        infoWindow.setContent(infoWindowContent);
+        infoWindow.open({
+          anchor: marker,
+          map,
+        });
+      });
+    });
+  }, [mapMarkers, map, infoWindow, getInfoWindowContent]);
 
   const disableNext =
     paginationPage.current * PAGINATION_LIMIT >= maxIndex.current;

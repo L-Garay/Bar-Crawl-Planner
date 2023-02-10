@@ -72,5 +72,6 @@ export const NEARBY_CITIES = {
   Denver: ['Edgewater', 'Lakewood', 'Wheat Ridge'],
   Slc: ['South Salt Lake', 'Murray', 'Millcreek'],
   Portland: ['Vancouver', 'Milwaukie', 'Beaverton'],
-  Seattle: ['Bainbridge Island', 'Kirkland', 'Bellevue'],
+  // TODO don't like this, will need to refactor the mapQuerries code to handle locations with no nearby cities
+  Seattle: ['Seattle', 'Seattle', 'Seattle'],
 };
