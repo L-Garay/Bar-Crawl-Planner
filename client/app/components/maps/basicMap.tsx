@@ -266,7 +266,7 @@ export default function BasicMap({
         <div className="map" ref={mapsRef} style={style}></div>
         <div className="results">
           Current Locations: <br />
-          {currentPaginationResults ? (
+          {currentPaginationResults.length ? (
             <ul>
               {currentPaginationResults.map(
                 (location: LocationDetails, index: number) => (
@@ -288,6 +288,17 @@ export default function BasicMap({
               Next
             </button>
           </div>
+          {currentPaginationResults.length ? (
+            <div className="results-counter">
+              <p>
+                Showing {paginationIndexRange.current[0] + 1} -{' '}
+                {paginationIndexRange.current[1] < locations.length
+                  ? paginationIndexRange.current[1]
+                  : locations.length}{' '}
+                out of {locations.length}
+              </p>
+            </div>
+          ) : null}
         </div>
       </div>
     </>
