@@ -4,21 +4,21 @@ import { GetPrismaError } from '../../utilities';
 
 export async function CreateOuting({
   name,
-  creator_profile_id,
   created_at,
   start_date_and_time,
   place_ids,
-}: OutingInput): Promise<QueryData> {
+  creatorId,
+}: OutingInput & { creatorId: number }): Promise<QueryData> {
   try {
     const outing = await prismaClient.outing.create({
       data: {
         name,
-        creator_profile_id,
+        creator_profile_id: creatorId,
         created_at,
         start_date_and_time,
         place_ids,
         profiles: {
-          connect: { id: creator_profile_id },
+          connect: { id: creatorId },
         },
       },
     });

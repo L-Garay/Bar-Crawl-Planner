@@ -105,9 +105,13 @@ async function StartServer() {
           picture,
         } = decodedToken.decoded;
 
-        const account = await CreateAccount(email, verified);
+        const account: any = await CreateAccount(email, verified);
 
-        const profile = await CreateProfile(name, picture, account.data.id);
+        const profile: any = await CreateProfile(
+          name,
+          picture,
+          account.data.id
+        );
 
         newUser = {
           name: profile.data.name,

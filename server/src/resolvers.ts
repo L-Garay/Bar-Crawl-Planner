@@ -290,7 +290,9 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
-      const outingData = { ...args } as OutingInput;
+      const outingInput = { ...args } as OutingInput;
+      const userId = user.data.id;
+      const outingData = { ...outingInput, creatorId: userId };
       const outing = await CreateOuting(outingData);
       if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot create outing', {

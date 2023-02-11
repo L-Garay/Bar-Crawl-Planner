@@ -115,10 +115,8 @@ export const SearchCity = async (
       (filteredLocation) => location.name === filteredLocation.name
     )
   );
-  console.log('BEFORE', allLocationsInCity.length);
 
   indexArray.forEach((index) => allLocationsInCity.splice(index, 1));
-  console.log('AFTER', allLocationsInCity.length);
 
   // Now we will itterate through the allLocationsInCtiy, as we have now removed the topLocations that we already have
   // we will check the types and if they match, we will still check their average rating, and if they are good enough, we will add them to the extraTopLocations array
@@ -180,9 +178,7 @@ export const SearchCity = async (
   // therefore there should be literally no way for the second iteration to possibly add in a duplicate of a topLocation
   // however, the code below does the trick, just shouldn't have to do it IMO
 
-  console.log('combinedTopLocations', combinedTopLocations.length);
   const testSet = new Set(combinedTopLocations);
-  console.log('testSet', testSet.size);
   const noDubplicatesArray = Array.from(testSet);
 
   if (noDubplicatesArray.length < 60) {
