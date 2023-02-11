@@ -2,5 +2,9 @@
   "devDependencies": {
     "concurrently": "^7.6.0",
     "parcel": "^2.8.1"
+  },
+  "dependencies": {
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.40"
   }
 }
