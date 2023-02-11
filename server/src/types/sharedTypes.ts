@@ -60,3 +60,11 @@ export type LocationDetails = {
   price_level?: number;
   expiration_date: string;
 };
+
+export type OutingInput = {
+  name: string;
+  creator_profile_id: number;
+  created_at: string;
+  start_date_and_time: string;
+  place_ids: string[];
+};

@@ -1,4 +1,7 @@
-import { GetAllOutings } from './prisma/querries/outingsQuerries';
+import {
+  GetAllOutings,
+  GetOutingByOutingId,
+} from './prisma/querries/outingsQuerries';
 import {
   FindFriendById,
   FindFriendByPin,
@@ -17,7 +20,8 @@ import {
 } from './prisma/mutations/accountMutations';
 import { AddFriend, RemoveFriend } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
-import { CitySelectOptions } from './types/sharedTypes';
+import { CitySelectOptions, OutingInput } from './types/sharedTypes';
+import { CreateOuting } from './prisma/mutations/outingMutations';
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
@@ -40,9 +44,6 @@ const resolvers: Resolvers = {
         return data.data;
       }
     },
-    // NOTE since the account is already set in context each request, when a user requests to get their account we can just return the user set in the context
-    // so that means this resolver will likely only be used by admins in the future, as a way to edit/suspend/delete other user's accounts
-    // which means it will likely need extra auth/role checks
     getAccountByEmail: async (parent, args, context, info) => {
       const { authError } = context;
       if (authError) {
@@ -85,7 +86,7 @@ const resolvers: Resolvers = {
         return data.data;
       }
     },
-    outings: async (parent, args, context, info) => {
+    getAllOutings: async (parent, args, context, info) => {
       const { authError } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -93,13 +94,33 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await GetAllOutings();
+      const data = await GetAllOutings(args.id);
       if (data.status === 'Failure') {
         throw new GraphQLError('Cannot get all outings', {
           extensions: { code: data.error?.name, message: data.error?.message },
         });
       } else {
         return data.data;
+      }
+    },
+    getOuting: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const outing = await GetOutingByOutingId(args.id);
+      if (outing.status === 'Failure') {
+        throw new GraphQLError('Cannot get outing', {
+          extensions: {
+            code: outing.error?.name,
+            message: outing.error?.message,
+          },
+        });
+      } else {
+        return outing.data;
       }
     },
     getAllFriends: async (parent, args, context, info) => {
@@ -260,6 +281,26 @@ const resolvers: Resolvers = {
         });
       } else {
         return removedFriend.data;
+      }
+    },
+    createOuting: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const outingData = { ...args } as OutingInput;
+      const outing = await CreateOuting(outingData);
+      if (outing.status === 'Failure') {
+        throw new GraphQLError('Cannot create outing', {
+          extensions: {
+            code: outing.error?.name,
+            message: outing.error?.message,
+          },
+        });
+      } else {
+        return outing.data;
       }
     },
   },

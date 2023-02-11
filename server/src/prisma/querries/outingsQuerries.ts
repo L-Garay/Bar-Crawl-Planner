@@ -6,21 +6,25 @@ export async function GetOutingByOutingId(
   outingId: number
 ): Promise<QueryData> {
   try {
-    const outings = await prismaClient.outing.findUnique({
+    const outing = await prismaClient.outing.findUnique({
       where: {
         id: outingId,
       },
     });
-    return { status: 'Success', data: outings };
+    return { status: 'Success', data: outing };
   } catch (error) {
     const newError = GetPrismaError(error);
     return { status: 'Failure', data: null, error: newError };
   }
 }
 
-export async function GetAllOutings(): Promise<QueryData> {
+export async function GetAllOutings(creatorId: number): Promise<QueryData> {
   try {
-    const outings = await prismaClient.outing.findMany();
+    const outings = await prismaClient.outing.findMany({
+      where: {
+        creator_profile_id: creatorId,
+      },
+    });
     return { status: 'Success', data: outings };
   } catch (error) {
     const newError = GetPrismaError(error);

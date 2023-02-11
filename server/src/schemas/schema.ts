@@ -90,10 +90,10 @@ const typeDefs = `#graphql
     getAccountByEmail(email: String!): Account
     getUserAccount: Account
     profile: Profile
-    outing: Outing
+    getOuting(id: Int!): Outing
     accounts: [Account]
     profiles: [Profile]
-    outings: [Outing]
+    getAllOutings(id: Int!): [Outing]
     getAllFriends: [Profile]
     findFriendById(id: Int!): Profile
     findFriendByPin(social_pin: String!): Profile
@@ -107,6 +107,12 @@ const typeDefs = `#graphql
     deactivateUserAccount(id: Int!): Account
     addFriend(id: Int!, friend_id: Int!): Profile
     removeFriend(id: Int!, friend_id: Int!): Profile
+    createOuting(
+    name: String
+    creator_profile_id: Int
+    start_date_and_time: String
+    place_ids: [String]
+  ): Outing
   }
 `;
 
