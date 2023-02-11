@@ -84,7 +84,7 @@ export type MutationCreateAccountArgs = {
 
 
 export type MutationCreateOutingArgs = {
-  creator_profile_id?: InputMaybe<Scalars['Int']>;
+  created_at?: InputMaybe<Scalars['String']>;
   name?: InputMaybe<Scalars['String']>;
   place_ids?: InputMaybe<Array<InputMaybe<Scalars['String']>>>;
   start_date_and_time?: InputMaybe<Scalars['String']>;

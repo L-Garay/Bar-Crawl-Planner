@@ -109,7 +109,7 @@ const typeDefs = `#graphql
     removeFriend(id: Int!, friend_id: Int!): Profile
     createOuting(
     name: String
-    creator_profile_id: Int
+    created_at: String
     start_date_and_time: String
     place_ids: [String]
   ): Outing
