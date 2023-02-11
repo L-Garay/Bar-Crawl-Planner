@@ -1,9 +1,15 @@
 // import { gql, useQuery } from '@apollo/client';
 import { Map as GoogleMap } from '~/components/maps';
-import type { LinksFunction, LoaderFunction } from '@remix-run/node';
+import type {
+  ActionFunction,
+  LinksFunction,
+  LoaderFunction,
+} from '@remix-run/node';
 // import { useLoaderData } from '@remix-run/react';
 import getConfig from '~/utils/config.server';
 import outingsStyles from '~/generatedStyles/outingspage.css';
+import { getNewClient } from '~/apollo/getClient';
+import { CREATE_OUTING } from '~/components/maps/basicMap';
 
 export const links: LinksFunction = () => {
   return [
@@ -13,6 +19,32 @@ export const links: LinksFunction = () => {
       as: 'style',
     },
   ];
+};
+
+export const action: ActionFunction = async ({ request }) => {
+  const client = await getNewClient(request);
+  const formData = await request.formData();
+  const name = formData.get('outing-name')?.toString();
+  const start_date_and_time = formData.get('outing-time')?.toString();
+  const place_idString = formData.get('place-ids')?.toString();
+  const place_idArray = place_idString?.split(',');
+  const created_at = new Date().toISOString();
+
+  try {
+    await client.mutate({
+      mutation: CREATE_OUTING,
+      variables: {
+        name,
+        start_date_and_time,
+        created_at,
+        place_ids: place_idArray,
+      },
+      fetchPolicy: 'no-cache',
+    });
+  } catch (error) {
+    console.error(error);
+  }
+  return null;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {

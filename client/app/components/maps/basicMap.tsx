@@ -15,6 +15,8 @@ import { gql, useLazyQuery } from '@apollo/client';
 import martiniImg from '~/assets/martini32px.png';
 import LocationListItem from './locationListItem';
 import OutingListItem from './outingListItem';
+import { Form } from '@remix-run/react';
+import moment from 'moment';
 
 // TODO figure out a better way to handle this
 // maybe have multiple small queries that fetch certain properties only when they are needed?
@@ -54,6 +56,29 @@ const CITY_SEARCH = gql`
   }
 `;
 
+export const CREATE_OUTING = gql`
+  mutation createOuting(
+    $name: String!
+    $created_at: String!
+    $start_date_and_time: String!
+    $place_ids: [String!]
+  ) {
+    createOuting(
+      name: $name
+      created_at: $created_at
+      start_date_and_time: $start_date_and_time
+      place_ids: $place_ids
+    ) {
+      id
+      name
+      creator_profile_id
+      created_at
+      start_date_and_time
+      place_ids
+    }
+  }
+`;
+
 export default function BasicMap({
   style,
   children,
@@ -65,7 +90,10 @@ export default function BasicMap({
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('Boise');
   const [selectedType, setSelectedType] =
     useState<LocationSelectOptions>('bars');
-  const [searchCity, { loading, error, data }] = useLazyQuery(CITY_SEARCH, {
+  const [
+    searchCity,
+    { loading: cityLoading, error: cityError, data: cityData },
+  ] = useLazyQuery(CITY_SEARCH, {
     fetchPolicy: 'no-cache', // testing purposes only
   });
 
@@ -85,6 +113,15 @@ export default function BasicMap({
 
   const MAX_SELECTED_OUTINGS = 5;
   const [selectedOutings, setSelectedOutings] = useState<LocationDetails[]>([]);
+  const selectedOutingPlaceIds = selectedOutings.map(
+    (outing) => outing.place_id
+  );
+  const outingPlaceIdString = selectedOutingPlaceIds.join(',');
+
+  const currentDay = new Date();
+  const currentDayInputValue = moment(currentDay).format('YYYY-MM-DDTHH:mm');
+  const maxDate = currentDay.setFullYear(currentDay.getFullYear() + 1);
+  const maxDateValue = moment(maxDate).format('YYYY-MM-DDTHH:mm');
 
   // create Info Window for pop ups on markers
   const infoWindow = useMemo(() => new google.maps.InfoWindow(), []);
@@ -95,11 +132,11 @@ export default function BasicMap({
 
   // Store all location data
   useEffect(() => {
-    if (data) {
-      setLocations(data.searchCity);
-      maxIndex.current = data.searchCity.length - 1;
+    if (cityData) {
+      setLocations(cityData.searchCity);
+      maxIndex.current = cityData.searchCity.length - 1;
     }
-  }, [data]);
+  }, [cityData]);
 
   // create and store all map markers
   useEffect(() => {
@@ -233,7 +270,13 @@ export default function BasicMap({
     );
     setSelectedOutings(filteredOutings);
   };
-  console.log('selected outings', selectedOutings);
+
+  const [noName, setNoName] = useState<boolean>(true);
+  const [noTime, setNoTime] = useState<boolean>(true);
+  const shouldDisableCreateOuting = useMemo(
+    () => selectedOutings.length === 0 || noName || noTime,
+    [selectedOutings, noName, noTime]
+  );
 
   return (
     <>
@@ -336,7 +379,36 @@ export default function BasicMap({
           <p>
             Selected {selectedOutings.length} / {MAX_SELECTED_OUTINGS}
           </p>
-          <button disabled={selectedOutings.length == 0}>Create Outing</button>
+          <div>
+            <Form method="post" action="/outings">
+              <label htmlFor="outing-name">Name of outing: </label>
+              <input
+                type="text"
+                name="outing-name"
+                id="outing-name"
+                placeholder={`ex: Tom's Bachelor Party`}
+                size={30}
+                onChange={(e) => setNoName(e.target.value === '')}
+              />
+              <label htmlFor="outing-time">Choose date and time: </label>
+              <input
+                type="datetime-local"
+                name="outing-time"
+                id="outing-time"
+                min={currentDayInputValue}
+                max={maxDateValue}
+                onChange={(e) => setNoTime(e.target.value === '')}
+              />
+              <input
+                type="hidden"
+                name="place-ids"
+                value={outingPlaceIdString}
+              />
+              <button type="submit" disabled={shouldDisableCreateOuting}>
+                Create Outing
+              </button>
+            </Form>
+          </div>
         </div>
         <div className="potential-outing-body">
           <div className="potential-outing-locations">
