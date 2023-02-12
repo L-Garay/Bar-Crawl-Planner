@@ -1,9 +1,5 @@
-// On this page, we will need to fetch all the outings for the signed in user
-// we can grab ones where the creator_id matches the signed in user's id
-// however, we will also need to grab outings where the signed in user is a member
-// which means we'll need to iterate through the outing's profiles collection
-
 import { gql, useQuery } from '@apollo/client';
+import { useNavigate } from '@remix-run/react';
 import { Dynamic } from '~/components/animated/loadingSpinners';
 
 const GET_OUTINGS = gql`
@@ -21,17 +17,23 @@ const GET_OUTINGS = gql`
 
 export default function MyOutings() {
   const { loading, error, data } = useQuery(GET_OUTINGS);
+  const navigate = useNavigate();
 
   if (loading) {
     return <Dynamic />;
   }
   if (error) throw error;
+
   return (
     <div>
       <h1>My Outings</h1>
       {data.getAllOutings.map((outing: any) => {
         return (
-          <div key={outing.id} style={{ display: 'flex' }}>
+          <div
+            key={outing.id}
+            style={{ display: 'flex' }}
+            onClick={() => navigate(`/outings/my-outings/${outing.id}`)}
+          >
             <p style={{ paddingRight: 10 }}>{outing.name}</p>
             <p>{outing.start_date_and_time}</p>
           </div>

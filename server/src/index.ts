@@ -188,7 +188,7 @@ async function StartServer() {
   app.set('trust proxy', true);
 
   // NOTE testing scheduler
-  await testGoogleJob();
+  // await testGoogleJob();
 
   // Modified server startup
   await new Promise((resolve) =>

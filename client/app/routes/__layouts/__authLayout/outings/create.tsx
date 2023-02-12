@@ -1,4 +1,5 @@
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { getNewClient } from '~/apollo/getClient';
 import { Map as GoogleMap } from '~/components/maps';
 import { CREATE_OUTING } from '~/components/maps/basicMap';
@@ -34,11 +35,11 @@ export const action: ActionFunction = async ({ request }) => {
     console.error(error);
   }
   if (createdOuting) {
-    return {
-      // TODO don't like the idea of using the very simple/small/easily guessable/targetabble outing id that is assigned by the database
-      // we should look to use a more secure id like using crypto.randomUUID()
-      redirect: `/outings/my-outings/${createdOuting.data.createOuting.id}`,
-    };
+    // TODO don't like the idea of using the very simple/small/easily guessable/targetabble outing id that is assigned by the database
+    // we should look to use a more secure id like using crypto.randomUUID()
+    return redirect(
+      `/outings/my-outings/${createdOuting.data.createOuting.id}`
+    );
   }
   return null;
 };

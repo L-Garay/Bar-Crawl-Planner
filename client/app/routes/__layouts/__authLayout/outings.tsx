@@ -56,14 +56,8 @@ export default function OutingsIndex() {
           page to see ALL past/upcomming outings
         </p>
 
-        {/* NOTE this is where the outings <Outlet /> component will go */}
-        {/* Then we will have a menu to select the different sections, the menu will be outside the outlet */}
-        {/* The 'home section' will have info about outings and will display a google map with the user's nearest outing if they have one */}
-
         <SimpleNav links={navLinks} />
         <Outlet />
-
-        {/* There will be a section to view user's created/joined outings */}
       </div>
     </>
   );
