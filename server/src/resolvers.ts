@@ -87,14 +87,14 @@ const resolvers: Resolvers = {
       }
     },
     getAllOutings: async (parent, args, context, info) => {
-      const { authError } = context;
+      const { authError, user } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
           extensions: { code: authError.code },
         });
       }
 
-      const data = await GetAllOutings(args.id);
+      const data = await GetAllOutings(user.data.id);
       if (data.status === 'Failure') {
         throw new GraphQLError('Cannot get all outings', {
           extensions: { code: data.error?.name, message: data.error?.message },

@@ -71,7 +71,7 @@ type Query {
   getOuting(id: Int!): Outing
   accounts: [Account]
   profiles: [Profile]
-  getAllOutings(id: Int!): [Outing]
+  getAllOutings: [Outing]
   getAllFriends: [Profile]
   findFriendById(id: Int!): Profile
   findFriendByPin(social_pin: String!): Profile

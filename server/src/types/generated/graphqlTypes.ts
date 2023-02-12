@@ -170,11 +170,6 @@ export type QueryGetAccountByEmailArgs = {
 };
 
 
-export type QueryGetAllOutingsArgs = {
-  id: Scalars['Int'];
-};
-
-
 export type QueryGetOutingArgs = {
   id: Scalars['Int'];
 };
@@ -367,7 +362,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   findFriendByPin?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<QueryFindFriendByPinArgs, 'social_pin'>>;
   getAccountByEmail?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountByEmailArgs, 'email'>>;
   getAllFriends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
-  getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType, RequireFields<QueryGetAllOutingsArgs, 'id'>>;
+  getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
   getUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;

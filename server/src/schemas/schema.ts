@@ -28,6 +28,9 @@ const typeDefs = `#graphql
   }
 
   type Outing {
+    # TODO don't like the idea of using the very simple/small/easily guessable/targetabble outing id that is assigned by the database
+    # we should look to use a more secure id like using crypto.randomUUID()
+    # with regards to accessing a specific outing by id in the url
     id: Int
     name: String
     profiles: [Profile]
@@ -93,7 +96,7 @@ const typeDefs = `#graphql
     getOuting(id: Int!): Outing
     accounts: [Account]
     profiles: [Profile]
-    getAllOutings(id: Int!): [Outing]
+    getAllOutings: [Outing]
     getAllFriends: [Profile]
     findFriendById(id: Int!): Profile
     findFriendByPin(social_pin: String!): Profile

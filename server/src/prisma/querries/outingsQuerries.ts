@@ -20,11 +20,24 @@ export async function GetOutingByOutingId(
 
 export async function GetAllOutings(creatorId: number): Promise<QueryData> {
   try {
-    const outings = await prismaClient.outing.findMany({
+    const createdOutings = await prismaClient.outing.findMany({
       where: {
         creator_profile_id: creatorId,
       },
     });
+    const joinedOutings = await prismaClient.outing.findMany({
+      where: {
+        creator_profile_id: {
+          not: creatorId,
+        },
+        profiles: {
+          some: {
+            id: creatorId,
+          },
+        },
+      },
+    });
+    const outings = [...createdOutings, ...joinedOutings];
     return { status: 'Success', data: outings };
   } catch (error) {
     const newError = GetPrismaError(error);
