@@ -1,15 +1,8 @@
-// import { gql, useQuery } from '@apollo/client';
-import { Map as GoogleMap } from '~/components/maps';
-import type {
-  ActionFunction,
-  LinksFunction,
-  LoaderFunction,
-} from '@remix-run/node';
-// import { useLoaderData } from '@remix-run/react';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import getConfig from '~/utils/config.server';
 import outingsStyles from '~/generatedStyles/outingspage.css';
-import { getNewClient } from '~/apollo/getClient';
-import { CREATE_OUTING } from '~/components/maps/basicMap';
+import { Outlet } from '@remix-run/react';
+import SimpleNav from '~/components/molecules/simpleNav';
 
 export const links: LinksFunction = () => {
   return [
@@ -21,38 +14,18 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const action: ActionFunction = async ({ request }) => {
-  const client = await getNewClient(request);
-  const formData = await request.formData();
-  const name = formData.get('outing-name')?.toString();
-  const start_date_and_time = formData.get('outing-time')?.toString();
-  const place_idString = formData.get('place-ids')?.toString();
-  const place_idArray = place_idString?.split(',');
-  const created_at = new Date().toISOString();
-
-  try {
-    await client.mutate({
-      mutation: CREATE_OUTING,
-      variables: {
-        name,
-        start_date_and_time,
-        created_at,
-        place_ids: place_idArray,
-      },
-      fetchPolicy: 'no-cache',
-    });
-  } catch (error) {
-    console.error(error);
-  }
-  return null;
-};
-
 export const loader: LoaderFunction = async ({ request }) => {
   return getConfig();
 };
 
 export default function OutingsIndex() {
   // const loaderData = useLoaderData();
+
+  const navLinks = [
+    { name: 'Home', path: '/outings' },
+    { name: 'Create an Outing', path: '/outings/create' },
+    { name: 'My Outings', path: '/outings/my-outings' },
+  ];
 
   return (
     <>
@@ -83,7 +56,14 @@ export default function OutingsIndex() {
           page to see ALL past/upcomming outings
         </p>
 
-        <GoogleMap />
+        {/* NOTE this is where the outings <Outlet /> component will go */}
+        {/* Then we will have a menu to select the different sections, the menu will be outside the outlet */}
+        {/* The 'home section' will have info about outings and will display a google map with the user's nearest outing if they have one */}
+
+        <SimpleNav links={navLinks} />
+        <Outlet />
+
+        {/* There will be a section to view user's created/joined outings */}
       </div>
     </>
   );

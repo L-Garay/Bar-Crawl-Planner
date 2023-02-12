@@ -280,7 +280,6 @@ export default function BasicMap({
 
   return (
     <>
-      <h3>should be map here</h3>
       <div className="map-search-container">
         <label htmlFor="cities">Select City:</label>
         <select
@@ -380,7 +379,7 @@ export default function BasicMap({
             Selected {selectedOutings.length} / {MAX_SELECTED_OUTINGS}
           </p>
           <div>
-            <Form method="post" action="/outings">
+            <Form method="post" action="/outings/create">
               <label htmlFor="outing-name">Name of outing: </label>
               <input
                 type="text"
