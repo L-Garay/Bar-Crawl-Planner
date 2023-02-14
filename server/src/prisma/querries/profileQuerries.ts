@@ -26,6 +26,24 @@ export async function GetAllProfiles(): Promise<QueryData> {
   }
 }
 
+export async function GetProfilesInOuting(id: number): Promise<QueryData> {
+  try {
+    const profiles = await prismaClient.profile.findMany({
+      where: {
+        outings: {
+          some: {
+            id,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: profiles };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
 export async function GetAllFriends(id: number): Promise<QueryData> {
   try {
     const friends = await prismaClient.profile.findMany({

@@ -148,6 +148,7 @@ export type Query = {
   getAllFriends?: Maybe<Array<Maybe<Profile>>>;
   getAllOutings?: Maybe<Array<Maybe<Outing>>>;
   getOuting?: Maybe<Outing>;
+  getProfilesInOuting?: Maybe<Array<Maybe<Profile>>>;
   getUserAccount?: Maybe<Account>;
   profile?: Maybe<Profile>;
   profiles?: Maybe<Array<Maybe<Profile>>>;
@@ -171,6 +172,11 @@ export type QueryGetAccountByEmailArgs = {
 
 
 export type QueryGetOutingArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type QueryGetProfilesInOutingArgs = {
   id: Scalars['Int'];
 };
 
@@ -364,6 +370,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getAllFriends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
+  getProfilesInOuting?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
   getUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;

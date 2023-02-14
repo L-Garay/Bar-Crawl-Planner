@@ -7,6 +7,7 @@ import {
   FindFriendByPin,
   GetAllFriends,
   GetAllProfiles,
+  GetProfilesInOuting,
 } from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
@@ -80,6 +81,23 @@ const resolvers: Resolvers = {
       const data = await GetAllProfiles();
       if (data.status === 'Failure') {
         throw new GraphQLError('Cannot get all profiles', {
+          extensions: { code: data.error?.name, message: data.error?.message },
+        });
+      } else {
+        return data.data;
+      }
+    },
+    getProfilesInOuting: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const data = await GetProfilesInOuting(args.id);
+      if (data.status === 'Failure') {
+        throw new GraphQLError('Cannot get profiles for outing', {
           extensions: { code: data.error?.name, message: data.error?.message },
         });
       } else {

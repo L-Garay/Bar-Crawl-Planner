@@ -93,6 +93,7 @@ const typeDefs = `#graphql
     getAccountByEmail(email: String!): Account
     getUserAccount: Account
     profile: Profile
+    getProfilesInOuting(id: Int!): [Profile]
     getOuting(id: Int!): Outing
     accounts: [Account]
     profiles: [Profile]
