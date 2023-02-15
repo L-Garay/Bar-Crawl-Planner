@@ -67,6 +67,7 @@ export type Mutation = {
   createProfile?: Maybe<Profile>;
   deactivateUserAccount?: Maybe<Account>;
   removeFriend?: Maybe<Profile>;
+  sendOutingInvites?: Maybe<Scalars['String']>;
   updateUserAccount?: Maybe<Account>;
 };
 
@@ -106,6 +107,13 @@ export type MutationDeactivateUserAccountArgs = {
 export type MutationRemoveFriendArgs = {
   friend_id: Scalars['Int'];
   id: Scalars['Int'];
+};
+
+
+export type MutationSendOutingInvitesArgs = {
+  emails: Array<Scalars['String']>;
+  outing_id: Scalars['Int'];
+  start_date_and_time: Scalars['String'];
 };
 
 
@@ -334,6 +342,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, Partial<MutationCreateProfileArgs>>;
   deactivateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationDeactivateUserAccountArgs, 'id'>>;
   removeFriend?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<MutationRemoveFriendArgs, 'friend_id' | 'id'>>;
+  sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
 }>;
 

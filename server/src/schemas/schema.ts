@@ -116,7 +116,8 @@ const typeDefs = `#graphql
     created_at: String
     start_date_and_time: String
     place_ids: [String]
-  ): Outing
+    ): Outing
+    sendOutingInvites(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
   }
 `;
 

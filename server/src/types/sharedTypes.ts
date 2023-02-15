@@ -67,3 +67,10 @@ export type OutingInput = {
   start_date_and_time: string;
   place_ids: string[];
 };
+
+export type SendingOutingsInvitesInput = {
+  outing_id: number;
+  emails: string[];
+  start_date_and_time: string;
+  senderName: string;
+};
