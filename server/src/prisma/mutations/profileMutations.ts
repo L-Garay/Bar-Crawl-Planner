@@ -1,9 +1,10 @@
 import { prismaClient } from '../../index';
 import { QueryData } from '../../types/sharedTypes';
 import { GetPrismaError } from '../../utilities';
+import short from 'short-uuid';
 
 export async function CreateProfile(
-  name: string,
+  name: string = 'New User',
   profile_img: string,
   account_id: number
 ): Promise<QueryData> {
@@ -16,10 +17,12 @@ export async function CreateProfile(
         profile_img,
         updated_at: new Date().toISOString(),
         account_Id: account_id,
+        social_pin: short.generate(),
       },
     });
     return { status: 'Success', data: profile };
   } catch (error) {
+    console.log(error);
     const newError = GetPrismaError(error);
     return { status: 'Failure', data: null, error: newError };
   }
