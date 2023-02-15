@@ -22,7 +22,10 @@ import {
 import { AddFriend, RemoveFriend } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import { CitySelectOptions, OutingInput } from './types/sharedTypes';
-import { CreateOuting } from './prisma/mutations/outingMutations';
+import {
+  CreateOuting,
+  SendOutingInvites,
+} from './prisma/mutations/outingMutations';
 
 // Resolvers define how to fetch the types defined in your schema.
 // This resolver retrieves books from the "books" array above.
@@ -314,6 +317,34 @@ const resolvers: Resolvers = {
       const outing = await CreateOuting(outingData);
       if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot create outing', {
+          extensions: {
+            code: outing.error?.name,
+            message: outing.error?.message,
+          },
+        });
+      } else {
+        return outing.data;
+      }
+    },
+    sendOutingInvites: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { outing_id, start_date_and_time, emails } = args;
+      const inviteArgs = {
+        outing_id,
+        start_date_and_time,
+        emails,
+        senderName: user.data.name,
+      };
+      console.log('\n\nINVITE ARGS', inviteArgs);
+
+      const outing = await SendOutingInvites(inviteArgs);
+      if (outing.status === 'Failure') {
+        throw new GraphQLError('Cannot send outing invites', {
           extensions: {
             code: outing.error?.name,
             message: outing.error?.message,
