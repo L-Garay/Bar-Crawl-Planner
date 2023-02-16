@@ -38,6 +38,7 @@ export async function GetAccountWithProfileData(
         profile: {
           select: {
             name: true,
+            id: true,
           },
         },
       },
