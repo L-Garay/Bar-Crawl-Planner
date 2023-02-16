@@ -144,3 +144,49 @@ export async function SendOutingInvites({
     return { status: 'Failure', data: null, error: newError };
   }
 }
+
+export async function ConnectUserWithOuting(
+  outingId: number,
+  profileId: number
+): Promise<QueryData> {
+  try {
+    console.log('DOES THE ACTUAL FUNCTION RUN?', outingId, profileId);
+
+    const outing = await prismaClient.outing.update({
+      where: { id: outingId },
+      data: {
+        profiles: {
+          connect: {
+            id: profileId,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: outing };
+  } catch (error) {
+    console.log(error);
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
+export async function DisconnectUserWithOuting(
+  profileId: number,
+  outingId: number
+): Promise<QueryData> {
+  try {
+    const user = await prismaClient.outing.update({
+      where: { id: outingId },
+      data: {
+        profiles: {
+          disconnect: { id: profileId },
+        },
+      },
+    });
+    return { status: 'Success', data: user };
+  } catch (error) {
+    console.log(error);
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}

@@ -103,35 +103,3 @@ export async function FindFriendByPin(social_pin: string): Promise<QueryData> {
 //     await prismaClient.$disconnect();
 //     process.exit(1);
 //   });
-
-// export async function ConnectUserWithOuting() {
-//   const user = await prismaClient.basicUser.update({
-//     where: { id: 5 },
-//     data: {
-//       outings: {
-//         connect: {
-//           id: 4,
-//         },
-//       },
-//     },
-//     include: {
-//       outings: true,
-//     },
-//   });
-//   console.log(user);
-// }
-
-// export async function DisconnectUserWithOuting() {
-//   const user = await prismaClient.basicUser.update({
-//     where: { id: 5 },
-//     data: {
-//       outings: {
-//         disconnect: { id: 4 },
-//       },
-//     },
-//     include: {
-//       outings: true,
-//     },
-//   });
-//   console.log(user);
-// }

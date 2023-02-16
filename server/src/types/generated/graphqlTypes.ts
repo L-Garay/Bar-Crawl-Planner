@@ -61,6 +61,8 @@ export type LocationDetails = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  ConnectUserWithOuting?: Maybe<Outing>;
+  DisconnectUserWithOuting?: Maybe<Outing>;
   addFriend?: Maybe<Profile>;
   createAccount?: Maybe<Account>;
   createOuting?: Maybe<Outing>;
@@ -69,6 +71,18 @@ export type Mutation = {
   removeFriend?: Maybe<Profile>;
   sendOutingInvites?: Maybe<Scalars['String']>;
   updateUserAccount?: Maybe<Account>;
+};
+
+
+export type MutationConnectUserWithOutingArgs = {
+  outing_id: Scalars['Int'];
+  profile_id: Scalars['Int'];
+};
+
+
+export type MutationDisconnectUserWithOutingArgs = {
+  outing_id: Scalars['Int'];
+  profile_id: Scalars['Int'];
 };
 
 
@@ -336,6 +350,8 @@ export type LocationDetailsResolvers<ContextType = any, ParentType extends Resol
 }>;
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  ConnectUserWithOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationConnectUserWithOutingArgs, 'outing_id' | 'profile_id'>>;
+  DisconnectUserWithOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationDisconnectUserWithOutingArgs, 'outing_id' | 'profile_id'>>;
   addFriend?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<MutationAddFriendArgs, 'friend_id' | 'id'>>;
   createAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationCreateAccountArgs>>;
   createOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, Partial<MutationCreateOutingArgs>>;

@@ -23,7 +23,9 @@ import { AddFriend, RemoveFriend } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import { CitySelectOptions, OutingInput } from './types/sharedTypes';
 import {
+  ConnectUserWithOuting,
   CreateOuting,
+  DisconnectUserWithOuting,
   SendOutingInvites,
 } from './prisma/mutations/outingMutations';
 
@@ -352,6 +354,51 @@ const resolvers: Resolvers = {
         });
       } else {
         return outing.data;
+      }
+    },
+    ConnectUserWithOuting: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { outing_id, profile_id } = args;
+      console.log('DOES THE RESOLVER GET HIT?', outing_id, profile_id);
+
+      const connectedUser = await ConnectUserWithOuting(outing_id, profile_id);
+      if (connectedUser.status === 'Failure') {
+        throw new GraphQLError('Cannot connect user with outing', {
+          extensions: {
+            code: connectedUser.error?.name,
+            message: connectedUser.error?.message,
+          },
+        });
+      } else {
+        return connectedUser.data;
+      }
+    },
+    DisconnectUserWithOuting: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { outing_id, profile_id } = args;
+      const disconnectedUser = await DisconnectUserWithOuting(
+        outing_id,
+        profile_id
+      );
+      if (disconnectedUser.status === 'Failure') {
+        throw new GraphQLError('Cannot disconnect user from outing', {
+          extensions: {
+            code: disconnectedUser.error?.name,
+            message: disconnectedUser.error?.message,
+          },
+        });
+      } else {
+        return disconnectedUser.data;
       }
     },
   },

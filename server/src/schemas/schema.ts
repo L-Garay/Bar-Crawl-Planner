@@ -118,6 +118,8 @@ const typeDefs = `#graphql
     place_ids: [String]
     ): Outing
     sendOutingInvites(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
+    ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
+    DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
   }
 `;
 
