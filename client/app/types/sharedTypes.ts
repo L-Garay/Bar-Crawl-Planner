@@ -1,6 +1,7 @@
 import type { Session } from '@remix-run/node';
 
 export type UserInfo = {
+  profileId: number;
   name: string;
   email: string;
 };
