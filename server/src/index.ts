@@ -91,6 +91,9 @@ async function StartServer() {
       return res.status(500).send(null);
     }
 
+    // NOTE for the invite flow, if they sign in to auth0 with a different email than they were invited with, this email from the decoded token will not match any in the DB
+    // However, we do not want to create a new account/profile for them in this case
+    // as they already have ones
     const email = decodedToken.decoded.email || '';
     const userData = await GetAccountWithProfileData(email);
 

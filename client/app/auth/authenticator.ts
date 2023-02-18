@@ -27,6 +27,9 @@ let auth0Strategy = new Auth0Strategy(
     // NOTE pay attention to any missed downstream errors after including the entire authData object instead of the
     const idToken = authData.extraParams.id_token;
 
+    // NOTE may have to take out the profile and account creation from this route
+    // may need to make it a separate call from an action and not this callback
+    // once this callback resolves in the action we'll know that we can fire off the other call to check for a profile and account and create them if needed
     const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
       headers: {
         Authorization: `Bearer ${idToken}`,

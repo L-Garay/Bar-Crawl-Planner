@@ -87,7 +87,15 @@ export default function OutingDetails() {
                 const emails =
                   e.currentTarget['profile-email'].value.split(',');
                 console.log(emails);
+                // const trimmedEmails = emails.map((email: string) => email.trim());
+                // console.log(trimmedEmails);
+
                 // TODO: add validation to make sure emails are valid
+                window.localStorage.setItem(
+                  'inviteEmails',
+                  e.currentTarget['profile-email'].value
+                );
+                window.localStorage.setItem('outingId', outingId.toString());
                 SendEmail({
                   variables: {
                     outing_id: outingId,
