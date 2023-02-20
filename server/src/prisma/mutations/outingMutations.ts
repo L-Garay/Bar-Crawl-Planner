@@ -10,6 +10,7 @@ import nodemailer from 'nodemailer';
 import { Account, Profile } from '@prisma/client';
 import { GenerateOutingInviteEmail } from '../../utilities/generateEmails';
 import dotenv from 'dotenv';
+import short from 'short-uuid';
 
 dotenv.config();
 
@@ -71,21 +72,47 @@ export async function SendOutingInvites({
       });
       return Promise.resolve(account);
     });
-    const resolvedAccounts = (await Promise.all(accounts)).filter(
-      (account) => account !== null
+    const resolvedAccounts = await Promise.all(accounts);
+    const createdAccounts: Promise<Account>[] = resolvedAccounts.map(
+      async (account, index) => {
+        if (account) return Promise.resolve(account);
+        const newAccount: Account = await prismaClient.account.create({
+          data: {
+            email: emails[index],
+            created_at: new Date().toISOString(),
+          },
+        });
+        return Promise.resolve(newAccount);
+      }
     );
     console.log('\n\nRESOLVED ACCOUNTS', resolvedAccounts);
+    console.log('\n\nCREATED ACCOUNTS', createdAccounts);
+    const resolvedCreatedAccounts = await Promise.allSettled(createdAccounts);
 
-    const profiles: Promise<Profile | null>[] = resolvedAccounts.map(
+    const profiles: Promise<Profile | null>[] = resolvedCreatedAccounts.map(
       async (account) => {
-        if (account) {
+        if (account.status === 'fulfilled') {
           const profile = await prismaClient.profile.findFirst({
             where: {
-              account_Id: account.id,
+              account_Id: account.value.id,
             },
           });
+          if (profile == null) {
+            const newProfile: Profile = await prismaClient.profile.create({
+              data: {
+                name: 'New Profile',
+                // should connect profile to account
+                account_Id: account.value.id,
+                profile_img: '',
+                updated_at: new Date().toISOString(),
+                social_pin: short.generate(),
+              },
+            });
+            return Promise.resolve(newProfile);
+          }
           return Promise.resolve(profile);
         } else {
+          // don't believe this should ever get hit
           return Promise.resolve(null);
         }
       }
@@ -96,9 +123,25 @@ export async function SendOutingInvites({
         return {
           id: profile?.id,
           name: profile?.name,
+          social_pin: profile?.social_pin,
         };
       });
     console.log('\n\nRESOLVED PROFILES', resolvedProfiles);
+
+    resolvedProfiles.map(async (profile) => {
+      await prismaClient.outing.update({
+        where: {
+          id: outing_id,
+        },
+        data: {
+          profiles: {
+            connect: {
+              id: profile.id,
+            },
+          },
+        },
+      });
+    });
 
     const generatedEmails = GenerateOutingInviteEmail(
       outing_id,

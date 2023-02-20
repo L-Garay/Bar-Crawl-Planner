@@ -16,10 +16,16 @@ import {
   GetAllAccounts,
 } from './prisma/querries/accountQuerries';
 import {
+  CreateAccount,
   DeactivateUserAccount,
+  UpdateAccountBySocialPin,
   UpdateUserAccount,
 } from './prisma/mutations/accountMutations';
-import { AddFriend, RemoveFriend } from './prisma/mutations/profileMutations';
+import {
+  AddFriend,
+  CreateProfile,
+  RemoveFriend,
+} from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import { CitySelectOptions, OutingInput } from './types/sharedTypes';
 import {
@@ -57,12 +63,15 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+      console.log('args.email: ', args.email);
+
       const data = await GetAccountByEmail(args.email);
       if (data.status === 'Failure') {
         throw new GraphQLError('Cannot get account', {
           extensions: { code: data.error?.name, message: data.error?.message },
         });
       } else {
+        console.log('should be return user: ', data.data);
         return data.data;
       }
     },
@@ -110,14 +119,15 @@ const resolvers: Resolvers = {
       }
     },
     getAllOutings: async (parent, args, context, info) => {
-      const { authError, user } = context;
+      const { authError, profile } = context;
+
       if (authError) {
         throw new GraphQLError(authError.message, {
           extensions: { code: authError.code },
         });
       }
 
-      const data = await GetAllOutings(user.data.id);
+      const data = await GetAllOutings(profile.data.id);
       if (data.status === 'Failure') {
         throw new GraphQLError('Cannot get all outings', {
           extensions: { code: data.error?.name, message: data.error?.message },
@@ -400,6 +410,61 @@ const resolvers: Resolvers = {
       } else {
         return disconnectedUser.data;
       }
+    },
+    UpdateAccountBySocialPin: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { profile_id, social_pin, email } = args;
+      const updatedUser = await UpdateAccountBySocialPin(
+        profile_id,
+        social_pin,
+        email
+      );
+      if (updatedUser.status === 'Failure') {
+        throw new GraphQLError('Cannot update user account using social_pin', {
+          extensions: {
+            code: updatedUser.error?.name,
+            message: updatedUser.error?.message,
+          },
+        });
+      } else {
+        return updatedUser.data;
+      }
+    },
+    CreateAccountAndProfile: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { name, picture, email, verified } = args;
+
+      const account: any = await CreateAccount(email, verified);
+      if (account.status === 'Failure') {
+        throw new GraphQLError('Cannot create user account', {
+          extensions: {
+            code: account.error?.name,
+            message: account.error?.message,
+          },
+        });
+      }
+
+      const profile: any = await CreateProfile(name, picture, account.data.id);
+      if (profile.status === 'Failure') {
+        throw new GraphQLError('Cannot create user profile', {
+          extensions: {
+            code: profile.error?.name,
+            message: profile.error?.message,
+          },
+        });
+      }
+
+      return `Account ${account.data.id} and Profile ${profile.data.id} created`;
     },
   },
 };

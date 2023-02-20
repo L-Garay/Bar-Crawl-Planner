@@ -6,6 +6,19 @@ export async function GetProfileByAccountId(id: number): Promise<QueryData> {
   try {
     const profile = await prismaClient.profile.findUnique({
       where: {
+        account_Id: id,
+      },
+    });
+    return { status: 'Success', data: profile };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+export async function GetProfileByProfileId(id: number): Promise<QueryData> {
+  try {
+    const profile = await prismaClient.profile.findUnique({
+      where: {
         id: id,
       },
     });

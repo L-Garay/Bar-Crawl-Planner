@@ -72,6 +72,38 @@ export async function DeactivateUserAccount(id: number) {
   }
 }
 
+export async function UpdateAccountBySocialPin(
+  profile_id: number,
+  social_pin: string,
+  email: string
+) {
+  try {
+    const profile = await prismaClient.profile.findFirst({
+      where: {
+        id: profile_id,
+        social_pin,
+      },
+    });
+    const account = await prismaClient.account.findFirst({
+      where: {
+        id: profile?.account_Id,
+      },
+    });
+    const updatedAccount = await prismaClient.account.update({
+      where: {
+        id: account?.id,
+      },
+      data: {
+        email,
+      },
+    });
+    return { status: 'Success', data: updatedAccount };
+  } catch (error) {
+    const newError = GetPrismaError(error);
+    return { status: 'Failure', data: null, error: newError };
+  }
+}
+
 // TESTING/SEEDING
 // export async function CreateAccountAndProfile() {
 //   const now = new Date().toISOString();
