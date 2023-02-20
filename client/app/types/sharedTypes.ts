@@ -9,7 +9,7 @@ export type UserInfo = {
 // TODO figure out how to properly type authData
 export type AuthenticatorUser = {
   authData: any;
-  info: UserInfo;
+  // info: UserInfo;
 };
 
 export type ValidationResponse = {

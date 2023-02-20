@@ -38,9 +38,7 @@ let auth0Strategy = new Auth0Strategy(
 
     if (response.status === 400 || response.status === 500) return null;
 
-    const userData = await response.json();
-
-    return { info: { ...userData.user }, authData };
+    return { authData };
   }
 );
 

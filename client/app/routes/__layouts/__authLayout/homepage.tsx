@@ -30,13 +30,13 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const user = await authenticator.isAuthenticated(request);
-  return { user };
-};
+// export const loader: LoaderFunction = async ({ request }) => {
+//   // const user = await authenticator.isAuthenticated(request);
+//   return { user };
+// };
 
 export default function HomePage() {
-  const { user } = useLoaderData();
+  // const { user } = useLoaderData();
 
   const { loading, error, data } = useQuery(testQuery);
 
@@ -48,8 +48,8 @@ export default function HomePage() {
   return (
     <main>
       <h1>This is the Home Page</h1>
-      <h3>Welcome {user.info.name}</h3>
-      <h4>{user.info.email}</h4>
+      {/* <h3>Welcome {user.info.name}</h3>
+      <h4>{user.info.email}</h4> */}
       <p>
         This is the page users will land when they have logged, they've been
         authenticated and a user session has been created for them
