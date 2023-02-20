@@ -99,4 +99,15 @@ type Mutation {
   ): String
   ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
   DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
+  UpdateAccountBySocialPin(
+    profile_id: Int!
+    social_pin: String!
+    email: String!
+  ): Account
+  CreateAccountAndProfile(
+    name: String!
+    picture: String!
+    email: String!
+    verified: Boolean!
+  ): String
 }

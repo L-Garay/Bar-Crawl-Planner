@@ -120,6 +120,8 @@ const typeDefs = `#graphql
     sendOutingInvites(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
     ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
+    UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
+    CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
   }
 `;
 

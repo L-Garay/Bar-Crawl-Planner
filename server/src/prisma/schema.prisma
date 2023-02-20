@@ -29,9 +29,9 @@ model Account {
 
 model Profile {
   id              Int       @id @default(autoincrement())
-  name            String    @db.VarChar(255)
-  profile_img     String    @db.VarChar(255)
-  updated_at      String    @db.VarChar(255)
+  name            String    @default("") @db.VarChar(255)
+  profile_img     String    @default("") @db.VarChar(255)
+  updated_at      String    @default("") @db.VarChar(255)
   account         Account   @relation(fields: [account_Id], references: [id])
   account_Id      Int       @unique
   outings         Outing[]  @relation(name: "Profiles_In_Outing")

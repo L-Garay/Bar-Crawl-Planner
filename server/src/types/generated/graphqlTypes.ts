@@ -62,7 +62,9 @@ export type LocationDetails = {
 export type Mutation = {
   __typename?: 'Mutation';
   ConnectUserWithOuting?: Maybe<Outing>;
+  CreateAccountAndProfile?: Maybe<Scalars['String']>;
   DisconnectUserWithOuting?: Maybe<Outing>;
+  UpdateAccountBySocialPin?: Maybe<Account>;
   addFriend?: Maybe<Profile>;
   createAccount?: Maybe<Account>;
   createOuting?: Maybe<Outing>;
@@ -80,9 +82,24 @@ export type MutationConnectUserWithOutingArgs = {
 };
 
 
+export type MutationCreateAccountAndProfileArgs = {
+  email: Scalars['String'];
+  name: Scalars['String'];
+  picture: Scalars['String'];
+  verified: Scalars['Boolean'];
+};
+
+
 export type MutationDisconnectUserWithOutingArgs = {
   outing_id: Scalars['Int'];
   profile_id: Scalars['Int'];
+};
+
+
+export type MutationUpdateAccountBySocialPinArgs = {
+  email: Scalars['String'];
+  profile_id: Scalars['Int'];
+  social_pin: Scalars['String'];
 };
 
 
@@ -351,7 +368,9 @@ export type LocationDetailsResolvers<ContextType = any, ParentType extends Resol
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   ConnectUserWithOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationConnectUserWithOutingArgs, 'outing_id' | 'profile_id'>>;
+  CreateAccountAndProfile?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationCreateAccountAndProfileArgs, 'email' | 'name' | 'picture' | 'verified'>>;
   DisconnectUserWithOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationDisconnectUserWithOutingArgs, 'outing_id' | 'profile_id'>>;
+  UpdateAccountBySocialPin?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationUpdateAccountBySocialPinArgs, 'email' | 'profile_id' | 'social_pin'>>;
   addFriend?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<MutationAddFriendArgs, 'friend_id' | 'id'>>;
   createAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationCreateAccountArgs>>;
   createOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, Partial<MutationCreateOutingArgs>>;
