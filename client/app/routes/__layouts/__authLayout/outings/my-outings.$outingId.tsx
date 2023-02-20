@@ -59,18 +59,6 @@ export default function OutingDetails() {
     SendEmail,
     { loading: emailLoading, error: emailError, data: emailData },
   ] = useMutation(SEND_EMAIL);
-  console.log(profilesData);
-  console.log(emailData);
-
-  // TODO will need to create mutation to send an email
-  // it will need the recipient's email address and the outing id
-  // the mutation will hit the resolver
-  // we will need to use the email address to find the recipient's profile
-  // then we pull the profile id and use the outing id to then use mailgen to generate the outing invitation template
-  // the template will include a button that will link to a Remix resource route
-  // we will need to make sure the route includes the outing id and the recipient's profile id
-  // that route will then use the action function to make a call to our server (probably a mutation again), and pull the outing id and the recipient's profile id from the url params
-  // this final mutation will take in both ids and finally add the recipient's profile id to the outing's profile_ids array
 
   return (
     <div>
@@ -91,11 +79,8 @@ export default function OutingDetails() {
                 // console.log(trimmedEmails);
 
                 // TODO: add validation to make sure emails are valid
-                window.localStorage.setItem(
-                  'inviteEmails',
-                  e.currentTarget['profile-email'].value
-                );
-                window.localStorage.setItem('outingId', outingId.toString());
+                // TODO: add logic to check and ensure that only the outing creator can send invites (is this desired?)
+
                 SendEmail({
                   variables: {
                     outing_id: outingId,
