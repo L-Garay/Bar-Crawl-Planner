@@ -18,7 +18,7 @@ export const GenerateOutingInviteEmail = (
           button: {
             color: '#ffb6c1',
             text: 'Accept Invite',
-            link: `http://localhost:3000/resources/outinginvite?outingId=${outing_id}&profileId=${profile.id}`,
+            link: `http://localhost:3000/outinginvite?outingId=${outing_id}&profileId=${profile.id}&socialPin=${profile.social_pin}`,
           },
         },
         outro:

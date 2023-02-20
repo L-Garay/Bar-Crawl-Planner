@@ -9,17 +9,14 @@ import { ApolloServer } from '@apollo/server';
 import { PrismaClient } from '@prisma/client';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import {
-  GetAccountByEmail,
-  GetAccountWithProfileData,
-} from './prisma/querries/accountQuerries';
-import { CreateProfile } from './prisma/mutations/profileMutations';
-import { CreateAccount } from './prisma/mutations/accountMutations';
+import { GetAccountByEmail } from './prisma/querries/accountQuerries';
 import {
   checkTokenExpiration,
   runTokenValidation,
 } from './auth/helperFunctions';
 import { testGoogleJob } from './scheduledJobs/testGoogleMaps';
+import { GetProfileByAccountId } from './prisma/querries/profileQuerries';
+import { DisconnectUserWithOuting } from './prisma/mutations/outingMutations';
 // import { readFileSync } from 'fs';
 // import path from 'path';
 
@@ -80,62 +77,49 @@ async function StartServer() {
     const decodedToken = await runTokenValidation(req);
 
     if (decodedToken.error) {
+      console.log(
+        'this means there was an error decoding token: ',
+        decodedToken.error.name,
+        decodedToken.error.message
+      );
+
       return res.status(400).send(null);
     }
-
-    // TODO need to look into how to handle if the decoded token is a string
     if (
       typeof decodedToken.decoded === 'string' ||
       typeof decodedToken.decoded === 'undefined'
     ) {
+      console.log('this means the decoded token is a string or undefined');
+
+      // TODO need to look into how to handle if the decoded token is a string
       return res.status(500).send(null);
     }
+    console.log('should be returning status 200');
 
-    // NOTE for the invite flow, if they sign in to auth0 with a different email than they were invited with, this email from the decoded token will not match any in the DB
-    // However, we do not want to create a new account/profile for them in this case
-    // as they already have ones
-    const email = decodedToken.decoded.email || '';
-    const userData = await GetAccountWithProfileData(email);
-
-    // Indicates that an account could not be found, but no errors occurred
-    // At this point since we know they are creating a new account, we'll need to assign them their 'User' role in auth0 too
-    let newUser;
-    if (userData.status === 'Success' && userData.data === null) {
-      try {
-        const {
-          email_verified: verified,
-          name,
-          picture,
-        } = decodedToken.decoded;
-
-        const account: any = await CreateAccount(email, verified);
-
-        const profile: any = await CreateProfile(
-          name,
-          picture,
-          account.data.id
-        );
-
-        newUser = {
-          name: profile.data.name,
-          email: account.data.email,
-        };
-
-        return res.status(200).send({ user: newUser, createdNewUser: true });
-      } catch (error) {
-        console.error('Error trying to create account or profile', error);
-        res.status(500).send(null);
-      }
-    }
-
-    // Indicates that there is an error object to read
-    if (userData.status === 'Failure') {
-      return res.status(500).send({ user: null, createdNewUser: false });
-    }
-
-    const user = userData.data;
-    return res.status(200).send({ user, createdNewUser: false });
+    return res.status(200).send('Success');
   });
+
+  app.post(
+    '/disconnect-user',
+    bodyParser.text(),
+    cors({ origin: 'http://localhost:3000', credentials: false }), // not sure how I feel about this, will likely need to change this after looking into cors more
+    // but for right now in testing, this works
+    async (req, res) => {
+      const keyValArray = req.body.split('&');
+      const valArray = keyValArray.map(
+        (keyVal: string) => keyVal.split('=')[1]
+      );
+
+      const response = await DisconnectUserWithOuting(
+        Number(valArray[0]),
+        Number(valArray[1])
+      );
+      if (response.error) {
+        return res.status(500).send(response.error);
+      }
+      return res.status(200).send(response.data);
+    }
+  );
 
   // NOTE will likely need to expand/modify this going forward
   // this is a basic example to be able to test connection
@@ -177,14 +161,24 @@ async function StartServer() {
         // When an empty object is returned, all auth based gql requests will fail (which is all of them)
         if (typeof decodedToken.decoded === 'string') return {};
 
+        // TODO here we need to check to see if the inviteData customHeader was passed
+        // if so, then we know that there is a chance this email may not match any account
+        // in which case, I'm thinking we just don't set a user account or profile
+        // I don't believe that there will be any issues, as once the invite flow is done the user will have claimed their account
+        if (req.headers.invitedata) {
+          console.log('inviteData header was passed', req.headers.invitedata);
+
+          return { decodedToken: decodedToken.decoded };
+        }
         const email = decodedToken.decoded?.email;
         const user = await GetAccountByEmail(email);
+        const profile = await GetProfileByAccountId(user.data.id);
 
         // NOTE need to clear this when user logs out
         // NOTE this may need to be handled client side see:
         // https://www.apollographql.com/docs/react/caching/advanced-topics/
         //  OR just make query against the server called like 'LogoutAndClear' that will have a specific header that we can check for, and if it is present we know to just return an empty context object ('clear it out')
-        return { decodedToken: decodedToken.decoded, user };
+        return { decodedToken: decodedToken.decoded, user, profile };
       },
     })
   );
