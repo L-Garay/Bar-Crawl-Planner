@@ -40,7 +40,7 @@ export default function LoginPage() {
       >
         <h1>Please log in to continue</h1>
         <Form method="post">
-          <button>Login or Sign up</button>
+          <button type="submit">Login or Sign up</button>
         </Form>
       </div>
     </>

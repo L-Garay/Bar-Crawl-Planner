@@ -5,6 +5,7 @@ import { useQuery, gql } from '@apollo/client';
 import homepageStyles from '../../../generatedStyles/homepage.css';
 import spinnerStyles from '../../../generatedStyles/spinners.css';
 import { Dynamic } from '~/components/animated/loadingSpinners';
+import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
 
 const testQuery = gql`
   query accounts {
@@ -37,6 +38,7 @@ export const links: LinksFunction = () => {
 
 export default function HomePage() {
   // const { user } = useLoaderData();
+  const isDomLoaded = useIsDomLoaded();
 
   const { loading, error, data } = useQuery(testQuery);
 
@@ -47,18 +49,22 @@ export default function HomePage() {
 
   return (
     <main>
-      <h1>This is the Home Page</h1>
-      {/* <h3>Welcome {user.info.name}</h3>
+      {isDomLoaded ? (
+        <>
+          <h1>This is the Home Page</h1>
+          {/* <h3>Welcome {user.info.name}</h3>
       <h4>{user.info.email}</h4> */}
-      <p>
-        This is the page users will land when they have logged, they've been
-        authenticated and a user session has been created for them
-      </p>
-      <small>Data from grapqhl query</small>
-      <small>{JSON.stringify(data)}</small>
-      <Form method="post" action="/resources/logout">
-        <button className="test-button">Logout</button>
-      </Form>
+          <p>
+            This is the page users will land when they have logged, they've been
+            authenticated and a user session has been created for them
+          </p>
+          <small>Data from grapqhl query</small>
+          <small>{JSON.stringify(data)}</small>
+          <Form method="post" action="/resources/logout">
+            <button className="test-button">Logout</button>
+          </Form>
+        </>
+      ) : null}
     </main>
   );
 }

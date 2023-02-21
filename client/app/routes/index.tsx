@@ -8,19 +8,11 @@ import type {
 import { redirect } from '@remix-run/node';
 import { logout } from '~/auth/authenticator';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
-import React from 'react';
-import SpinningCube from '~/components/animated/spinningCube';
-import landingPageStyles from '../generatedStyles/landingpage.css';
 import footerStyles from '../generatedStyles/footer.css';
 import LandingPageLayout from '~/layouts/LandingPageLayout';
 
 export const links: LinksFunction = () => {
   return [
-    {
-      rel: 'stylesheet',
-      href: landingPageStyles,
-      as: 'style',
-    },
     {
       rel: 'stylesheet',
       href: footerStyles,
@@ -48,35 +40,10 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function LandingPage() {
   const { valid } = useLoaderData();
-  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
-  const [showChildren, setShowChildren] = React.useState<boolean>(false);
-
-  // This will only fire once on initial mounting
-  React.useEffect(() => {
-    const validWindow = window && typeof window !== 'undefined';
-    if (canvasRef.current && validWindow) setShowChildren(true);
-  }, []);
-
-  React.useEffect(() => {
-    const validWindow = window && typeof window !== 'undefined';
-    if (showChildren === false && canvasRef.current && validWindow)
-      setShowChildren(true);
-  }, [showChildren]);
-
-  // window is not defined during initial SSR generation/rendering
-  // so we'll need to wait until after first SSR
-  // we can try to block the UI on the first render to prevent things jumping/rendering at different times
-  // only unblock the UI once the canvas ref is set and window is defined
-  // that way we can be certain that passing those values to SpinningCube will not throw an error
-  if (showChildren) {
-    SpinningCube(canvasRef.current, window);
-  }
 
   return (
     <>
-      {/* <canvas ref={canvasRef} className="canvas"></canvas> */}
       <LandingPageLayout>
-        {/* {showChildren && ( */}
         <div
           style={{
             fontFamily: 'system-ui, sans-serif',
@@ -105,7 +72,6 @@ export default function LandingPage() {
             </button>
           </Form>
         </div>
-        {/* )} */}
       </LandingPageLayout>
     </>
   );
