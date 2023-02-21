@@ -10,7 +10,7 @@
      "target": "ES2018",
      "module": "CommonJS",
      "moduleResolution": "Node",
-     "types": ["node"],
+     "types": ["node", "jest"],
      "strict": true,
      "allowJs": true,
      "useUnknownInCatchVariables": false,

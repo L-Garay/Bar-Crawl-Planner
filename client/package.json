@@ -30,6 +30,8 @@
   "devDependencies": {
     "@remix-run/dev": "^1.7.5",
     "@remix-run/eslint-config": "^1.7.5",
+    "@testing-library/dom": "^9.0.0",
+    "@testing-library/react": "^14.0.0",
     "@types/google.maps": "^3.51.0",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
