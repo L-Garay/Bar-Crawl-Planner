@@ -1,6 +1,8 @@
 import { prismaClient } from '../..';
 import {
+  GenerateOutingInviteEmailParams,
   OutingInput,
+  OutingInviteProfiles,
   QueryData,
   SendingOutingsInvitesInput,
 } from '../../types/sharedTypes';
@@ -8,7 +10,7 @@ import { GetPrismaError } from '../../utilities';
 import Mailgen from 'mailgen';
 import nodemailer from 'nodemailer';
 import { Account, Profile } from '@prisma/client';
-import { GenerateOutingInviteEmail } from '../../utilities/generateEmails';
+import { GenerateOutingInviteEmail } from '../../utilities/generateEmails/';
 import dotenv from 'dotenv';
 import short from 'short-uuid';
 
@@ -124,7 +126,7 @@ export async function SendOutingInvites({
           id: profile?.id,
           name: profile?.name,
           social_pin: profile?.social_pin,
-        };
+        } as OutingInviteProfiles;
       });
     console.log('\n\nRESOLVED PROFILES', resolvedProfiles);
 
@@ -143,12 +145,13 @@ export async function SendOutingInvites({
       });
     });
 
-    const generatedEmails = GenerateOutingInviteEmail(
+    const generateEmailInput: GenerateOutingInviteEmailParams = {
       outing_id,
       start_date_and_time,
-      resolvedProfiles,
-      senderName
-    );
+      profiles: resolvedProfiles,
+      senderName,
+    };
+    const generatedEmails = GenerateOutingInviteEmail(generateEmailInput);
     const emailsToSend = generatedEmails.map((email) =>
       generator.generate(email)
     );

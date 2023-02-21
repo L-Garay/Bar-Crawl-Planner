@@ -74,3 +74,32 @@ export type SendingOutingsInvitesInput = {
   start_date_and_time: string;
   senderName: string;
 };
+
+export type OutingInviteProfiles = {
+  id: number;
+  name: string;
+  social_pin: string;
+};
+
+export type GenerateOutingInviteEmailParams = {
+  outing_id: number;
+  start_date_and_time: string;
+  profiles: OutingInviteProfiles[];
+  senderName: string;
+};
+
+export type OutingInviteEmail = {
+  body: {
+    name: string;
+    intro: string;
+    action: {
+      instructions: string;
+      button: {
+        color: string;
+        text: string;
+        link: string;
+      };
+    };
+    outro: string;
+  };
+};
