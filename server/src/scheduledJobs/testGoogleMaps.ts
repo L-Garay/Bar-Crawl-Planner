@@ -20,11 +20,9 @@ import {
   DETAILS_FIELDS_TO_RETURN,
   LOCATION_DATA_EXPIRATION_DAYS,
 } from '../constants/mapConstants';
+import { Sleep } from '../utilities/sleepFunction';
 
 dotenv.config();
-
-const Sleep = async (delay: number) =>
-  new Promise((resolve) => setTimeout(resolve, delay));
 
 const testGoogleQueue = new Bull('Test Google Maps Queue', {
   redis: {
