@@ -17,11 +17,7 @@ export async function GetAccountByEmail(email: string): Promise<PrismaData> {
 
 export async function GetAllAccounts(): Promise<PrismaData> {
   try {
-    const users = await prismaClient.account.findMany({
-      where: {
-        id: 2,
-      },
-    });
+    const users = await prismaClient.account.findMany();
     return { status: 'Success', data: users, error: null };
   } catch (error) {
     console.log('ERROR BEING SENT TO GETPRISMAERROR', error);

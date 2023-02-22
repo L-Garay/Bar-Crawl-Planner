@@ -16,6 +16,9 @@ const NavMenu = () => {
         <Link to="/support" className="menuLink">
           Support
         </Link>
+        <Link to="/resources/logout" className="menuLink">
+          Logout
+        </Link>
       </div>
     </div>
   );
