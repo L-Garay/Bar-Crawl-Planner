@@ -5,16 +5,18 @@ export interface GoogleError extends Error {
   headers?: any;
 }
 
-export type QueryData = {
-  status: string;
-  data: any;
-  error?: PrismaError | Error | GoogleError;
-};
-
 export type PrismaError = {
-  clientVersion: string;
-  meta: Record<any, unknown>;
+  meta?: Record<any, unknown>;
+  errorCode?: string;
 } & Error;
+
+export type QueryError = PrismaError | Error | GoogleError;
+
+export type QueryData = {
+  status: 'Success' | 'Failure';
+  data: any;
+  error?: QueryError;
+};
 
 export type TokenValidationResponse = {
   status: number;

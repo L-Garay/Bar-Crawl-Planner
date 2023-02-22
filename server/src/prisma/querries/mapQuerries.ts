@@ -5,8 +5,8 @@ import {
   NEARBY_CITIES,
   TOTAL_RATINGS_CUTOFFS,
 } from '../../constants/mapConstants';
-import { CitySelectOptions } from '../../types/sharedTypes';
-import { GetPrismaError } from '../../utilities';
+import { CitySelectOptions, PrismaError } from '../../types/sharedTypes';
+import { GetServerError } from '../../utilities';
 import prismaClient from '../../index';
 import { QueryData } from '../../types/sharedTypes';
 
@@ -42,8 +42,7 @@ export const SearchCity = async (
       },
     });
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Error', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 
   if (allLocationsInCity.length === 0) {

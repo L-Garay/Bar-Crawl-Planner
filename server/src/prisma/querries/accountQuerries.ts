@@ -1,6 +1,6 @@
 import prismaClient from '../../index';
-import { GetPrismaError } from '../../utilities';
-import { QueryData } from '../../types/sharedTypes';
+import { GetServerError } from '../../utilities';
+import { PrismaError, QueryData } from '../../types/sharedTypes';
 
 export async function GetAccountByEmail(email: string): Promise<QueryData> {
   try {
@@ -11,18 +11,21 @@ export async function GetAccountByEmail(email: string): Promise<QueryData> {
     });
     return { status: 'Success', data: user };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
 export async function GetAllAccounts(): Promise<QueryData> {
   try {
-    const users = await prismaClient.account.findMany();
+    const users = await prismaClient.account.findMany({
+      where: {
+        id: 2,
+      },
+    });
     return { status: 'Success', data: users };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    console.log('ERROR BEING SENT TO GETPRISMAERROR', error);
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -50,7 +53,6 @@ export async function GetAccountWithProfileData(
     const expectedUser = { email: data?.email, name: data?.profile?.name };
     return { status: 'Success', data: expectedUser };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }

@@ -1,1 +1,1 @@
-export { default as GetPrismaError } from './getPrismaError';
+export { default as GetServerError } from './getPrismaError';

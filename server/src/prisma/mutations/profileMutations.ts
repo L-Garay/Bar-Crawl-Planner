@@ -1,6 +1,6 @@
 import prismaClient from '../../index';
-import { QueryData } from '../../types/sharedTypes';
-import { GetPrismaError } from '../../utilities';
+import { PrismaError, QueryData } from '../../types/sharedTypes';
+import { GetServerError } from '../../utilities';
 import short from 'short-uuid';
 
 export async function CreateProfile(
@@ -9,8 +9,6 @@ export async function CreateProfile(
   account_id: number
 ): Promise<QueryData> {
   try {
-    // Apperently, if you manually just attach another data type's record's id, prisma or postgresql will automatically create the right relationship
-    // I checked Prisma Studio after creating an account and profile (with no specific linking code yet) and they were already related/linked! #cool
     const profile = await prismaClient.profile.create({
       data: {
         name,
@@ -23,8 +21,7 @@ export async function CreateProfile(
     return { status: 'Success', data: profile };
   } catch (error) {
     console.log(error);
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -45,8 +42,7 @@ export async function AddFriend(
     });
     return { status: 'Success', data: profile };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -67,7 +63,6 @@ export async function RemoveFriend(
     });
     return { status: 'Success', data: profile };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }

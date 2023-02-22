@@ -12,7 +12,7 @@ import {
   LocationDetails,
   QueryData,
 } from '../types/sharedTypes';
-import { GetPrismaError } from '../utilities';
+import { GetServerError } from '../utilities';
 import prismaClient from '..';
 import {
   CITY_COORDINATES,
@@ -401,7 +401,7 @@ testGoogleQueue.process('Fetch all location data', async (job, done) => {
         });
         done(null, recordsCreated);
       } catch (error) {
-        const newError = GetPrismaError(error);
+        const newError = GetServerError(error);
         job.log(
           `Job failed uploading data to DB with error ${error.message}\nError: ${newError}`
         );

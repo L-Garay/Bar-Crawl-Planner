@@ -1,6 +1,6 @@
 import prismaClient from '../../index';
-import { QueryData } from '../../types/sharedTypes';
-import { GetPrismaError } from '../../utilities';
+import { PrismaError, QueryData } from '../../types/sharedTypes';
+import { GetServerError } from '../../utilities';
 
 export async function CreateAccount(
   email: string,
@@ -20,8 +20,7 @@ export async function CreateAccount(
 
     return { status: 'Success', data: account };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -48,8 +47,7 @@ export async function UpdateUserAccount(
 
     return { status: 'Success', data: updatedUser };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -67,8 +65,7 @@ export async function DeactivateUserAccount(id: number) {
 
     return { status: 'Success', data: deactivatedUser };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -99,7 +96,6 @@ export async function UpdateAccountBySocialPin(
     });
     return { status: 'Success', data: updatedAccount };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }

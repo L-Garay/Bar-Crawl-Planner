@@ -1,6 +1,6 @@
 import prismaClient from '../../index';
-import { QueryData } from '../../types/sharedTypes';
-import { GetPrismaError } from '../../utilities/';
+import { PrismaError, QueryData } from '../../types/sharedTypes';
+import { GetServerError } from '../../utilities/';
 
 export async function GetProfileByAccountId(id: number): Promise<QueryData> {
   try {
@@ -11,8 +11,7 @@ export async function GetProfileByAccountId(id: number): Promise<QueryData> {
     });
     return { status: 'Success', data: profile };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 export async function GetProfileByProfileId(id: number): Promise<QueryData> {
@@ -24,8 +23,7 @@ export async function GetProfileByProfileId(id: number): Promise<QueryData> {
     });
     return { status: 'Success', data: profile };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -34,8 +32,7 @@ export async function GetAllProfiles(): Promise<QueryData> {
     const profiles = await prismaClient.profile.findMany();
     return { status: 'Success', data: profiles };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -52,8 +49,7 @@ export async function GetProfilesInOuting(id: number): Promise<QueryData> {
     });
     return { status: 'Success', data: profiles };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -75,8 +71,7 @@ export async function GetAllFriends(id: number): Promise<QueryData> {
     });
     return { status: 'Success', data: friends };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -90,8 +85,7 @@ export async function FindFriendById(friend_id: number): Promise<QueryData> {
     });
     return { status: 'Success', data: friend };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -102,17 +96,6 @@ export async function FindFriendByPin(social_pin: string): Promise<QueryData> {
     });
     return { status: 'Success', data: friend };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
-
-// GetAllProfiles()
-//   .then(async () => {
-//     await prismaClient.$disconnect();
-//   })
-//   .catch(async (e) => {
-//     console.error(e);
-//     await prismaClient.$disconnect();
-//     process.exit(1);
-//   });

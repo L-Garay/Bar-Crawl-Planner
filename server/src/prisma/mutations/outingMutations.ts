@@ -3,10 +3,11 @@ import {
   GenerateOutingInviteEmailParams,
   OutingInput,
   OutingInviteProfiles,
+  PrismaError,
   QueryData,
   SendingOutingsInvitesInput,
 } from '../../types/sharedTypes';
-import { GetPrismaError } from '../../utilities';
+import { GetServerError } from '../../utilities';
 import Mailgen from 'mailgen';
 import nodemailer from 'nodemailer';
 import { Account, Profile } from '@prisma/client';
@@ -38,8 +39,7 @@ export async function CreateOuting({
     });
     return { status: 'Success', data: outing };
   } catch (error) {
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -186,8 +186,7 @@ export async function SendOutingInvites({
     };
   } catch (error) {
     console.error(error);
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -209,8 +208,7 @@ export async function ConnectUserWithOuting(
     return { status: 'Success', data: outing };
   } catch (error) {
     console.log(error);
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
@@ -230,7 +228,6 @@ export async function DisconnectUserWithOuting(
     return { status: 'Success', data: user };
   } catch (error) {
     console.log(error);
-    const newError = GetPrismaError(error);
-    return { status: 'Failure', data: null, error: newError };
+    return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
