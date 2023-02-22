@@ -74,3 +74,6 @@ export default function LandingPage() {
     </LandingPageLayout>
   );
 }
+
+// NOTE since this essentially the root of the root page's component tree
+// I think it's acceptable to just allow any errors to bubble up from here to the root Error and Catch boundaries

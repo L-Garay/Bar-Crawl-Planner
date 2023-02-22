@@ -1,11 +1,10 @@
-import type { LinksFunction, LoaderFunction } from '@remix-run/node';
-import { Form, useLoaderData } from '@remix-run/react';
-import { authenticator } from '~/auth/authenticator';
+import type { LinksFunction } from '@remix-run/node';
 import { useQuery, gql } from '@apollo/client';
 import homepageStyles from '../../../generatedStyles/homepage.css';
 import spinnerStyles from '../../../generatedStyles/spinners.css';
 import { Dynamic } from '~/components/animated/loadingSpinners';
 import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
+import logApolloError from '~/utils/getApolloError';
 
 const testQuery = gql`
   query accounts {
@@ -31,13 +30,7 @@ export const links: LinksFunction = () => {
   ];
 };
 
-// export const loader: LoaderFunction = async ({ request }) => {
-//   // const user = await authenticator.isAuthenticated(request);
-//   return { user };
-// };
-
 export default function HomePage() {
-  // const { user } = useLoaderData();
   const isDomLoaded = useIsDomLoaded();
 
   const { loading, error, data } = useQuery(testQuery);
@@ -45,36 +38,63 @@ export default function HomePage() {
   if (loading) {
     return <Dynamic />;
   }
-  if (error) throw error;
+  if (error) {
+    logApolloError(error);
+    throw new Error(JSON.stringify(error));
+  }
 
   return (
     <main>
       {isDomLoaded ? (
         <>
           <h1>This is the Home Page</h1>
-          {/* <h3>Welcome {user.info.name}</h3>
-      <h4>{user.info.email}</h4> */}
           <p>
             This is the page users will land when they have logged, they've been
             authenticated and a user session has been created for them
           </p>
           <small>Data from grapqhl query</small>
           <small>{JSON.stringify(data)}</small>
-          <Form method="post" action="/resources/logout">
-            <button className="test-button">Logout</button>
-          </Form>
         </>
       ) : null}
     </main>
   );
 }
 
-// TODO properly think about and update this
-export function ErrorBoundary({ error }: { error: Error }) {
+// TODO look into why even though I have this error boundary, when I throw an error from the component, in the console it still says 'Uncaught error...'
+// does it always log that?
+// does it get logged before it gets caught by the error boundary?
+// or am I missing something about using Error boundaries?
+export function ErrorBoundary({ error }: { error: any }) {
   return (
     <main>
-      <h1>Home Page error</h1>
-      <p>{error.message}</p>
+      <div className="error-container">
+        <h1>
+          Uh-oh looks like someone spilled their drink again here at the office
+        </h1>
+        <p>
+          Please try again later, and if the issue still persists contact
+          customer support
+        </p>
+        <small>Call (208) 999-8888 or email test@mail.com</small>
+      </div>
+    </main>
+  );
+}
+
+// Will catch responses thrown from loaders and actions, any errors thrown from component will only get caught by error boundary
+export function CatchBoundary() {
+  return (
+    <main>
+      <div className="error-container">
+        <h1>
+          Uh-oh looks like someone spilled their drink again here at the office
+        </h1>
+        <p>
+          Please try again later, and if the issue still persists contact
+          customer support
+        </p>
+        <small>Call (208) 999-8888 or email test@mail.com</small>
+      </div>
     </main>
   );
 }

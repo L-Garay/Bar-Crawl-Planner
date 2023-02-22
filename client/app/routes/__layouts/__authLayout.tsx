@@ -21,3 +21,7 @@ export default function AuthLayout() {
     </>
   );
 }
+
+// Don't believe I should need an Error or Catch boundary here, as the only way to get to this route is to be authenticated
+// If there's an error between when the user logs in and then they try to access a protected route, we know something really bad happened
+// in which case logging them out should work, and then if the issue persists it should get caught by the root/login pages' error and catch boundaries
