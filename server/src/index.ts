@@ -20,7 +20,8 @@ import { DisconnectUserWithOuting } from './prisma/mutations/outingMutations';
 // import { readFileSync } from 'fs';
 // import path from 'path';
 
-export const prismaClient = new PrismaClient();
+const prismaClient = new PrismaClient();
+export default prismaClient;
 
 dotenv.config();
 

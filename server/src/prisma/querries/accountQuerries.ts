@@ -1,4 +1,4 @@
-import { prismaClient } from '../../index';
+import prismaClient from '../../index';
 import { GetPrismaError } from '../../utilities';
 import { QueryData } from '../../types/sharedTypes';
 

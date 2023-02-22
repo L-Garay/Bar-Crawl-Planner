@@ -1,4 +1,4 @@
-import { prismaClient } from '../..';
+import prismaClient from '../..';
 import {
   GenerateOutingInviteEmailParams,
   OutingInput,
@@ -196,8 +196,6 @@ export async function ConnectUserWithOuting(
   profileId: number
 ): Promise<QueryData> {
   try {
-    console.log('DOES THE ACTUAL FUNCTION RUN?', outingId, profileId);
-
     const outing = await prismaClient.outing.update({
       where: { id: outingId },
       data: {

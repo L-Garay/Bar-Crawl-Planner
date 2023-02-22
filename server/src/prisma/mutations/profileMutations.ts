@@ -1,4 +1,4 @@
-import { prismaClient } from '../../index';
+import prismaClient from '../../index';
 import { QueryData } from '../../types/sharedTypes';
 import { GetPrismaError } from '../../utilities';
 import short from 'short-uuid';

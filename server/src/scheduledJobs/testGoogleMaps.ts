@@ -13,7 +13,7 @@ import {
   QueryData,
 } from '../types/sharedTypes';
 import { GetPrismaError } from '../utilities';
-import { prismaClient } from '..';
+import prismaClient from '..';
 import {
   CITY_COORDINATES,
   CRON_JOB_DATA,

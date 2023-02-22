@@ -7,9 +7,8 @@ import {
 } from '../../constants/mapConstants';
 import { CitySelectOptions } from '../../types/sharedTypes';
 import { GetPrismaError } from '../../utilities';
-import { prismaClient } from '../../index';
+import prismaClient from '../../index';
 import { QueryData } from '../../types/sharedTypes';
-import { Prisma } from '@prisma/client';
 
 dotenv.config();
 
