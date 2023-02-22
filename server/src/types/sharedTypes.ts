@@ -12,10 +12,10 @@ export type PrismaError = {
 
 export type QueryError = PrismaError | Error | GoogleError;
 
-export type QueryData = {
+export type PrismaData = {
   status: 'Success' | 'Failure';
-  data: any;
-  error?: QueryError;
+  data: any; // TODO try to type prismas return data
+  error: PrismaError | null;
 };
 
 export type TokenValidationResponse = {

@@ -8,14 +8,14 @@ import {
 import { CitySelectOptions, PrismaError } from '../../types/sharedTypes';
 import { GetServerError } from '../../utilities';
 import prismaClient from '../../index';
-import { QueryData } from '../../types/sharedTypes';
+import { PrismaData } from '../../types/sharedTypes';
 
 dotenv.config();
 
 export const SearchCity = async (
   city: CitySelectOptions,
   locationType: string
-): Promise<QueryData> => {
+): Promise<PrismaData> => {
   const fullCityName = city === 'Slc' ? 'Salt Lake City' : city;
 
   let allLocationsInCity: any[] = [];
@@ -46,7 +46,7 @@ export const SearchCity = async (
   }
 
   if (allLocationsInCity.length === 0) {
-    return { status: 'Success', data: [] };
+    return { status: 'Success', data: [], error: null };
   }
 
   // Filter the locations by name using location type first
@@ -186,8 +186,8 @@ export const SearchCity = async (
       'Still less than 60 after second switch',
       noDubplicatesArray.length
     );
-    return { status: 'Success', data: noDubplicatesArray };
+    return { status: 'Success', data: noDubplicatesArray, error: null };
   } else {
-    return { status: 'Success', data: noDubplicatesArray };
+    return { status: 'Success', data: noDubplicatesArray, error: null };
   }
 };

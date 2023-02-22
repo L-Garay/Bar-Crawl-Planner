@@ -1,23 +1,23 @@
 import prismaClient from '../../index';
-import { PrismaError, QueryData } from '../../types/sharedTypes';
+import { PrismaError, PrismaData } from '../../types/sharedTypes';
 import { GetServerError } from '../../utilities';
 
 export async function GetOutingByOutingId(
   outingId: number
-): Promise<QueryData> {
+): Promise<PrismaData> {
   try {
     const outing = await prismaClient.outing.findUnique({
       where: {
         id: outingId,
       },
     });
-    return { status: 'Success', data: outing };
+    return { status: 'Success', data: outing, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
-export async function GetAllOutings(creatorId: number): Promise<QueryData> {
+export async function GetAllOutings(creatorId: number): Promise<PrismaData> {
   try {
     const createdOutings = await prismaClient.outing.findMany({
       where: {
@@ -37,7 +37,7 @@ export async function GetAllOutings(creatorId: number): Promise<QueryData> {
       },
     });
     const outings = [...createdOutings, ...joinedOutings];
-    return { status: 'Success', data: outings };
+    return { status: 'Success', data: outings, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }

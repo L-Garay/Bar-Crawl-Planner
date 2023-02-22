@@ -10,7 +10,7 @@ import {
   CitySelectOptions,
   GoogleError,
   LocationDetails,
-  QueryData,
+  PrismaData,
 } from '../types/sharedTypes';
 import { GetServerError } from '../utilities';
 import prismaClient from '..';

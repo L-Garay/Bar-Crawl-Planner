@@ -1,11 +1,11 @@
 import prismaClient from '../../index';
-import { PrismaError, QueryData } from '../../types/sharedTypes';
+import { PrismaError, PrismaData } from '../../types/sharedTypes';
 import { GetServerError } from '../../utilities';
 
 export async function CreateAccount(
   email: string,
   email_verified: boolean
-): Promise<QueryData> {
+): Promise<PrismaData> {
   try {
     const account = await prismaClient.account.create({
       data: {
@@ -18,7 +18,7 @@ export async function CreateAccount(
       },
     });
 
-    return { status: 'Success', data: account };
+    return { status: 'Success', data: account, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
@@ -28,7 +28,7 @@ export async function UpdateUserAccount(
   originalUserEmail: string,
   phone?: string | null,
   email?: string | null
-) {
+): Promise<PrismaData> {
   // We want to make sure these are undefined (and not null) so that way Prisma will not try to update the field
   const phoneOrUndefinded = phone ? phone : undefined;
   const emailOrUndefined = email ? email : undefined;
@@ -45,13 +45,13 @@ export async function UpdateUserAccount(
     });
     // TODO update data in Auth0 DB
 
-    return { status: 'Success', data: updatedUser };
+    return { status: 'Success', data: updatedUser, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
 
-export async function DeactivateUserAccount(id: number) {
+export async function DeactivateUserAccount(id: number): Promise<PrismaData> {
   try {
     const deactivatedUser = await prismaClient.account.update({
       where: {
@@ -63,7 +63,7 @@ export async function DeactivateUserAccount(id: number) {
       },
     });
 
-    return { status: 'Success', data: deactivatedUser };
+    return { status: 'Success', data: deactivatedUser, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
@@ -73,7 +73,7 @@ export async function UpdateAccountBySocialPin(
   profile_id: number,
   social_pin: string,
   email: string
-) {
+): Promise<PrismaData> {
   try {
     const profile = await prismaClient.profile.findFirst({
       where: {
@@ -94,7 +94,7 @@ export async function UpdateAccountBySocialPin(
         email,
       },
     });
-    return { status: 'Success', data: updatedAccount };
+    return { status: 'Success', data: updatedAccount, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }

@@ -4,7 +4,7 @@ import {
   OutingInput,
   OutingInviteProfiles,
   PrismaError,
-  QueryData,
+  PrismaData,
   SendingOutingsInvitesInput,
 } from '../../types/sharedTypes';
 import { GetServerError } from '../../utilities';
@@ -23,7 +23,7 @@ export async function CreateOuting({
   start_date_and_time,
   place_ids,
   creatorId,
-}: OutingInput & { creatorId: number }): Promise<QueryData> {
+}: OutingInput & { creatorId: number }): Promise<PrismaData> {
   try {
     const outing = await prismaClient.outing.create({
       data: {
@@ -37,7 +37,7 @@ export async function CreateOuting({
         },
       },
     });
-    return { status: 'Success', data: outing };
+    return { status: 'Success', data: outing, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
@@ -48,7 +48,7 @@ export async function SendOutingInvites({
   start_date_and_time,
   emails,
   senderName,
-}: SendingOutingsInvitesInput): Promise<QueryData> {
+}: SendingOutingsInvitesInput): Promise<PrismaData> {
   try {
     const generator = new Mailgen({
       theme: 'default',
@@ -183,6 +183,7 @@ export async function SendOutingInvites({
     return {
       status: 'Success',
       data: `Sucessfully sent ${successfulEmails.length} email${successString}!`,
+      error: null,
     };
   } catch (error) {
     console.error(error);
@@ -193,7 +194,7 @@ export async function SendOutingInvites({
 export async function ConnectUserWithOuting(
   outingId: number,
   profileId: number
-): Promise<QueryData> {
+): Promise<PrismaData> {
   try {
     const outing = await prismaClient.outing.update({
       where: { id: outingId },
@@ -205,7 +206,7 @@ export async function ConnectUserWithOuting(
         },
       },
     });
-    return { status: 'Success', data: outing };
+    return { status: 'Success', data: outing, error: null };
   } catch (error) {
     console.log(error);
     return { status: 'Failure', data: null, error: error as PrismaError };
@@ -215,7 +216,7 @@ export async function ConnectUserWithOuting(
 export async function DisconnectUserWithOuting(
   profileId: number,
   outingId: number
-): Promise<QueryData> {
+): Promise<PrismaData> {
   try {
     const user = await prismaClient.outing.update({
       where: { id: outingId },
@@ -225,7 +226,7 @@ export async function DisconnectUserWithOuting(
         },
       },
     });
-    return { status: 'Success', data: user };
+    return { status: 'Success', data: user, error: null };
   } catch (error) {
     console.log(error);
     return { status: 'Failure', data: null, error: error as PrismaError };
