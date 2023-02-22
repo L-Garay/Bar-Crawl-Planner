@@ -35,8 +35,6 @@ import {
   SendOutingInvites,
 } from './prisma/mutations/outingMutations';
 
-// Resolvers define how to fetch the types defined in your schema.
-// This resolver retrieves books from the "books" array above.
 const resolvers: Resolvers = {
   Query: {
     accounts: async (parent, args, context, info) => {
@@ -47,13 +45,18 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await GetAllAccounts();
-      if (data.status === 'Failure') {
+      const accounts = await GetAllAccounts();
+      if (accounts.status === 'Failure') {
         throw new GraphQLError('Cannot get all accounts', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: accounts.error?.name,
+            message: accounts.error?.message,
+            prismaMeta: accounts.error?.meta,
+            prismaErrorCode: accounts.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return accounts.data;
       }
     },
     getAccountByEmail: async (parent, args, context, info) => {
@@ -65,14 +68,19 @@ const resolvers: Resolvers = {
       }
       console.log('args.email: ', args.email);
 
-      const data = await GetAccountByEmail(args.email);
-      if (data.status === 'Failure') {
+      const account = await GetAccountByEmail(args.email);
+      if (account.status === 'Failure') {
         throw new GraphQLError('Cannot get account', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: account.error?.name,
+            message: account.error?.message,
+            prismaMeta: account.error?.meta,
+            prismaErrorCode: account.error?.errorCode,
+          },
         });
       } else {
-        console.log('should be return user: ', data.data);
-        return data.data;
+        console.log('should be return user: ', account.data);
+        return account.data;
       }
     },
     getUserAccount: async (parent, args, context, info) => {
@@ -92,13 +100,18 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await GetAllProfiles();
-      if (data.status === 'Failure') {
+      const profiles = await GetAllProfiles();
+      if (profiles.status === 'Failure') {
         throw new GraphQLError('Cannot get all profiles', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: profiles.error?.name,
+            message: profiles.error?.message,
+            prismaMeta: profiles.error?.meta,
+            prismaErrorCode: profiles.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return profiles.data;
       }
     },
     getProfilesInOuting: async (parent, args, context, info) => {
@@ -109,13 +122,18 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await GetProfilesInOuting(args.id);
-      if (data.status === 'Failure') {
+      const profiles = await GetProfilesInOuting(args.id);
+      if (profiles.status === 'Failure') {
         throw new GraphQLError('Cannot get profiles for outing', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: profiles.error?.name,
+            message: profiles.error?.message,
+            prismaMeta: profiles.error?.meta,
+            prismaErrorCode: profiles.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return profiles.data;
       }
     },
     getAllOutings: async (parent, args, context, info) => {
@@ -127,13 +145,18 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await GetAllOutings(profile.data.id);
-      if (data.status === 'Failure') {
+      const outings = await GetAllOutings(profile.data.id);
+      if (outings.status === 'Failure') {
         throw new GraphQLError('Cannot get all outings', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: outings.error?.name,
+            message: outings.error?.message,
+            prismaMeta: outings.error?.meta,
+            prismaErrorCode: outings.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return outings.data;
       }
     },
     getOuting: async (parent, args, context, info) => {
@@ -150,6 +173,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: outing.error?.name,
             message: outing.error?.message,
+            prismaMeta: outing.error?.meta,
+            prismaErrorCode: outing.error?.errorCode,
           },
         });
       } else {
@@ -164,13 +189,18 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await GetAllFriends(user.data.id);
-      if (data.status === 'Failure') {
+      const friends = await GetAllFriends(user.data.id);
+      if (friends.status === 'Failure') {
         throw new GraphQLError('Cannot get all friends', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: friends.error?.name,
+            message: friends.error?.message,
+            prismaMeta: friends.error?.meta,
+            prismaErrorCode: friends.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return friends.data;
       }
     },
     findFriendById: async (parent, args, context, info) => {
@@ -181,13 +211,18 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await FindFriendById(args.id);
-      if (data.status === 'Failure') {
+      const friend = await FindFriendById(args.id);
+      if (friend.status === 'Failure') {
         throw new GraphQLError('Cannot get friend by id', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: friend.error?.name,
+            message: friend.error?.message,
+            prismaMeta: friend.error?.meta,
+            prismaErrorCode: friend.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return friend.data;
       }
     },
     findFriendByPin: async (parent, args, context, info) => {
@@ -198,13 +233,18 @@ const resolvers: Resolvers = {
         });
       }
 
-      const data = await FindFriendByPin(args.social_pin);
-      if (data.status === 'Failure') {
+      const friend = await FindFriendByPin(args.social_pin);
+      if (friend.status === 'Failure') {
         throw new GraphQLError('Cannot get friend by pin', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: friend.error?.name,
+            message: friend.error?.message,
+            prismaMeta: friend.error?.meta,
+            prismaErrorCode: friend.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return friend.data;
       }
     },
     searchCity: async (parent, args, context, info) => {
@@ -215,13 +255,18 @@ const resolvers: Resolvers = {
         });
       }
       const city = args.city as CitySelectOptions;
-      const data = await SearchCity(city, args.locationType);
-      if (data.status === 'Failure') {
+      const locations = await SearchCity(city, args.locationType);
+      if (locations.status === 'Failure') {
         throw new GraphQLError('Cannot search city', {
-          extensions: { code: data.error?.name, message: data.error?.message },
+          extensions: {
+            code: locations.error?.name,
+            message: locations.error?.message,
+            prismaMeta: locations.error?.meta,
+            prismaErrorCode: locations.error?.errorCode,
+          },
         });
       } else {
-        return data.data;
+        return locations.data;
       }
     },
   },
@@ -246,6 +291,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: updatedUser.error?.name,
             message: updatedUser.error?.message,
+            prismaMeta: updatedUser.error?.meta,
+            prismaErrorCode: updatedUser.error?.errorCode,
           },
         });
       } else {
@@ -268,6 +315,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: deactivatedUser.error?.name,
             message: deactivatedUser.error?.message,
+            prismaMeta: deactivatedUser.error?.meta,
+            prismaErrorCode: deactivatedUser.error?.errorCode,
           },
         });
       } else {
@@ -289,6 +338,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: addedFriend.error?.name,
             message: addedFriend.error?.message,
+            prismaMeta: addedFriend.error?.meta,
+            prismaErrorCode: addedFriend.error?.errorCode,
           },
         });
       } else {
@@ -310,6 +361,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: removedFriend.error?.name,
             message: removedFriend.error?.message,
+            prismaMeta: removedFriend.error?.meta,
+            prismaErrorCode: removedFriend.error?.errorCode,
           },
         });
       } else {
@@ -332,6 +385,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: outing.error?.name,
             message: outing.error?.message,
+            prismaMeta: outing.error?.meta,
+            prismaErrorCode: outing.error?.errorCode,
           },
         });
       } else {
@@ -360,6 +415,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: outing.error?.name,
             message: outing.error?.message,
+            prismaMeta: outing.error?.meta,
+            prismaErrorCode: outing.error?.errorCode,
           },
         });
       } else {
@@ -382,6 +439,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: connectedUser.error?.name,
             message: connectedUser.error?.message,
+            prismaMeta: connectedUser.error?.meta,
+            prismaErrorCode: connectedUser.error?.errorCode,
           },
         });
       } else {
@@ -405,6 +464,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: disconnectedUser.error?.name,
             message: disconnectedUser.error?.message,
+            prismaMeta: disconnectedUser.error?.meta,
+            prismaErrorCode: disconnectedUser.error?.errorCode,
           },
         });
       } else {
@@ -429,6 +490,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: updatedUser.error?.name,
             message: updatedUser.error?.message,
+            prismaMeta: updatedUser.error?.meta,
+            prismaErrorCode: updatedUser.error?.errorCode,
           },
         });
       } else {
@@ -450,6 +513,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: account.error?.name,
             message: account.error?.message,
+            prismaMeta: account.error?.meta,
+            prismaErrorCode: account.error?.errorCode,
           },
         });
       }
@@ -460,6 +525,8 @@ const resolvers: Resolvers = {
           extensions: {
             code: profile.error?.name,
             message: profile.error?.message,
+            prismaMeta: profile.error?.meta,
+            prismaErrorCode: profile.error?.errorCode,
           },
         });
       }
