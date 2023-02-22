@@ -1,9 +1,25 @@
 import { Form } from '@remix-run/react';
 import getConfig from '~/utils/config.server';
-import type { ActionFunction, LoaderFunction } from '@remix-run/node';
+import type {
+  ActionFunction,
+  LinksFunction,
+  LoaderFunction,
+} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { authenticator } from '~/auth/authenticator';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
+import LandingPageLayout from '~/layouts/LandingPageLayout';
+import footerStyles from '~/generatedStyles/footer.css';
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: footerStyles,
+      as: 'style',
+    },
+  ];
+};
 
 export const action: ActionFunction = async ({ params, request }) => {
   return authenticator.authenticate('auth0', request);
@@ -31,7 +47,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
 
 export default function LoginPage() {
   return (
-    <>
+    <LandingPageLayout>
       <div
         style={{
           fontFamily: 'system-ui, sans-serif',
@@ -43,6 +59,6 @@ export default function LoginPage() {
           <button type="submit">Login or Sign up</button>
         </Form>
       </div>
-    </>
+    </LandingPageLayout>
   );
 }

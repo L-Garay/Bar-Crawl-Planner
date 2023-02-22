@@ -1,5 +1,5 @@
 import React from 'react';
-import { BasicFooter } from '~/components/organisms/Footers';
+import { LandingPageFooter } from '~/components/organisms/Footers';
 
 export default function LandingPageLayout({
   children,
@@ -9,7 +9,7 @@ export default function LandingPageLayout({
   return (
     <>
       {children}
-      <BasicFooter />
+      <LandingPageFooter />
     </>
   );
 }
