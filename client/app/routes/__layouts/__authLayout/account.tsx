@@ -1,6 +1,6 @@
-import { gql, useQuery } from '@apollo/client';
-import type { ActionFunction } from '@remix-run/node';
-import { Form, useTransition } from '@remix-run/react';
+import { gql } from '@apollo/client';
+import type { ActionFunction, LoaderFunction } from '@remix-run/node';
+import { Form, useLoaderData, useTransition } from '@remix-run/react';
 import React from 'react';
 import { getNewClient } from '~/apollo/getClient';
 import { Dynamic } from '~/components/animated/loadingSpinners';
@@ -50,19 +50,27 @@ export const action: ActionFunction = async ({ request }) => {
   return { userData };
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const client = await getNewClient(request);
+  let account: any;
+  try {
+    account = await client.query({
+      query: getAccount,
+    });
+  } catch (error) {
+    logApolloError(error);
+    throw new Response(JSON.stringify(error), { status: 500 });
+  }
+  return account;
+};
+
 export default function AccountIndex() {
-  const { loading, error, data: accountData } = useQuery(getAccount);
   const transition = useTransition();
+  const loaderData = useLoaderData();
+
+  const { getUserAccount: accountData } = loaderData.data;
 
   const phoneRef = React.useRef<HTMLInputElement>(null);
-
-  if (loading) {
-    return <Dynamic />;
-  }
-  if (error) {
-    logApolloError(error);
-    throw error;
-  }
 
   // Not super thrilled with this
   // Optimistically show the user's updated values, or their current value
@@ -70,7 +78,7 @@ export default function AccountIndex() {
   const phoneToShow = transition.submission
     ? transition.submission?.formData.get('phone_number')
     : accountData
-    ? accountData.getUserAccount.phone_number
+    ? accountData.phone_number
     : null;
 
   return (

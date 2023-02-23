@@ -1,16 +1,16 @@
-import type { LinksFunction } from '@remix-run/node';
-import { useQuery, gql } from '@apollo/client';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
+import { gql } from '@apollo/client';
 import homepageStyles from '../../../generatedStyles/homepage.css';
 import spinnerStyles from '../../../generatedStyles/spinners.css';
-import { Dynamic } from '~/components/animated/loadingSpinners';
 import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
 import logApolloError from '~/utils/getApolloError';
+import { getNewClient } from '~/apollo/getClient';
+import { useLoaderData } from '@remix-run/react';
 
-const testQuery = gql`
-  query accounts {
-    accounts {
+const getAccount = gql`
+  query getUserAccount {
+    getUserAccount {
       email
-      email_verified
     }
   }
 `;
@@ -30,18 +30,24 @@ export const links: LinksFunction = () => {
   ];
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const client = await getNewClient(request);
+  let account: any;
+  try {
+    account = await client.query({
+      query: getAccount,
+    });
+  } catch (error) {
+    logApolloError(error);
+    throw new Response(JSON.stringify(error), { status: 500 });
+  }
+  return account;
+};
+
 export default function HomePage() {
   const isDomLoaded = useIsDomLoaded();
-
-  const { loading, error, data } = useQuery(testQuery);
-
-  if (loading) {
-    return <Dynamic />;
-  }
-  if (error) {
-    logApolloError(error);
-    throw new Error(JSON.stringify(error));
-  }
+  const loaderData = useLoaderData();
+  const { email } = loaderData.data.getUserAccount;
 
   return (
     <main>
@@ -52,8 +58,8 @@ export default function HomePage() {
             This is the page users will land when they have logged, they've been
             authenticated and a user session has been created for them
           </p>
-          <small>Data from grapqhl query</small>
-          <small>{JSON.stringify(data)}</small>
+          <small>Logged in user's email: </small>
+          <small>{email}</small>
         </>
       ) : null}
     </main>

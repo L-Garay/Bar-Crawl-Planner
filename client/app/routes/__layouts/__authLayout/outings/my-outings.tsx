@@ -1,6 +1,7 @@
-import { gql, useQuery } from '@apollo/client';
-import { useNavigate } from '@remix-run/react';
-import { Dynamic } from '~/components/animated/loadingSpinners';
+import { gql } from '@apollo/client';
+import type { LoaderFunction } from '@remix-run/node';
+import { useLoaderData, useNavigate } from '@remix-run/react';
+import { getNewClient } from '~/apollo/getClient';
 import logApolloError from '~/utils/getApolloError';
 
 const GET_OUTINGS = gql`
@@ -16,22 +17,30 @@ const GET_OUTINGS = gql`
   }
 `;
 
-export default function MyOutings() {
-  const { loading, error, data } = useQuery(GET_OUTINGS);
-  const navigate = useNavigate();
-
-  if (loading) {
-    return <Dynamic />;
-  }
-  if (error) {
+export const loader: LoaderFunction = async ({ request }) => {
+  const client = await getNewClient(request);
+  let outings: any;
+  try {
+    outings = await client.query({
+      query: GET_OUTINGS,
+    });
+  } catch (error) {
     logApolloError(error);
-    throw error;
+    throw new Response(JSON.stringify(error), { status: 500 });
   }
+  return outings;
+};
+
+export default function MyOutings() {
+  const navigate = useNavigate();
+  const loaderData = useLoaderData();
+
+  const { getAllOutings } = loaderData.data;
 
   return (
     <div>
       <h1>My Outings</h1>
-      {data.getAllOutings.map((outing: any) => {
+      {getAllOutings.map((outing: any) => {
         return (
           <div
             key={outing.id}

@@ -1,26 +1,4 @@
-// import { gql, useQuery } from '@apollo/client';
-// import { Dynamic } from '~/components/animated/loadingSpinners';
-
-// TODO need to set up a query to get the user's profile data in server
-// const getProfileAndFriends = gql`
-//   query profielAndFriends {
-//     profile {
-//       name
-//     }
-//     friends {
-//       name
-//     }
-//   }
-// `;
-
 export default function FriendsIndex() {
-  // const { loading, error, data } = useQuery(getProfileAndFriends);
-
-  // if (loading) {
-  //   return <Dynamic />;
-  // }
-  // if (error) throw error;
-
   return (
     <>
       <div

@@ -1,6 +1,7 @@
-import { gql, useMutation, useQuery } from '@apollo/client';
-import { useParams } from '@remix-run/react';
-import { Dynamic } from '~/components/animated/loadingSpinners';
+import { gql, useMutation } from '@apollo/client';
+import type { LoaderFunction } from '@remix-run/node';
+import { useLoaderData, useParams } from '@remix-run/react';
+import { getNewClient } from '~/apollo/getClient';
 import logApolloError from '~/utils/getApolloError';
 
 const GET_OUTING = gql`
@@ -41,41 +42,44 @@ const SEND_EMAIL = gql`
   }
 `;
 
+export const loader: LoaderFunction = async ({ request, params }) => {
+  const client = await getNewClient(request);
+
+  let outing: any;
+  let profiles: any;
+
+  try {
+    outing = await client.query({
+      query: GET_OUTING,
+      variables: {
+        id: Number(params.outingId),
+      },
+    });
+    profiles = await client.query({
+      query: GET_PROFILES_IN_OUTING,
+      variables: {
+        id: Number(params.outingId),
+      },
+    });
+  } catch (error) {
+    logApolloError(error);
+    throw new Response(JSON.stringify(error), { status: 500 });
+  }
+  return { outing, profiles };
+};
+
 export default function OutingDetails() {
   const outingId = Number(useParams().outingId);
-  const {
-    loading: outingLoading,
-    error: outingError,
-    data: outingData,
-  } = useQuery(GET_OUTING, {
-    variables: { id: outingId },
-  });
-  const {
-    loading: profilesLoading,
-    error: profilesError,
-    data: profilesData,
-  } = useQuery(GET_PROFILES_IN_OUTING, {
-    variables: { id: outingId },
-  });
+  const { outing, profiles } = useLoaderData();
+
+  const { getOuting } = outing.data;
+  const { getProfilesInOuting } = profiles.data;
+
   const [
     SendEmail,
     { loading: emailLoading, error: emailError, data: emailData },
   ] = useMutation(SEND_EMAIL);
 
-  if (outingLoading || profilesLoading) {
-    return <Dynamic />;
-  }
-
-  // TODO update logApolloError to be able to handle an array of apollo errors
-  if (outingError) {
-    logApolloError(outingError);
-  }
-  if (profilesError) {
-    logApolloError(profilesError);
-  }
-  if (outingError || profilesError) {
-    throw new Error('Error loading outing details');
-  }
   if (emailError) {
     logApolloError(emailError);
     // don't throw an error here, because if the email fails to send we can still show the outing details
@@ -83,11 +87,11 @@ export default function OutingDetails() {
 
   return (
     <div>
-      {outingData ? (
+      {getOuting ? (
         <>
-          <h1>{outingData.getOuting.name}</h1>
-          <p>{outingData.getOuting.start_date_and_time}</p>
-          <p>{outingData.getOuting.place_ids}</p>
+          <h1>{getOuting.name}</h1>
+          <p>{getOuting.start_date_and_time}</p>
+          <p>{getOuting.place_ids}</p>
           <br />
           <div className="add-profiles">
             <form
@@ -105,8 +109,7 @@ export default function OutingDetails() {
                 SendEmail({
                   variables: {
                     outing_id: outingId,
-                    start_date_and_time:
-                      outingData.getOuting.start_date_and_time,
+                    start_date_and_time: getOuting.start_date_and_time,
                     emails,
                   },
                 });
@@ -119,9 +122,9 @@ export default function OutingDetails() {
             </form>
           </div>
           <h4>Profiles in Outing</h4>
-          {profilesData ? (
+          {getProfilesInOuting ? (
             <>
-              {profilesData.getProfilesInOuting.map((profile: any) => {
+              {getProfilesInOuting.map((profile: any) => {
                 return (
                   <div key={profile.id}>
                     <p>

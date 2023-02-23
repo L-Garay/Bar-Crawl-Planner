@@ -1,23 +1,4 @@
-// import { gql, useQuery } from '@apollo/client';
-// import { Dynamic } from '~/components/animated/loadingSpinners';
-
-// TODO need to set up a query to get the user's profile data in server
-// const getProfile = gql`
-//   query profile {
-//     profile {
-//       name
-//     }
-//   }
-// `;
-
 export default function ProfileIndex() {
-  // const { loading, error, data } = useQuery(getProfile);
-
-  // if (loading) {
-  //   return <Dynamic />;
-  // }
-  // if (error) throw error;
-
   return (
     <>
       <div
