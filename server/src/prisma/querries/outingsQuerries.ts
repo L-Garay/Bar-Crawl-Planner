@@ -1,6 +1,5 @@
 import prismaClient from '../../index';
 import { PrismaError, PrismaData } from '../../types/sharedTypes';
-import { GetServerError } from '../../utilities';
 
 export async function GetOutingByOutingId(
   outingId: number

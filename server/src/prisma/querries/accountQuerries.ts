@@ -1,5 +1,5 @@
 import prismaClient from '../../index';
-import { GetServerError } from '../../utilities';
+
 import { PrismaError, PrismaData } from '../../types/sharedTypes';
 
 export async function GetAccountByEmail(email: string): Promise<PrismaData> {

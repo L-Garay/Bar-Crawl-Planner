@@ -7,7 +7,7 @@ import {
   PrismaData,
   SendingOutingsInvitesInput,
 } from '../../types/sharedTypes';
-import { GetServerError } from '../../utilities';
+
 import Mailgen from 'mailgen';
 import nodemailer from 'nodemailer';
 import { Account, Profile } from '@prisma/client';

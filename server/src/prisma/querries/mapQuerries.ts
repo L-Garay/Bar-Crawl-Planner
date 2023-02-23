@@ -6,7 +6,7 @@ import {
   TOTAL_RATINGS_CUTOFFS,
 } from '../../constants/mapConstants';
 import { CitySelectOptions, PrismaError } from '../../types/sharedTypes';
-import { GetServerError } from '../../utilities';
+
 import prismaClient from '../../index';
 import { PrismaData } from '../../types/sharedTypes';
 
