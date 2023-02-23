@@ -1,5 +1,7 @@
 import invariant from 'tiny-invariant';
 
+// TODO look into why invariant cause remix to crash when running built assets
+// works in development, works in built assets if you comment out the invariant functions
 const getConfig = () => {
   invariant(process.env.SERVER_ADDRESS, 'SERVER_ADDRESS is undefined');
   invariant(process.env.AUTH0_CLIENT_ID, 'AUTH0_CLIENT_ID is undefined');
