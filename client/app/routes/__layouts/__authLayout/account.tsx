@@ -3,8 +3,8 @@ import type { ActionFunction } from '@remix-run/node';
 import { Form, useTransition } from '@remix-run/react';
 import React from 'react';
 import { getNewClient } from '~/apollo/getClient';
-import { logout } from '~/auth/authenticator';
 import { Dynamic } from '~/components/animated/loadingSpinners';
+import logApolloError from '~/utils/getApolloError';
 
 // TODO need to investigate extraneous graphql calls I'm seeing in the network tab when visiting this Account page
 // I'm seeing requests to the operation 'accounts', which was only being used when first developing this page as a quick test to make sure the query was working
@@ -34,52 +34,20 @@ const updateAccount = gql`
   }
 `;
 
-const deactivateAccount = gql`
-  mutation deactivateUserAccount($id: Int!) {
-    deactivateUserAccount(id: $id) {
-      id
-      email
-      deactivated
-      deactivated_at
-    }
-  }
-`;
-
 export const action: ActionFunction = async ({ request }) => {
   const client = await getNewClient(request);
   const formData = await request.formData();
+  const phone_number = formData.get('phone_number')?.toString();
 
-  switch (request.method) {
-    case 'PATCH':
-      const phone_number = formData.get('phone_number')?.toString();
+  const updatedUser = await client.mutate({
+    mutation: updateAccount,
+    variables: {
+      phone_number: phone_number,
+    },
+  });
+  const userData = updatedUser.data.updateUserAccount;
 
-      const updatedUser = await client.mutate({
-        mutation: updateAccount,
-        variables: {
-          phone_number: phone_number,
-        },
-      });
-      const userData = updatedUser.data.updateUserAccount;
-
-      return { userData };
-
-    case 'DELETE': // NOTE even though this is actually calls an update on the server, is it okay to use the DELETE method here?
-      const id = Number(formData.get('account_id'));
-      try {
-        await client.mutate({
-          mutation: deactivateAccount,
-          variables: {
-            id,
-          },
-        });
-        return logout(request);
-      } catch (error) {
-        throw error;
-      }
-
-    default:
-      return null;
-  }
+  return { userData };
 };
 
 export default function AccountIndex() {
@@ -87,21 +55,18 @@ export default function AccountIndex() {
   const transition = useTransition();
 
   const phoneRef = React.useRef<HTMLInputElement>(null);
-  const emailRef = React.useRef<HTMLInputElement>(null);
 
   if (loading) {
     return <Dynamic />;
   }
-  if (error) throw error;
+  if (error) {
+    logApolloError(error);
+    throw error;
+  }
 
   // Not super thrilled with this
   // Optimistically show the user's updated values, or their current value
   // Then once the sumbission process is over, the updated value should have then become their current value and it will remain in the UI
-  const emailToShow = transition.submission
-    ? transition.submission?.formData.get('email')
-    : accountData
-    ? accountData.getUserAccount.email
-    : null;
   const phoneToShow = transition.submission
     ? transition.submission?.formData.get('phone_number')
     : accountData
@@ -118,7 +83,6 @@ export default function AccountIndex() {
           }}
         >
           <h1>This will be the Account page</h1>
-          <small>{'Email: ' + emailToShow + ' '}</small>
           <small>{'Phone: ' + phoneToShow + ' '}</small>
           <p>
             This will probably be a pretty simple page content wise, as in it
@@ -126,29 +90,16 @@ export default function AccountIndex() {
             can think of currently.
           </p>
           <p>
-            This will be where they can delete their account, will need to think
-            about whether we'll do a hard delete of the profile and a soft
-            delete of the account OR a hard delete of both OR a soft delete of
-            both.
+            For now they can just update their phone. As updating emails would
+            require a whole new process with Auth0, which may be implemented in
+            the future. They also can not currently delete their account, but I
+            can see soft deletes in the future.
           </p>
           <div className="form-container">
             <Form method="patch" action="/account">
-              <label htmlFor="email">Email</label>
-              <input type="text" name="email" ref={emailRef} />
               <label htmlFor="phone_number">Phone</label>
               <input type="text" name="phone_number" ref={phoneRef} />
               <button type="submit">Submit</button>
-            </Form>
-          </div>
-          <div className="delete-button">
-            <Form method="delete" action="/account">
-              <input
-                hidden
-                type="number"
-                name="account_id"
-                defaultValue={accountData.getUserAccount.id}
-              />
-              <button>Deactivate Account</button>
             </Form>
           </div>
         </div>
@@ -156,5 +107,42 @@ export default function AccountIndex() {
         <Dynamic />
       )}
     </>
+  );
+}
+
+export function ErrorBoundary({ error }: { error: any }) {
+  return (
+    <main>
+      <div className="error-container">
+        <h1>
+          Uh-oh looks like someone ran off with your account, don't worry we are
+          tracking it down!
+        </h1>
+        <p>
+          Please try again later, and if the issue still persists contact
+          customer support
+        </p>
+        <small>Call (208) 999-8888 or email test@mail.com</small>
+      </div>
+    </main>
+  );
+}
+
+// Will catch responses thrown from loaders and actions, any errors thrown from component will only get caught by error boundary
+export function CatchBoundary() {
+  return (
+    <main>
+      <div className="error-container">
+        <h1>
+          Uh-oh looks like someone ran off with your account, don't worry we are
+          tracking it down!
+        </h1>
+        <p>
+          Please try again later, and if the issue still persists contact
+          customer support
+        </p>
+        <small>Call (208) 999-8888 or email test@mail.com</small>
+      </div>
+    </main>
   );
 }

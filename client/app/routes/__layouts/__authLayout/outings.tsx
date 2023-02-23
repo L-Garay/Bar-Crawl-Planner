@@ -1,9 +1,9 @@
-import type { LinksFunction, LoaderFunction } from '@remix-run/node';
-import getConfig from '~/utils/config.server';
+import type { LinksFunction } from '@remix-run/node';
 import outingsStyles from '~/generatedStyles/outingspage.css';
 import { Outlet } from '@remix-run/react';
 import SimpleNav from '~/components/molecules/simpleNav';
 import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
+import { Dynamic } from '~/components/animated/loadingSpinners';
 
 export const links: LinksFunction = () => {
   return [
@@ -15,12 +15,7 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  return getConfig();
-};
-
 export default function OutingsIndex() {
-  // const loaderData = useLoaderData();
   const isDomLoaded = useIsDomLoaded();
 
   const navLinks = [
@@ -62,7 +57,12 @@ export default function OutingsIndex() {
           <SimpleNav links={navLinks} />
           <Outlet />
         </div>
-      ) : null}
+      ) : (
+        <Dynamic />
+      )}
     </>
   );
 }
+
+// I don't believe this specific file needs an error and catch boundary
+// each specific outing page will have it's own, which should selectively render each section appropriately

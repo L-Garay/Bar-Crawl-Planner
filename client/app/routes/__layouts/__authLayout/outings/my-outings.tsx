@@ -1,6 +1,7 @@
 import { gql, useQuery } from '@apollo/client';
 import { useNavigate } from '@remix-run/react';
 import { Dynamic } from '~/components/animated/loadingSpinners';
+import logApolloError from '~/utils/getApolloError';
 
 const GET_OUTINGS = gql`
   query getAllOutings {
@@ -22,7 +23,10 @@ export default function MyOutings() {
   if (loading) {
     return <Dynamic />;
   }
-  if (error) throw error;
+  if (error) {
+    logApolloError(error);
+    throw error;
+  }
 
   return (
     <div>
@@ -40,5 +44,40 @@ export default function MyOutings() {
         );
       })}
     </div>
+  );
+}
+
+export function ErrorBoundary({ error }: { error: any }) {
+  return (
+    <main>
+      <div className="error-container">
+        <h1>
+          Uh-oh looks like someone forgot to tell your outings they worked today
+        </h1>
+        <p>
+          Please try again later, and if the issue still persists contact
+          customer support
+        </p>
+        <small>Call (208) 999-8888 or email test@mail.com</small>
+      </div>
+    </main>
+  );
+}
+
+// Will catch responses thrown from loaders and actions, any errors thrown from component will only get caught by error boundary
+export function CatchBoundary() {
+  return (
+    <main>
+      <div className="error-container">
+        <h1>
+          Uh-oh looks like someone forgot to tell your outings they worked today
+        </h1>
+        <p>
+          Please try again later, and if the issue still persists contact
+          customer support
+        </p>
+        <small>Call (208) 999-8888 or email test@mail.com</small>
+      </div>
+    </main>
   );
 }
