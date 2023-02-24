@@ -19,17 +19,38 @@ import { Form } from '@remix-run/react';
 import moment from 'moment';
 import { CITY_SEARCH } from '~/constants/graphqlConstants';
 
-export default function BasicMap({
-  style,
-  children,
-  onIdle,
-  mapOptions,
-}: MapProps) {
-  const mapsRef = useRef<HTMLDivElement>(null);
+export default function BasicMap({ style, mapOptions }: MapProps) {
+  // Map variables
   const [map, setMap] = useState<google.maps.Map>();
+  const mapsRef = useRef<HTMLDivElement>(null);
+  const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
+  const [currentMapMarkers, setCurrentMapMarkers] = useState<
+    google.maps.Marker[]
+  >([]);
+
+  // Map setup
+  useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
+  useSetMapOptions(map, mapOptions);
+  useSetMapEventListeners(map);
+
+  // create Info Window for pop ups on markers
+  const infoWindow = useMemo(() => new google.maps.InfoWindow(), []);
+  const openInfoWindow = (index: number, location: LocationDetails) => {
+    const marker = currentMapMarkers[index];
+    const infoWindowContent = getInfoWindowContent(undefined, location);
+    infoWindow.setContent(infoWindowContent);
+    infoWindow.open({
+      anchor: marker,
+      map,
+    });
+  };
+
+  // Search variables
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('Boise');
   const [selectedType, setSelectedType] =
     useState<LocationSelectOptions>('bars');
+  const [locations, setLocations] = useState<LocationDetails[]>([]);
+  // Search query
   const [
     searchCity,
     { loading: cityLoading, error: cityError, data: cityData },
@@ -37,109 +58,45 @@ export default function BasicMap({
     fetchPolicy: 'no-cache', // testing purposes only
   });
 
-  const [locations, setLocations] = useState<LocationDetails[]>([]);
-  const [mapMarkers, setMapMarkers] = useState<google.maps.Marker[]>([]);
-  const [currentMapMarkers, setCurrentMapMarkers] = useState<
-    google.maps.Marker[]
-  >([]);
-  const [currentPaginationResults, setCurrentPaginationResults] = useState<
-    any[]
-  >([]);
-
-  const paginationPage = useRef<number>(1);
-  const PAGINATION_LIMIT = 10;
-  const paginationIndexRange = useRef<number[]>([0, 10]);
-  const maxIndex = useRef<number>(0);
-
-  const MAX_SELECTED_OUTINGS = 5;
+  // create outing variables
   const [selectedOutings, setSelectedOutings] = useState<LocationDetails[]>([]);
+  const [noName, setNoName] = useState<boolean>(true);
+  const [noTime, setNoTime] = useState<boolean>(true);
+  const shouldDisableCreateOuting = useMemo(
+    () => selectedOutings.length === 0 || noName || noTime,
+    [selectedOutings, noName, noTime]
+  );
   const selectedOutingPlaceIds = selectedOutings.map(
     (outing) => outing.place_id
   );
   const outingPlaceIdString = selectedOutingPlaceIds.join(',');
-
   const currentDay = new Date();
   const currentDayInputValue = moment(currentDay).format('YYYY-MM-DDTHH:mm');
   const maxDate = currentDay.setFullYear(currentDay.getFullYear() + 1);
   const maxDateValue = moment(maxDate).format('YYYY-MM-DDTHH:mm');
 
-  // create Info Window for pop ups on markers
-  const infoWindow = useMemo(() => new google.maps.InfoWindow(), []);
-
-  useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
-  useSetMapOptions(map, mapOptions);
-  useSetMapEventListeners(map, undefined, onIdle);
-
-  // Store all location data
-  useEffect(() => {
-    if (cityData) {
-      setLocations(cityData.searchCity);
-      maxIndex.current = cityData.searchCity.length - 1;
+  // Outing functions
+  const addLocationToOutings = (location: LocationDetails) => {
+    if (selectedOutings.length < MAX_SELECTED_OUTINGS) {
+      setSelectedOutings([...selectedOutings, location]);
     }
-  }, [cityData]);
-
-  // create and store all map markers
-  useEffect(() => {
-    const mapMarkers = locations.map((location: LocationDetails) => {
-      const lat = location.lat ? location.lat : 0;
-      const lng = location.lng ? location.lng : 0;
-      // TODO make markers accessible
-      // https://developers.google.com/maps/documentation/javascript/markers#accessible
-      return new google.maps.Marker({
-        position: { lat, lng },
-        optimized: false,
-        icon: martiniImg,
-      });
-    });
-    setMapMarkers(mapMarkers);
-  }, [locations]);
-
-  // set first 10 current locations and markers
-  useEffect(() => {
-    const firstTenLocations = locations.slice(
-      paginationIndexRange.current[0],
-      paginationPage.current * PAGINATION_LIMIT
+  };
+  const removeLocationFromOutings = (locationId: number) => {
+    const filteredOutings = selectedOutings.filter(
+      (outing) => outing.id !== locationId
     );
-    setCurrentPaginationResults(firstTenLocations);
+    setSelectedOutings(filteredOutings);
+  };
 
-    const firstTenMarkers = mapMarkers.slice(
-      paginationIndexRange.current[0],
-      paginationPage.current * PAGINATION_LIMIT
-    );
-    setCurrentMapMarkers(firstTenMarkers);
-  }, [locations, mapMarkers]);
-
-  const getInfoWindowContent = useCallback(
-    (index?: number, location?: LocationDetails): string => {
-      const locationData = index ? locations[index] : location;
-      return `<div className="info-window-content-container">
-          <div className="info-window-content-header">
-            <h3>${locationData?.name}</h3>
-            <h3>${locationData?.name}</h3>
-          </div>
-          <div className="info-window-content-body">
-            <p>${locationData?.formatted_address}</p>
-            <p>${locationData?.formatted_phone_number}</p>
-            <p>${locationData?.website}</p>
-            <p>${locationData?.rating}</p>
-          </div>
-        </div>`;
-    },
-    [locations]
-  );
-
-  useEffect(() => {
-    mapMarkers.forEach((marker, index) => {
-      const infoWindowContent = getInfoWindowContent(index);
-      marker.addListener('click', () => {
-        infoWindow.setContent(infoWindowContent);
-        infoWindow.open({
-          anchor: marker,
-          map,
-        });
-      });
-    });
-  }, [mapMarkers, map, infoWindow, getInfoWindowContent]);
+  // Search results pagination
+  const [currentPaginationResults, setCurrentPaginationResults] = useState<
+    any[]
+  >([]);
+  const paginationPage = useRef<number>(1);
+  const paginationIndexRange = useRef<number[]>([0, 10]);
+  const maxIndex = useRef<number>(0);
+  const PAGINATION_LIMIT = 10;
+  const MAX_SELECTED_OUTINGS = 5;
 
   const disableNext =
     paginationPage.current * PAGINATION_LIMIT >= maxIndex.current;
@@ -185,38 +142,82 @@ export default function BasicMap({
     }
   };
 
+  // Effects
+  // Store all location data
+  useEffect(() => {
+    if (cityData) {
+      setLocations(cityData.searchCity);
+      maxIndex.current = cityData.searchCity.length - 1;
+    }
+  }, [cityData]);
+
+  // create and store all map markers
+  useEffect(() => {
+    const mapMarkers = locations.map((location: LocationDetails) => {
+      const lat = location.lat ? location.lat : 0;
+      const lng = location.lng ? location.lng : 0;
+      // TODO make markers accessible
+      // https://developers.google.com/maps/documentation/javascript/markers#accessible
+      return new google.maps.Marker({
+        position: { lat, lng },
+        optimized: false,
+        icon: martiniImg,
+      });
+    });
+    setMapMarkers(mapMarkers);
+  }, [locations]);
+
+  // set first 10 current locations and markers
+  useEffect(() => {
+    const firstTenLocations = locations.slice(
+      paginationIndexRange.current[0],
+      paginationPage.current * PAGINATION_LIMIT
+    );
+    setCurrentPaginationResults(firstTenLocations);
+
+    const firstTenMarkers = mapMarkers.slice(
+      paginationIndexRange.current[0],
+      paginationPage.current * PAGINATION_LIMIT
+    );
+    setCurrentMapMarkers(firstTenMarkers);
+  }, [locations, mapMarkers]);
+
   // set the current markers on the map
   currentMapMarkers.forEach((marker) => marker.setMap(map!));
 
-  const openInfoWindow = (index: number, location: LocationDetails) => {
-    const marker = currentMapMarkers[index];
-    const infoWindowContent = getInfoWindowContent(undefined, location);
-    infoWindow.setContent(infoWindowContent);
-    infoWindow.open({
-      anchor: marker,
-      map,
-    });
-  };
-
-  const addLocationToOutings = (location: LocationDetails) => {
-    if (selectedOutings.length < MAX_SELECTED_OUTINGS) {
-      setSelectedOutings([...selectedOutings, location]);
-    }
-  };
-
-  const removeLocationFromOutings = (locationId: number) => {
-    const filteredOutings = selectedOutings.filter(
-      (outing) => outing.id !== locationId
-    );
-    setSelectedOutings(filteredOutings);
-  };
-
-  const [noName, setNoName] = useState<boolean>(true);
-  const [noTime, setNoTime] = useState<boolean>(true);
-  const shouldDisableCreateOuting = useMemo(
-    () => selectedOutings.length === 0 || noName || noTime,
-    [selectedOutings, noName, noTime]
+  // basic google info window to display location details
+  const getInfoWindowContent = useCallback(
+    (index?: number, location?: LocationDetails): string => {
+      const locationData = index ? locations[index] : location;
+      return `<div className="info-window-content-container">
+          <div className="info-window-content-header">
+            <h3>${locationData?.name}</h3>
+            <h3>${locationData?.name}</h3>
+          </div>
+          <div className="info-window-content-body">
+            <p>${locationData?.formatted_address}</p>
+            <p>${locationData?.formatted_phone_number}</p>
+            <p>${locationData?.website}</p>
+            <p>${locationData?.rating}</p>
+          </div>
+        </div>`;
+    },
+    [locations]
   );
+
+  // add click listener to each marker to open info window
+  useEffect(() => {
+    mapMarkers.forEach((marker, index) => {
+      const infoWindowContent = getInfoWindowContent(index);
+      marker.addListener('click', () => {
+        infoWindow.setContent(infoWindowContent);
+        infoWindow.open({
+          anchor: marker,
+          map,
+        });
+      });
+    });
+  }, [mapMarkers, map, infoWindow, getInfoWindowContent]);
 
   return (
     <>

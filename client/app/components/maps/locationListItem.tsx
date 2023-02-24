@@ -19,6 +19,7 @@ export const LocationListItem = ({
 }: LocationListItemProps) => {
   const [isHoveringPlus, setIsHoveringPlus] = useState<boolean>(false);
 
+  // if the location is already selected, or if the user has selected 5 locations, hide the plus icon
   const hidePlusCircle = useMemo(() => {
     const isSelected = selectedOutings.some((selectedOuting) => {
       return selectedOuting.id === location.id;
