@@ -24,12 +24,8 @@ let auth0Strategy = new Auth0Strategy(
   },
   // Sets the token header
   async (authData) => {
-    // NOTE pay attention to any missed downstream errors after including the entire authData object instead of the
     const idToken = authData.extraParams.id_token;
 
-    // NOTE may have to take out the profile and account creation from this route
-    // may need to make it a separate call from an action and not this callback
-    // once this callback resolves in the action we'll know that we can fire off the other call to check for a profile and account and create them if needed
     const response = await fetch(`${config.SERVER.ADDRESS}/authenticate`, {
       headers: {
         Authorization: `Bearer ${idToken}`,
@@ -49,11 +45,13 @@ const getLogoutUrl = (returnToLoginPage?: boolean): string => {
   const config = getConfig();
 
   const logoutURL = new URL(config.AUTH0.LOGOUT_URL);
-  logoutURL.searchParams.set('client_id', config.AUTH0.CLIENT_ID);
 
   const returnToURL = returnToLoginPage
-    ? config.AUTH0.LOGIN_PAGE
-    : config.AUTH0.RETURN_TO_URL;
+    ? config.AUTH0.LOGIN_PAGE // login page
+    : config.AUTH0.RETURN_TO_URL; // landing page
+
+  // these are required by Auth0
+  logoutURL.searchParams.set('client_id', config.AUTH0.CLIENT_ID);
   logoutURL.searchParams.set('returnTo', returnToURL);
 
   return logoutURL.toString();
