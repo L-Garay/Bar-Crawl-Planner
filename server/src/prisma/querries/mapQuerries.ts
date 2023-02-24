@@ -6,7 +6,6 @@ import {
   TOTAL_RATINGS_CUTOFFS,
 } from '../../constants/mapConstants';
 import { CitySelectOptions, PrismaError } from '../../types/sharedTypes';
-
 import prismaClient from '../../index';
 import { PrismaData } from '../../types/sharedTypes';
 
@@ -18,6 +17,8 @@ export const SearchCity = async (
 ): Promise<PrismaData> => {
   const fullCityName = city === 'Slc' ? 'Salt Lake City' : city;
 
+  // Get all known locations for the given search city and it's surrounding/nearby cities
+  // sort by most rated to least
   let allLocationsInCity: any[] = [];
   try {
     allLocationsInCity = await prismaClient.locationDetails.findMany({
@@ -44,12 +45,15 @@ export const SearchCity = async (
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
-
+  // retunr an empty array if no locations are found, but not a failure
+  // don't expect this to get hit at all, but just in case
   if (allLocationsInCity.length === 0) {
+    // should probably log some sort of message here to let me/admin know that something might be wrong with locations
     return { status: 'Success', data: [], error: null };
   }
 
   // Filter the locations by name using location type first
+  // I.e. if the location has the word 'pub' in their name, then those locations will be returned when the given locationType is 'pub'
   const checkName = (location: any) => {
     const nameIncludesType = LOCATION_FILTER_NAMES[
       locationType as keyof typeof LOCATION_FILTER_NAMES
@@ -63,12 +67,12 @@ export const SearchCity = async (
       return false;
     }
   };
-
+  // apply the checkName function to each location
   const filteredLocationsByName = allLocationsInCity.filter((location) =>
     checkName(location)
   );
 
-  // Check location's total ratings and average rating
+  // Check location's total ratings
   // only grab those that meet certain crieteria
   const checkTotalRatings = (totalRatings: number, cutoff: number) => {
     if (totalRatings >= cutoff) {
@@ -77,12 +81,13 @@ export const SearchCity = async (
       return false;
     }
   };
-
+  // apply the checkTotalRatings function to each location
   const topLocations: any[] = filteredLocationsByName.map((location) => {
     const totalRatings = location.user_ratings_total
       ? location.user_ratings_total
       : 0;
-
+    // locations with a certain amount of ratings, must have a certain average rating
+    // the lower the total ratings, the higher the average must be
     if (checkTotalRatings(totalRatings, TOTAL_RATINGS_CUTOFFS[0])) {
       if (location.rating && Number(location.rating) >= 4.0) {
         return location;
@@ -98,27 +103,31 @@ export const SearchCity = async (
         return location;
       }
     }
+    // if a location hasn't been returned yet, then it doesn't meet the criteria and we don't want it
+    // must return something, so we will return null
     return null;
   });
 
-  // First we will find the index of each topLocation in allLocationsInCity and remove it
-  // this will avoid duplicates when we itterate through the list again
-
+  // remove any nulls from the topLocations array
   const noNullTopLocations = topLocations.filter(
     (location) => location !== null
   ) as any[];
 
+  // Find the index of each topLocation in allLocationsInCity and remove it
+  // this will avoid duplicates when we itterate through the list again
   const indexArray: number[] = noNullTopLocations.map((location) =>
     allLocationsInCity.findIndex(
       (filteredLocation) => location.name === filteredLocation.name
     )
   );
-
   indexArray.forEach((index) => allLocationsInCity.splice(index, 1));
 
   // Now we will itterate through the allLocationsInCtiy, as we have now removed the topLocations that we already have
   // we will check the types and if they match, we will still check their average rating, and if they are good enough, we will add them to the extraTopLocations array
 
+  // Filter locations by their types, given the locationType
+  // The constant LOCATION_FILTER_TYPES is an object where the values are arrays of string of two types I think are most applicable to each locationType
+  // likely not the best and will need to be itterated on
   const checkType = (location: any) => {
     const typesIncludesType = LOCATION_FILTER_TYPES[
       locationType as keyof typeof LOCATION_FILTER_TYPES
@@ -133,6 +142,7 @@ export const SearchCity = async (
     }
   };
 
+  // apply the checkType function to each location
   const filteredLocationsByType = allLocationsInCity.filter((location) =>
     checkType(location)
   );
@@ -165,6 +175,7 @@ export const SearchCity = async (
     (location) => location !== null
   ) as any[];
 
+  // combine the topLocations that matched name and the extraTopLocations that matched type
   const combinedTopLocations = noNullTopLocations.concat(
     noNullExtraTopLocations
   );
@@ -175,13 +186,12 @@ export const SearchCity = async (
   // if you console.log() the length of the allLocationsInCity array before and after removing the topLocations, you will see that the length does get smaller
   // therefore there should be literally no way for the second iteration to possibly add in a duplicate of a topLocation
   // however, the code below does the trick, just shouldn't have to do it IMO
-
-  const testSet = new Set(combinedTopLocations);
-  const noDubplicatesArray = Array.from(testSet);
+  const locationSet = new Set(combinedTopLocations);
+  const noDubplicatesArray = Array.from(locationSet);
 
   if (noDubplicatesArray.length < 60) {
-    // at this point we would likely need to do another round with even lower ratings
-    // NOTE for testing purposes I want to return here to see how many locations we have usually after two swtiches
+    // NOTE at this point we would likely need to do another round with even lower ratings
+    // for testing purposes I want to return here to see how many locations we have usually after two swtiches
     console.log(
       'Still less than 60 after second switch',
       noDubplicatesArray.length

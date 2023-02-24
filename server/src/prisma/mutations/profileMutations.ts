@@ -1,6 +1,5 @@
 import prismaClient from '../../index';
 import { PrismaError, PrismaData } from '../../types/sharedTypes';
-
 import short from 'short-uuid';
 
 export async function CreateProfile(

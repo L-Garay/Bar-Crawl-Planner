@@ -25,24 +25,19 @@ export async function CreateAccount(
 
 export async function UpdateUserAccount(
   originalUserEmail: string,
-  phone?: string | null,
-  email?: string | null
+  phone?: string | null
 ): Promise<PrismaData> {
   // We want to make sure these are undefined (and not null) so that way Prisma will not try to update the field
   const phoneOrUndefinded = phone ? phone : undefined;
-  const emailOrUndefined = email ? email : undefined;
   try {
-    // update data in our DB
     const updatedUser = await prismaClient.account.update({
       where: {
         email: originalUserEmail,
       },
       data: {
         phone_number: phoneOrUndefinded,
-        email: emailOrUndefined,
       },
     });
-    // TODO update data in Auth0 DB
 
     return { status: 'Success', data: updatedUser, error: null };
   } catch (error) {

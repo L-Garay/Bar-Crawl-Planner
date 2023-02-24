@@ -57,7 +57,6 @@ export const LOCATION_FILTER_TYPES = {
 };
 
 export const TOTAL_RATINGS_CUTOFFS = [2000, 1000, 100];
-
 export const RATINGS_VALUE_CUTOFFS = {
   2000: 4.5,
   1500: 4.6,

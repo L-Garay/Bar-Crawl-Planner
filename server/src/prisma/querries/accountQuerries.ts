@@ -1,5 +1,4 @@
 import prismaClient from '../../index';
-
 import { PrismaError, PrismaData } from '../../types/sharedTypes';
 
 export async function GetAccountByEmail(email: string): Promise<PrismaData> {
@@ -20,7 +19,6 @@ export async function GetAllAccounts(): Promise<PrismaData> {
     const users = await prismaClient.account.findMany();
     return { status: 'Success', data: users, error: null };
   } catch (error) {
-    console.log('ERROR BEING SENT TO GETPRISMAERROR', error);
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
