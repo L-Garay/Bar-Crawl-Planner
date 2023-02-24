@@ -12,7 +12,7 @@ const useCheckEnvironmentAndSetMap = (
     if (validWindow && ref.current && !map) {
       setMap(
         new window.google.maps.Map(ref.current, {
-          center: { lat: 43.6141397, lng: -116.2155451 },
+          center: { lat: 43.6141397, lng: -116.2155451 }, // TODO centered on Boise, will need to update to center on user's location (or default to Boise)
           zoom: 13,
           backgroundColor: 'lightpink',
         })
