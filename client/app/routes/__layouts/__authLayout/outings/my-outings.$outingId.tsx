@@ -1,47 +1,14 @@
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useParams } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';
+import {
+  GET_OUTING,
+  GET_PROFILES_IN_OUTING,
+  SEND_OUTING_EMAIL,
+} from '~/constants/graphqlConstants';
 import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
-
-const GET_OUTING = gql`
-  query getOuting($id: Int!) {
-    getOuting(id: $id) {
-      id
-      name
-      creator_profile_id
-      created_at
-      start_date_and_time
-      place_ids
-    }
-  }
-`;
-
-const GET_PROFILES_IN_OUTING = gql`
-  query getProfilesInOuting($id: Int!) {
-    getProfilesInOuting(id: $id) {
-      id
-      name
-      profile_img
-      social_pin
-    }
-  }
-`;
-
-const SEND_EMAIL = gql`
-  mutation sendOutingInvites(
-    $outing_id: Int!
-    $start_date_and_time: String!
-    $emails: [String!]!
-  ) {
-    sendOutingInvites(
-      outing_id: $outing_id
-      start_date_and_time: $start_date_and_time
-      emails: $emails
-    )
-  }
-`;
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -79,7 +46,7 @@ export default function OutingDetails() {
   const [
     SendEmail,
     { loading: emailLoading, error: emailError, data: emailData },
-  ] = useMutation(SEND_EMAIL);
+  ] = useMutation(SEND_OUTING_EMAIL);
 
   if (emailError) {
     logApolloError(emailError);

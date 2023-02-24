@@ -1,38 +1,10 @@
-import { gql } from '@apollo/client';
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { Form, useLoaderData, useTransition } from '@remix-run/react';
 import React from 'react';
 import { getNewClient } from '~/apollo/getClient';
 import { Dynamic } from '~/components/animated/loadingSpinners';
+import { UPDATE_ACCOUNT, GET_ACCOUNT } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
-
-// TODO need to investigate extraneous graphql calls I'm seeing in the network tab when visiting this Account page
-// I'm seeing requests to the operation 'accounts', which was only being used when first developing this page as a quick test to make sure the query was working
-// It returns all the accounts in the DB; but now I have switched the query to just look for a single user account
-// This would suggest some caching issue, in which old queries are being are still being used
-// So I need to think about how to detect old/stale cache data and how/when to best clear it
-// Actually, the request seems to fire off on other pages too and it does not always fire off when visiting this page
-const getAccount = gql`
-  query getUserAccount {
-    getUserAccount {
-      email
-      email_verified
-      phone_number
-      created_at
-      deactivated
-      id
-    }
-  }
-`;
-
-const updateAccount = gql`
-  mutation updateUserAccount($email: String, $phone_number: String) {
-    updateUserAccount(email: $email, phone_number: $phone_number) {
-      email
-      phone_number
-    }
-  }
-`;
 
 export const action: ActionFunction = async ({ request }) => {
   const client = await getNewClient(request);
@@ -40,7 +12,7 @@ export const action: ActionFunction = async ({ request }) => {
   const phone_number = formData.get('phone_number')?.toString();
 
   const updatedUser = await client.mutate({
-    mutation: updateAccount,
+    mutation: UPDATE_ACCOUNT,
     variables: {
       phone_number: phone_number,
     },
@@ -55,7 +27,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   let account: any;
   try {
     account = await client.query({
-      query: getAccount,
+      query: GET_ACCOUNT,
     });
   } catch (error) {
     logApolloError(error);
@@ -72,7 +44,6 @@ export default function AccountIndex() {
 
   const phoneRef = React.useRef<HTMLInputElement>(null);
 
-  // Not super thrilled with this
   // Optimistically show the user's updated values, or their current value
   // Then once the sumbission process is over, the updated value should have then become their current value and it will remain in the UI
   const phoneToShow = transition.submission

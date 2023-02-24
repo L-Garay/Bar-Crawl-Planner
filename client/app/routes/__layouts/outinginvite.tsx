@@ -1,18 +1,10 @@
-import { gql, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import { useEffect } from 'react';
+import { DISCONNECT_PROFILE } from '~/constants/graphqlConstants';
 import getConfig from '~/utils/config.server';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
-
-export const CONNECT_PROFILE = gql`
-  mutation DisconnectUserWithOuting($outing_id: Int!, $profile_id: Int!) {
-    DisconnectUserWithOuting(outing_id: $outing_id, profile_id: $profile_id) {
-      id
-      name
-    }
-  }
-`;
 
 export const loader: LoaderFunction = async ({ params, request, context }) => {
   const url = new URL(request.url);
@@ -37,7 +29,7 @@ export default function OutingInvite() {
       error: connectionError,
       data: connectionData,
     },
-  ] = useMutation(CONNECT_PROFILE);
+  ] = useMutation(DISCONNECT_PROFILE);
 
   useEffect(() => {
     if ((outingId || profileId || socialPin) && !isValid && window) {

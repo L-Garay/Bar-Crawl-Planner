@@ -1,52 +1,14 @@
 import type { LoaderFunction } from '@remix-run/node';
-import { CONNECT_PROFILE } from '../outinginvite';
-import { gql, useLazyQuery, useMutation } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import { useState, useEffect } from 'react';
 import { Basic as BasicSpinner } from '~/components/animated/loadingSpinners';
 import { authenticator } from '~/auth/authenticator';
-
-const GET_ACCOUNT = gql`
-  query getAccountByEmail($email: String!) {
-    getAccountByEmail(email: $email) {
-      id
-      email
-    }
-  }
-`;
-
-const UPDATE_ACCOUNT_BY_SOCIAL_PIN = gql`
-  mutation UpdateAccountBySocialPin(
-    $profile_id: Int!
-    $social_pin: String!
-    $email: String!
-  ) {
-    UpdateAccountBySocialPin(
-      profile_id: $profile_id
-      social_pin: $social_pin
-      email: $email
-    ) {
-      id
-      email
-    }
-  }
-`;
-
-const CREATE_ACCOUNT_AND_PROFILE = gql`
-  mutation CreateAccountAndProfile(
-    $name: String!
-    $picture: String!
-    $email: String!
-    $verified: Boolean!
-  ) {
-    CreateAccountAndProfile(
-      name: $name
-      picture: $picture
-      email: $email
-      verified: $verified
-    )
-  }
-`;
+import {
+  GET_ACCOUNT_BY_EMAIL,
+  UPDATE_ACCOUNT_BY_SOCIAL_PIN,
+  CREATE_ACCOUNT_AND_PROFILE,
+} from '~/constants/graphqlConstants';
 
 export const loader: LoaderFunction = async ({ request, context }) => {
   return await authenticator.isAuthenticated(request);
@@ -59,9 +21,9 @@ export default function CheckUser() {
   const [hasAccount, setHasAccount] = useState<boolean | undefined>(undefined);
   const [email, setEmail] = useState<string | undefined>(undefined);
   const [
-    getAccount,
+    getAccountByEmail,
     { data: accountData, loading: accountLoading, error: accountError },
-  ] = useLazyQuery(GET_ACCOUNT, {
+  ] = useLazyQuery(GET_ACCOUNT_BY_EMAIL, {
     context: {
       headers: {
         inviteData: inviteData,
@@ -82,14 +44,6 @@ export default function CheckUser() {
     createAccountAndProfile,
     { data: creationData, loading: creationLoading, error: creationError },
   ] = useMutation(CREATE_ACCOUNT_AND_PROFILE);
-  const [
-    ConnectProfile,
-    {
-      loading: connectionLoading,
-      error: connectionError,
-      data: connectionData,
-    },
-  ] = useMutation(CONNECT_PROFILE);
 
   // Attempt to get inviteData from local storage if there
   useEffect(() => {
@@ -115,7 +69,7 @@ export default function CheckUser() {
     if (email) {
       console.log('attempting to get account by email');
       const getAccountFunction = async () => {
-        const data = await getAccount({ variables: { email } });
+        const data = await getAccountByEmail({ variables: { email } });
 
         if (data.data.getAccountByEmail && inviteData) {
           // if account exists redirect them to the returnTo(outing details page) here
@@ -156,7 +110,7 @@ export default function CheckUser() {
 
       getAccountFunction();
     }
-  }, [ConnectProfile, email, getAccount, inviteData, navigate]);
+  }, [email, getAccountByEmail, inviteData, navigate]);
 
   // NOTE this would indicate that there is no account, that the user is coming from an invite, and they signed into Auth0 with a different email than the one they were invited with
   // If account does not exist, fire off a mutation using the social pin to find the pre-created profile, find the associated account, update account with the email just recieved from Auth0, and then redirect to returnTo

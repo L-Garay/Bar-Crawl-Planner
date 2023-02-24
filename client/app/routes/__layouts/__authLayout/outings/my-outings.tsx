@@ -2,20 +2,8 @@ import { gql } from '@apollo/client';
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';
+import { GET_OUTINGS } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
-
-const GET_OUTINGS = gql`
-  query getAllOutings {
-    getAllOutings {
-      id
-      name
-      creator_profile_id
-      created_at
-      start_date_and_time
-      place_ids
-    }
-  }
-`;
 
 export const loader: LoaderFunction = async ({ request }) => {
   const client = await getNewClient(request);

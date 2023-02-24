@@ -2,7 +2,7 @@ import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { getNewClient } from '~/apollo/getClient';
 import { Map as GoogleMap } from '~/components/maps';
-import { CREATE_OUTING } from '~/components/maps/basicMap';
+import { CREATE_OUTING } from '~/constants/graphqlConstants';
 import getConfig from '~/utils/config.server';
 import logApolloError from '~/utils/getApolloError';
 

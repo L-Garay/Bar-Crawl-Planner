@@ -1,19 +1,11 @@
 import type { LinksFunction, LoaderFunction } from '@remix-run/node';
-import { gql } from '@apollo/client';
 import homepageStyles from '../../../generatedStyles/homepage.css';
 import spinnerStyles from '../../../generatedStyles/spinners.css';
 import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
 import logApolloError from '~/utils/getApolloError';
 import { getNewClient } from '~/apollo/getClient';
 import { useLoaderData } from '@remix-run/react';
-
-const getAccount = gql`
-  query getUserAccount {
-    getUserAccount {
-      email
-    }
-  }
-`;
+import { GET_ACCOUNT } from '~/constants/graphqlConstants';
 
 export const links: LinksFunction = () => {
   return [
@@ -35,7 +27,7 @@ export const loader: LoaderFunction = async ({ request }) => {
   let account: any;
   try {
     account = await client.query({
-      query: getAccount,
+      query: GET_ACCOUNT,
     });
   } catch (error) {
     logApolloError(error);

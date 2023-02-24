@@ -11,73 +11,13 @@ import {
   useSetMapOptions,
 } from '~/utils/maps';
 import { CITY_COORDINATES } from '~/constants/mapConstants';
-import { gql, useLazyQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client';
 import martiniImg from '~/assets/martini32px.png';
 import LocationListItem from './locationListItem';
 import OutingListItem from './outingListItem';
 import { Form } from '@remix-run/react';
 import moment from 'moment';
-
-// TODO figure out a better way to handle this
-// maybe have multiple small queries that fetch certain properties only when they are needed?
-const CITY_SEARCH = gql`
-  query searchCity($city: String!, $locationType: String!) {
-    searchCity(city: $city, locationType: $locationType) {
-      id
-      business_status
-      formatted_address
-      city
-      state
-      lat
-      lng
-      html_attributions
-      icon
-      icon_mask_base_uri
-      icon_background_color
-      name
-      place_id
-      rating
-      user_ratings_total
-      types
-      vicinity
-      formatted_phone_number
-      plus_compound_code
-      plus_global_code
-      open_periods
-      weekday_text
-      photos_references
-      reviews
-      url
-      website
-      utc_offset_minutes
-      price_level
-      expiration_date
-    }
-  }
-`;
-
-export const CREATE_OUTING = gql`
-  mutation createOuting(
-    $name: String!
-    $created_at: String!
-    $start_date_and_time: String!
-    $place_ids: [String!]
-  ) {
-    createOuting(
-      name: $name
-      created_at: $created_at
-      start_date_and_time: $start_date_and_time
-      place_ids: $place_ids
-    ) {
-      id
-      name
-      creator_profile_id
-      created_at
-      start_date_and_time
-      place_ids
-    }
-  }
-`;
+import { CITY_SEARCH } from '~/constants/graphqlConstants';
 
 export default function BasicMap({
   style,
