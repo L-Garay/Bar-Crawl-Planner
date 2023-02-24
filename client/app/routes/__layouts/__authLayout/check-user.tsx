@@ -15,35 +15,27 @@ export const loader: LoaderFunction = async ({ request, context }) => {
 };
 
 export default function CheckUser() {
-  const loaderData = useLoaderData();
   const navigate = useNavigate();
+  const loaderData = useLoaderData();
   const [inviteData, setInviteData] = useState<string | null>(null);
   const [hasAccount, setHasAccount] = useState<boolean | undefined>(undefined);
   const [email, setEmail] = useState<string | undefined>(undefined);
-  const [
-    getAccountByEmail,
-    { data: accountData, loading: accountLoading, error: accountError },
-  ] = useLazyQuery(GET_ACCOUNT_BY_EMAIL, {
+
+  const [getAccountByEmail] = useLazyQuery(GET_ACCOUNT_BY_EMAIL, {
     context: {
       headers: {
         inviteData: inviteData,
       },
     },
   });
-  const [
-    updateAccountBySocialPin,
-    { data: updateData, loading: updateLoading, error: updateError },
-  ] = useMutation(UPDATE_ACCOUNT_BY_SOCIAL_PIN, {
+  const [updateAccountBySocialPin] = useMutation(UPDATE_ACCOUNT_BY_SOCIAL_PIN, {
     context: {
       headers: {
         inviteData: inviteData,
       },
     },
   });
-  const [
-    createAccountAndProfile,
-    { data: creationData, loading: creationLoading, error: creationError },
-  ] = useMutation(CREATE_ACCOUNT_AND_PROFILE);
+  const [createAccountAndProfile] = useMutation(CREATE_ACCOUNT_AND_PROFILE);
 
   // Attempt to get inviteData from local storage if there
   useEffect(() => {
@@ -73,25 +65,13 @@ export default function CheckUser() {
 
         if (data.data.getAccountByEmail && inviteData) {
           // if account exists redirect them to the returnTo(outing details page) here
-          // TODO we need to connect the profile associated with the found account, to the outing for the invite found in the inviteData
-          const { outingId } = JSON.parse(inviteData);
-          // const connectionData = await ConnectProfile({
-          //   variables: {
-          //     profile_id: Number(profileId),
-          //     outing_id: Number(outingId),
-          //   },
-          // });
-          // if (connectionData.errors) {
-          //   console.log('error connecting profile to outing');
-          //   console.log(connectionData.errors);
-          //   // maybe redirect to an error page here
-          // }
+          const { outingId, returnTo } = JSON.parse(inviteData);
           console.log(
             'found and account by email and now redirecting to outing details page with outingId: ',
             outingId
           );
           window.localStorage.removeItem('inviteData');
-          navigate(`/outings/my-outings/${outingId}`);
+          navigate(returnTo);
         } else if (data.data.getAccountByEmail && !inviteData) {
           // if there is an account and they are not coming from an invite, redirect them to the homepage
           console.log(
@@ -99,7 +79,7 @@ export default function CheckUser() {
           );
           navigate('/homepage');
         } else {
-          // otherwise set hasAccount to false
+          // otherwise no account was found, set hasAccount to false
           console.log(
             'did not find an account by email, setting hasAccount to false'
           );
@@ -152,8 +132,6 @@ export default function CheckUser() {
   // this would be considered the 'normal' flow for signing up now
   useEffect(() => {
     if (hasAccount === false && !inviteData) {
-      // TODO fire off mutation to create account and profile (same flow as from the authenticator callback function)
-      // probably want this specific mutation to handle both account and profile creation
       const variables = {
         name: loaderData.authData.profile.displayName,
         picture: loaderData.authData.profile.photos[0].value,

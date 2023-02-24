@@ -19,18 +19,12 @@ export const loader: LoaderFunction = async ({ params, request, context }) => {
 };
 
 export default function OutingInvite() {
-  const { outingId, profileId, socialPin, isValid, config } = useLoaderData();
   const navigate = useNavigate();
+  const { outingId, profileId, socialPin, isValid, config } = useLoaderData();
 
-  const [
-    DisconnectProfile,
-    {
-      loading: connectionLoading,
-      error: connectionError,
-      data: connectionData,
-    },
-  ] = useMutation(DISCONNECT_PROFILE);
+  const [DisconnectProfile] = useMutation(DISCONNECT_PROFILE);
 
+  // save inviteData to local storage if user does not have valid session
   useEffect(() => {
     if ((outingId || profileId || socialPin) && !isValid && window) {
       const inviteData = {
@@ -71,9 +65,11 @@ export default function OutingInvite() {
           outing_id: Number(outingId),
         },
       });
-      window.localStorage.removeItem('inviteData');
       navigate('/outings/my-outings');
     } else {
+      // have to use fetch here because useMutation doesn't work with no valid client
+      // which without a valid user/session there can't be a valid client because there is no id_token to use
+      // NOTE is this considered bad practice? I just can't think of another way to do this
       await fetch(`${config.SERVER.ADDRESS}/disconnect-user`, {
         method: 'POST',
         body: `profileId=${profileId}&outingId=${outingId}`,
