@@ -2,6 +2,7 @@ import { gql, useMutation } from '@apollo/client';
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useParams } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';
+import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
 
 const GET_OUTING = gql`
@@ -104,7 +105,6 @@ export default function OutingDetails() {
                 // console.log(trimmedEmails);
 
                 // TODO: add validation to make sure emails are valid
-                // TODO: add logic to check and ensure that only the outing creator can send invites (is this desired?)
 
                 SendEmail({
                   variables: {
@@ -117,7 +117,14 @@ export default function OutingDetails() {
               }}
             >
               <label htmlFor="profile-email">Send invitation email to: </label>
-              <input type="email" name="profile-email" id="profile-email" />
+              <input
+                type="email"
+                name="profile-email"
+                id="profile-email"
+                // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
+                // pattern={`${VALID_EMAIL_REGEX}`}
+                title="figure out what pattern(s) to show here"
+              />
               <button type="submit">Send Invite</button>
             </form>
           </div>
