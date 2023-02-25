@@ -155,24 +155,28 @@ export type MutationUpdateUserAccountArgs = {
 
 export type Outing = {
   __typename?: 'Outing';
+  accepted_profiles?: Maybe<Array<Maybe<Profile>>>;
   created_at?: Maybe<Scalars['String']>;
   creator_profile_id?: Maybe<Scalars['String']>;
+  declined_profiles?: Maybe<Array<Maybe<Profile>>>;
   id?: Maybe<Scalars['Int']>;
   name?: Maybe<Scalars['String']>;
+  pending_profiles?: Maybe<Array<Maybe<Profile>>>;
   place_ids?: Maybe<Array<Maybe<Scalars['String']>>>;
-  profiles?: Maybe<Array<Maybe<Profile>>>;
   start_date_and_time?: Maybe<Scalars['String']>;
 };
 
 export type Profile = {
   __typename?: 'Profile';
+  accepted_outings?: Maybe<Array<Maybe<Outing>>>;
   account?: Maybe<Account>;
   account_id?: Maybe<Scalars['Int']>;
+  declined_outings?: Maybe<Array<Maybe<Outing>>>;
   friends?: Maybe<Array<Maybe<Profile>>>;
   friendsRelation?: Maybe<Array<Maybe<Profile>>>;
   id?: Maybe<Scalars['Int']>;
   name?: Maybe<Scalars['String']>;
-  outings?: Maybe<Array<Maybe<Outing>>>;
+  pending_outings?: Maybe<Array<Maybe<Outing>>>;
   profile_img?: Maybe<Scalars['String']>;
   social_pin?: Maybe<Scalars['String']>;
   updated_at?: Maybe<Scalars['String']>;
@@ -382,24 +386,28 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 }>;
 
 export type OutingResolvers<ContextType = any, ParentType extends ResolversParentTypes['Outing'] = ResolversParentTypes['Outing']> = ResolversObject<{
+  accepted_profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   creator_profile_id?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  declined_profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  pending_profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   place_ids?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
-  profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   start_date_and_time?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type ProfileResolvers<ContextType = any, ParentType extends ResolversParentTypes['Profile'] = ResolversParentTypes['Profile']> = ResolversObject<{
+  accepted_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   account_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  declined_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   friends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   friendsRelation?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
+  pending_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   profile_img?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   social_pin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updated_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

@@ -32,7 +32,7 @@ export async function CreateOuting({
         created_at,
         start_date_and_time,
         place_ids,
-        profiles: {
+        accepted_profiles: {
           connect: { id: creatorId },
         },
       },
@@ -160,7 +160,7 @@ export async function SendOutingInvites({
         id: outing_id,
       },
       data: {
-        profiles: {
+        pending_profiles: {
           connect: {
             id: profile.id,
           },
@@ -226,7 +226,7 @@ export async function ConnectUserWithOuting(
     const outing = await prismaClient.outing.update({
       where: { id: outingId },
       data: {
-        profiles: {
+        accepted_profiles: {
           connect: {
             id: profileId,
           },
@@ -248,8 +248,11 @@ export async function DisconnectUserWithOuting(
     const user = await prismaClient.outing.update({
       where: { id: outingId },
       data: {
-        profiles: {
+        accepted_profiles: {
           disconnect: { id: profileId },
+        },
+        declined_profiles: {
+          connect: { id: profileId },
         },
       },
     });

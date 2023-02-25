@@ -28,7 +28,7 @@ export async function GetAllOutings(creatorId: number): Promise<PrismaData> {
         creator_profile_id: {
           not: creatorId,
         },
-        profiles: {
+        accepted_profiles: {
           some: {
             id: creatorId,
           },

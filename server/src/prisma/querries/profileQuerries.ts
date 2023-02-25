@@ -39,7 +39,7 @@ export async function GetProfilesInOuting(id: number): Promise<PrismaData> {
   try {
     const profiles = await prismaClient.profile.findMany({
       where: {
-        outings: {
+        accepted_outings: {
           some: {
             id,
           },

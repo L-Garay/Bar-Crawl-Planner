@@ -21,7 +21,9 @@ const typeDefs = `#graphql
     updated_at: String
     account: Account
     account_id: Int
-    outings: [Outing]
+    accepted_outings: [Outing]
+    pending_outings: [Outing]
+    declined_outings: [Outing]
     social_pin: String
     friends: [Profile]
     friendsRelation: [Profile]
@@ -33,7 +35,9 @@ const typeDefs = `#graphql
     # with regards to accessing a specific outing by id in the url
     id: Int
     name: String
-    profiles: [Profile]
+    accepted_profiles: [Profile]
+    pending_profiles: [Profile]
+    declined_profiles: [Profile]
     creator_profile_id: String 
     created_at: String
     start_date_and_time: String

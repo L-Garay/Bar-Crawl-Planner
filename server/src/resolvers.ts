@@ -280,11 +280,10 @@ const resolvers: Resolvers = {
       }
 
       const originalUserEmail = user.data.email;
-      const { phone_number, email } = args;
+      const { phone_number } = args;
       const updatedUser = await UpdateUserAccount(
         originalUserEmail,
-        phone_number,
-        email
+        phone_number
       );
       if (updatedUser.status === 'Failure') {
         throw new GraphQLError('Cannot update user account', {
