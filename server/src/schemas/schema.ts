@@ -44,6 +44,12 @@ const typeDefs = `#graphql
     place_ids: [String]
   }
 
+  type OutingProfileStates {
+    accepted_profiles: [Profile]
+    pending_profiles: [Profile]
+    declined_profiles: [Profile]
+  }
+
   type LocationDetails {
     id: Int
     business_status: String
@@ -97,7 +103,7 @@ const typeDefs = `#graphql
     getAccountByEmail(email: String!): Account
     getUserAccount: Account
     profile: Profile
-    getProfilesInOuting(id: Int!): [Profile]
+    getProfilesInOuting(id: Int!): OutingProfileStates
     getOuting(id: Int!): Outing
     accounts: [Account]
     profiles: [Profile]

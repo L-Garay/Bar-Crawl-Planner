@@ -35,11 +35,49 @@ export async function GetAllProfiles(): Promise<PrismaData> {
   }
 }
 
-export async function GetProfilesInOuting(id: number): Promise<PrismaData> {
+export async function GetAcceptedProfilesInOuting(
+  id: number
+): Promise<PrismaData> {
   try {
     const profiles = await prismaClient.profile.findMany({
       where: {
         accepted_outings: {
+          some: {
+            id,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: profiles, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+export async function GetPendingProfilesInOuting(
+  id: number
+): Promise<PrismaData> {
+  try {
+    const profiles = await prismaClient.profile.findMany({
+      where: {
+        pending_outings: {
+          some: {
+            id,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: profiles, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+export async function GetDeclinedProfilesInOuting(
+  id: number
+): Promise<PrismaData> {
+  try {
+    const profiles = await prismaClient.profile.findMany({
+      where: {
+        declined_outings: {
           some: {
             id,
           },

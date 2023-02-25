@@ -7,7 +7,9 @@ import {
   FindFriendByPin,
   GetAllFriends,
   GetAllProfiles,
-  GetProfilesInOuting,
+  GetAcceptedProfilesInOuting,
+  GetPendingProfilesInOuting,
+  GetDeclinedProfilesInOuting,
 } from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
@@ -122,19 +124,46 @@ const resolvers: Resolvers = {
         });
       }
 
-      const profiles = await GetProfilesInOuting(args.id);
-      if (profiles.status === 'Failure') {
-        throw new GraphQLError('Cannot get profiles for outing', {
+      const accepted = await GetAcceptedProfilesInOuting(args.id);
+      if (accepted.status === 'Failure') {
+        throw new GraphQLError('Cannot get accepted for outing', {
           extensions: {
-            code: profiles.error?.name,
-            message: profiles.error?.message,
-            prismaMeta: profiles.error?.meta,
-            prismaErrorCode: profiles.error?.errorCode,
+            code: accepted.error?.name,
+            message: accepted.error?.message,
+            prismaMeta: accepted.error?.meta,
+            prismaErrorCode: accepted.error?.errorCode,
           },
         });
-      } else {
-        return profiles.data;
       }
+
+      const pending = await GetPendingProfilesInOuting(args.id);
+      if (pending.status === 'Failure') {
+        throw new GraphQLError('Cannot get pending for outing', {
+          extensions: {
+            code: pending.error?.name,
+            message: pending.error?.message,
+            prismaMeta: pending.error?.meta,
+            prismaErrorCode: pending.error?.errorCode,
+          },
+        });
+      }
+
+      const declined = await GetDeclinedProfilesInOuting(args.id);
+      if (declined.status === 'Failure') {
+        throw new GraphQLError('Cannot get declined for outing', {
+          extensions: {
+            code: declined.error?.name,
+            message: declined.error?.message,
+            prismaMeta: declined.error?.meta,
+            prismaErrorCode: declined.error?.errorCode,
+          },
+        });
+      }
+      return {
+        accepted_profiles: accepted.data,
+        pending_profiles: pending.data,
+        declined_profiles: declined.data,
+      };
     },
     getAllOutings: async (parent, args, context, info) => {
       const { authError, profile } = context;

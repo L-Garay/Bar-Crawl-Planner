@@ -251,6 +251,9 @@ export async function DisconnectUserWithOuting(
         accepted_profiles: {
           disconnect: { id: profileId },
         },
+        pending_profiles: {
+          disconnect: { id: profileId },
+        },
         declined_profiles: {
           connect: { id: profileId },
         },
