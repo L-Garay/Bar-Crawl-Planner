@@ -1,3 +1,4 @@
+import { ApolloClient, ApolloProvider } from '@apollo/client';
 import type { LoaderFunction, MetaFunction } from '@remix-run/node';
 import {
   Links,
@@ -6,7 +7,9 @@ import {
   Scripts,
   ScrollRestoration,
   useCatch,
+  useLoaderData,
 } from '@remix-run/react';
+import useGetApolloClient from './apollo/getClient';
 import getConfig from './utils/config.server';
 import { validateUserAndSession } from './utils/validateUserAndSession';
 
@@ -51,10 +54,18 @@ function Document({
 }
 
 export default function App() {
+  const { config, user } = useLoaderData();
+  const idToken = user?.authData.extraParams.id_token;
+
+  const getClient = useGetApolloClient(config.SERVER.ADDRESS, idToken);
+  const client = getClient() as ApolloClient<any>;
+
   // can put any top level providers here if needed
   return (
     <Document>
-      <Outlet />
+      <ApolloProvider client={client}>
+        <Outlet />
+      </ApolloProvider>
     </Document>
   );
 }

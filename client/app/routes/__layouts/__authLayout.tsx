@@ -1,36 +1,21 @@
-import { ApolloClient, ApolloProvider } from '@apollo/client';
 import type { LoaderFunction } from '@remix-run/node';
-import { Outlet, useLoaderData } from '@remix-run/react';
-import useGetApolloClient from '~/apollo/getClient';
+import { Outlet } from '@remix-run/react';
 import { logout } from '~/auth/authenticator';
-import getConfig from '~/utils/config.server';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 
 // Having this pathless auth layout route handle user validation will protect all of it's child routes from unauthenticated users
 export const loader: LoaderFunction = async ({ request }) => {
-  const config = getConfig();
   const { valid, user, session } = await validateUserAndSession(request);
 
   if (valid) {
-    return { session, user, valid, config };
+    return { session, user, valid };
   } else {
     return logout(request, true);
   }
 };
 
 export default function AuthLayout() {
-  const loaderData = useLoaderData();
-  const { config, user } = loaderData;
-  const getClient = useGetApolloClient(
-    config.SERVER.ADDRESS,
-    user.authData.extraParams.id_token
-  );
-  const client = getClient() as ApolloClient<any>;
-  return (
-    <ApolloProvider client={client}>
-      <Outlet />
-    </ApolloProvider>
-  );
+  return <Outlet />;
 }
 
 // Don't believe I should need an Error or Catch boundary here, as the only way to get to this route is to be authenticated

@@ -8,14 +8,22 @@ import getConfig from '~/utils/config.server';
 // See this discussion where Apollo dev says that it's not required to create a new client for each request https://github.com/apollographql/apollo-client/issues/9520
 const useGetApolloClient = (serverAddress: string, idToken?: string) => {
   const callback = React.useCallback(() => {
-    return new ApolloClient({
-      uri: `${serverAddress}/graphql`,
-      cache: new InMemoryCache(),
-      credentials: 'include',
-      headers: {
-        authorization: `Bearer ${idToken}`,
-      },
-    });
+    if (idToken) {
+      return new ApolloClient({
+        uri: `${serverAddress}/graphql`,
+        cache: new InMemoryCache(),
+        credentials: 'include',
+        headers: {
+          authorization: `Bearer ${idToken}`,
+        },
+      });
+    } else {
+      return new ApolloClient({
+        uri: `${serverAddress}/graphql`,
+        cache: new InMemoryCache(),
+        credentials: 'include',
+      });
+    }
   }, [serverAddress, idToken]);
   return callback;
 };
