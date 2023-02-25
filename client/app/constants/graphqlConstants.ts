@@ -65,6 +65,28 @@ export const CREATE_ACCOUNT_AND_PROFILE = gql`
   }
 `;
 
+export const GET_PROFILES_IN_OUTING = gql`
+  query getProfilesInOuting($id: Int!) {
+    getProfilesInOuting(id: $id) {
+      accepted_profiles {
+        id
+        name
+        social_pin
+      }
+      pending_profiles {
+        id
+        name
+        social_pin
+      }
+      declined_profiles {
+        id
+        name
+        social_pin
+      }
+    }
+  }
+`;
+
 // ------------------- Outings -------------------
 export const CITY_SEARCH = gql`
   query searchCity($city: String!, $locationType: String!) {
@@ -143,17 +165,6 @@ export const GET_OUTING = gql`
       created_at
       start_date_and_time
       place_ids
-    }
-  }
-`;
-
-export const GET_PROFILES_IN_OUTING = gql`
-  query getProfilesInOuting($id: Int!) {
-    getProfilesInOuting(id: $id) {
-      id
-      name
-      profile_img
-      social_pin
     }
   }
 `;

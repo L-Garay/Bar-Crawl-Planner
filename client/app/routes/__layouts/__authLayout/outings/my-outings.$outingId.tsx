@@ -1,5 +1,4 @@
-import { useMutation } from '@apollo/client';
-import type { LoaderFunction } from '@remix-run/node';
+import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useParams } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';
 import {
@@ -9,6 +8,31 @@ import {
 } from '~/constants/graphqlConstants';
 import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
+
+export const action: ActionFunction = async ({ request, params }) => {
+  const client = await getNewClient(request);
+  const formData = await request.formData();
+
+  const emails = formData.get('profile-email') as string;
+  const emailsArray = emails.split(',');
+  const start_date_and_time = formData.get('start-date-and-time') as string;
+  const outing_id = Number(params.outingId);
+
+  try {
+    await client.mutate({
+      mutation: SEND_OUTING_EMAIL,
+      variables: {
+        emails: emailsArray,
+        start_date_and_time,
+        outing_id,
+      },
+    });
+  } catch (error) {
+    logApolloError(error);
+    // Don't throw an error here, because if the email fails they should still be able to interact with the rest of the page
+    // throw new Response(JSON.stringify(error), { status: 500 });
+  }
+};
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -37,21 +61,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function OutingDetails() {
-  const outingId = Number(useParams().outingId);
   const { outing, profiles } = useLoaderData();
-
   const { getOuting } = outing.data;
   const { getProfilesInOuting } = profiles.data;
-
-  const [
-    SendEmail,
-    { loading: emailLoading, error: emailError, data: emailData },
-  ] = useMutation(SEND_OUTING_EMAIL);
-
-  if (emailError) {
-    logApolloError(emailError);
-    // don't throw an error here, because if the email fails to send we can still show the outing details
-  }
+  const { accepted_profiles, pending_profiles, declined_profiles } =
+    getProfilesInOuting;
+  console.log(accepted_profiles, pending_profiles, declined_profiles);
 
   return (
     <div>
@@ -59,30 +74,10 @@ export default function OutingDetails() {
         <>
           <h1>{getOuting.name}</h1>
           <p>{getOuting.start_date_and_time}</p>
-          <p>{getOuting.place_ids}</p>
           <br />
           <div className="add-profiles">
-            <form
-              onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-                e.preventDefault();
-                const emails =
-                  e.currentTarget['profile-email'].value.split(',');
-                console.log(emails);
-                // const trimmedEmails = emails.map((email: string) => email.trim());
-                // console.log(trimmedEmails);
-
-                // TODO: add validation to make sure emails are valid
-
-                SendEmail({
-                  variables: {
-                    outing_id: outingId,
-                    start_date_and_time: getOuting.start_date_and_time,
-                    emails,
-                  },
-                });
-                e.currentTarget['profile-email'].value = '';
-              }}
-            >
+            <form method="post">
+              {/* TODO: add validation to make sure emails are valid */}
               <label htmlFor="profile-email">Send invitation email to: </label>
               <input
                 type="email"
@@ -92,25 +87,57 @@ export default function OutingDetails() {
                 // pattern={`${VALID_EMAIL_REGEX}`}
                 title="figure out what pattern(s) to show here"
               />
+              <input
+                type="hidden"
+                name="start-date-and-time"
+                value={getOuting.start_date_and_time}
+              />
               <button type="submit">Send Invite</button>
             </form>
           </div>
           <h4>Profiles in Outing</h4>
-          {getProfilesInOuting ? (
+          {accepted_profiles.length ? (
             <>
-              {getProfilesInOuting.map((profile: any) => {
+              {accepted_profiles.map((profile: any) => {
                 return (
-                  <div key={profile.id}>
-                    <p>
+                  <div key={profile.id} style={{ display: 'flex' }}>
+                    <p style={{ color: 'green', paddingRight: 10 }}>
                       {profile.name} with id {profile.id}
                     </p>
+                    <p>(Accepted)</p>
                   </div>
                 );
               })}
             </>
-          ) : (
-            <p>No one yet!</p>
-          )}
+          ) : null}
+          {pending_profiles.length ? (
+            <>
+              {pending_profiles.map((profile: any) => {
+                return (
+                  <div key={profile.id} style={{ display: 'flex' }}>
+                    <p style={{ color: 'grey', paddingRight: 10 }}>
+                      {profile.name} with id {profile.id}
+                    </p>
+                    <p>(Pending)</p>
+                  </div>
+                );
+              })}
+            </>
+          ) : null}
+          {declined_profiles.length ? (
+            <>
+              {declined_profiles.map((profile: any) => {
+                return (
+                  <div key={profile.id} style={{ display: 'flex' }}>
+                    <p style={{ color: 'red', paddingRight: 10 }}>
+                      {profile.name} with id {profile.id}
+                    </p>
+                    <p>(Declined)</p>
+                  </div>
+                );
+              })}
+            </>
+          ) : null}
         </>
       ) : (
         <p>Outing not found</p>

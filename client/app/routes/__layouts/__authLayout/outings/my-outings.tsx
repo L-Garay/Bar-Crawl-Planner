@@ -28,18 +28,24 @@ export default function MyOutings() {
   return (
     <div>
       <h1>My Outings</h1>
-      {getAllOutings.map((outing: any) => {
-        return (
-          <div
-            key={outing.id}
-            style={{ display: 'flex' }}
-            onClick={() => navigate(`/outings/my-outings/${outing.id}`)}
-          >
-            <p style={{ paddingRight: 10 }}>{outing.name}</p>
-            <p>{outing.start_date_and_time}</p>
-          </div>
-        );
-      })}
+      {getAllOutings.length === 0 ? (
+        <p>No outings yet</p>
+      ) : (
+        <>
+          {getAllOutings.map((outing: any) => {
+            return (
+              <div
+                key={outing.id}
+                style={{ display: 'flex' }}
+                onClick={() => navigate(`/outings/my-outings/${outing.id}`)}
+              >
+                <p style={{ paddingRight: 10 }}>{outing.name}</p>
+                <p>{outing.start_date_and_time}</p>
+              </div>
+            );
+          })}
+        </>
+      )}
     </div>
   );
 }
