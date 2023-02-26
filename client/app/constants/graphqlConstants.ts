@@ -147,6 +147,15 @@ export const CREATE_OUTING = gql`
   }
 `;
 
+export const CONNECT_PROFILE = gql`
+  mutation ConnectUserWithOuting($outing_id: Int!, $profile_id: Int!) {
+    ConnectUserWithOuting(outing_id: $outing_id, profile_id: $profile_id) {
+      id
+      name
+    }
+  }
+`;
+
 export const DISCONNECT_PROFILE = gql`
   mutation DisconnectUserWithOuting($outing_id: Int!, $profile_id: Int!) {
     DisconnectUserWithOuting(outing_id: $outing_id, profile_id: $profile_id) {

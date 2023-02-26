@@ -2,7 +2,10 @@ import { useMutation } from '@apollo/client';
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import { useEffect } from 'react';
-import { DISCONNECT_PROFILE } from '~/constants/graphqlConstants';
+import {
+  CONNECT_PROFILE,
+  DISCONNECT_PROFILE,
+} from '~/constants/graphqlConstants';
 import getConfig from '~/utils/config.server';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 
@@ -23,6 +26,7 @@ export default function OutingInvite() {
   const { outingId, profileId, socialPin, isValid, config } = useLoaderData();
 
   const [DisconnectProfile] = useMutation(DISCONNECT_PROFILE);
+  const [ConnectProfile] = useMutation(CONNECT_PROFILE);
 
   // save inviteData to local storage if user does not have valid session
   useEffect(() => {
@@ -41,6 +45,12 @@ export default function OutingInvite() {
 
   const handleAccept = async () => {
     if (isValid) {
+      await ConnectProfile({
+        variables: {
+          profile_id: Number(profileId),
+          outing_id: Number(outingId),
+        },
+      });
       navigate(`/outings/my-outings/${outingId}`);
     } else {
       const inviteData = window.localStorage.getItem('inviteData');

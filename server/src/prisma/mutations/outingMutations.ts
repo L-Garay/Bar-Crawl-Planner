@@ -49,6 +49,15 @@ export async function SendOutingInvites({
   emails,
   senderName,
 }: SendingOutingsInvitesInput): Promise<PrismaData> {
+  if (!emails || emails.length === 0) {
+    console.log('No emails provided');
+
+    return {
+      status: 'Success',
+      data: 'No emails provided or emails already accepted',
+      error: null,
+    };
+  }
   // instantiate mailgen generator to create emails
   const generator = new Mailgen({
     theme: 'default',
@@ -76,7 +85,6 @@ export async function SendOutingInvites({
       },
     };
   }
-
   // get the accounts associated with the input emails
   const accounts: Promise<Account | null>[] = emails.map(async (email) => {
     const account = await prismaClient.account.findFirst({
@@ -112,6 +120,7 @@ export async function SendOutingInvites({
   console.log('\n\nCREATED ACCOUNTS', createdAccounts);
 
   // get the profiles associated with the accounts
+  // if the profile is already connected to the outing (accepted), don't include it
   // if a profile doesn't exist, create one
   const profiles: Promise<Profile | null>[] = resolvedCreatedAccounts.map(
     async (account) => {
@@ -226,6 +235,9 @@ export async function ConnectUserWithOuting(
     const outing = await prismaClient.outing.update({
       where: { id: outingId },
       data: {
+        pending_profiles: {
+          disconnect: { id: profileId },
+        },
         accepted_profiles: {
           connect: {
             id: profileId,

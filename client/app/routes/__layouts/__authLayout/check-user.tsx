@@ -8,6 +8,7 @@ import {
   GET_ACCOUNT_BY_EMAIL,
   UPDATE_ACCOUNT_BY_SOCIAL_PIN,
   CREATE_ACCOUNT_AND_PROFILE,
+  CONNECT_PROFILE,
 } from '~/constants/graphqlConstants';
 
 export const loader: LoaderFunction = async ({ request, context }) => {
@@ -36,6 +37,7 @@ export default function CheckUser() {
     },
   });
   const [createAccountAndProfile] = useMutation(CREATE_ACCOUNT_AND_PROFILE);
+  const [ConnectProfile] = useMutation(CONNECT_PROFILE);
 
   // Attempt to get inviteData from local storage if there
   useEffect(() => {
@@ -65,9 +67,22 @@ export default function CheckUser() {
 
         if (data.data.getAccountByEmail && inviteData) {
           // if account exists redirect them to the returnTo(outing details page) here
-          const { outingId, returnTo } = JSON.parse(inviteData);
+          const { outingId, profileId, returnTo } = JSON.parse(inviteData);
+          const connectProfileData = await ConnectProfile({
+            variables: {
+              profile_id: Number(profileId),
+              outing_id: Number(outingId),
+            },
+          });
+          // if there is an error at this step, we don't want to throw anything, since this isn't breaking anything
+          if (connectProfileData.errors) {
+            console.log(
+              'error connecting profile after getting account by email',
+              connectProfileData.errors
+            );
+          }
           console.log(
-            'found and account by email and now redirecting to outing details page with outingId: ',
+            'found and account by email and connected the profile to the outing, now redirecting to outing details page with outingId: ',
             outingId
           );
           window.localStorage.removeItem('inviteData');
@@ -93,17 +108,21 @@ export default function CheckUser() {
   }, [email, getAccountByEmail, inviteData, navigate]);
 
   // NOTE this would indicate that there is no account, that the user is coming from an invite, and they signed into Auth0 with a different email than the one they were invited with
-  // If account does not exist, fire off a mutation using the social pin to find the pre-created profile, find the associated account, update account with the email just recieved from Auth0, and then redirect to returnTo
+  // If account does not exist, fire off a mutation using the social pin to find the pre-created profile, find the associated account, and update account with the email just recieved from Auth0
+  // then we also need to connect the newly claimed profile to the outing, and change the status from pending to accepted
+  // then redirect to the returnTo url
   useEffect(() => {
     if (hasAccount === false && inviteData) {
-      const { returnTo, profileId, socialPin } = JSON.parse(inviteData);
+      const { returnTo, profileId, socialPin, outingId } =
+        JSON.parse(inviteData);
       console.log(
         'attempting to update account by social pin',
         returnTo,
         profileId,
-        socialPin
+        socialPin,
+        outingId
       );
-      const updateAccountBySocialPinFunction = async () => {
+      const claimAccountAndConnectProfile = async () => {
         const data = await updateAccountBySocialPin({
           variables: {
             profile_id: Number(profileId),
@@ -120,13 +139,39 @@ export default function CheckUser() {
             'successfully updated account by social pin, attempting to redirect to returnTo: ',
             returnTo
           );
+        }
+        const connectProfileData = await ConnectProfile({
+          variables: {
+            profile_id: Number(profileId),
+            outing_id: Number(outingId),
+          },
+        });
+
+        if (connectProfileData.errors) {
+          console.log(
+            'error connecting profile after updating account by social pin'
+          );
+          console.log(connectProfileData.errors);
+        }
+        if (connectProfileData.data.UpdateAccountBySocialPin) {
+          console.log(
+            'successfully connected profile after updating account by social pin, attempting to redirect to returnTo: ',
+            returnTo
+          );
           window.localStorage.removeItem('inviteData');
           navigate(returnTo);
         }
       };
-      updateAccountBySocialPinFunction();
+      claimAccountAndConnectProfile();
     }
-  }, [hasAccount, inviteData, navigate, updateAccountBySocialPin, email]);
+  }, [
+    hasAccount,
+    inviteData,
+    navigate,
+    updateAccountBySocialPin,
+    email,
+    ConnectProfile,
+  ]);
 
   // NOTE this would indicate that there is no account, that the user is not coming from an invite, and that they just signed up with Auth0
   // this would be considered the 'normal' flow for signing up now
