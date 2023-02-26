@@ -19,7 +19,7 @@ export const action: ActionFunction = async ({ request, params }) => {
   const outing_id = Number(params.outingId);
 
   try {
-    await client.mutate({
+    const data = await client.mutate({
       mutation: SEND_OUTING_EMAIL,
       variables: {
         emails: emailsArray,
@@ -27,6 +27,7 @@ export const action: ActionFunction = async ({ request, params }) => {
         outing_id,
       },
     });
+    return data;
   } catch (error) {
     logApolloError(error);
     // Don't throw an error here, because if the email fails they should still be able to interact with the rest of the page
@@ -66,7 +67,7 @@ export default function OutingDetails() {
   const { getProfilesInOuting } = profiles.data;
   const { accepted_profiles, pending_profiles, declined_profiles } =
     getProfilesInOuting;
-  console.log(accepted_profiles, pending_profiles, declined_profiles);
+  console.log(accepted_profiles, pending_profiles);
 
   return (
     <div>
@@ -86,6 +87,7 @@ export default function OutingDetails() {
                 // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
                 // pattern={`${VALID_EMAIL_REGEX}`}
                 title="figure out what pattern(s) to show here"
+                minLength={5} // what should this be?
               />
               <input
                 type="hidden"

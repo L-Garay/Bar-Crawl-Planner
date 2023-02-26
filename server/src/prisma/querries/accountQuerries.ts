@@ -13,6 +13,18 @@ export async function GetAccountByEmail(email: string): Promise<PrismaData> {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
+export async function GetAccountByAccountId(id: number): Promise<PrismaData> {
+  try {
+    const user = await prismaClient.account.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    return { status: 'Success', data: user, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
 
 export async function GetAllAccounts(): Promise<PrismaData> {
   try {

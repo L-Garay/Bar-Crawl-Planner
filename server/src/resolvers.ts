@@ -14,6 +14,7 @@ import {
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
 import {
+  GetAccountByAccountId,
   GetAccountByEmail,
   GetAllAccounts,
 } from './prisma/querries/accountQuerries';
@@ -36,6 +37,7 @@ import {
   DisconnectUserWithOuting,
   SendOutingInvites,
 } from './prisma/mutations/outingMutations';
+import { Profile } from '@prisma/client';
 
 const resolvers: Resolvers = {
   Query: {
@@ -422,22 +424,53 @@ const resolvers: Resolvers = {
       }
     },
     sendOutingInvites: async (parent, args, context, info) => {
-      const { authError, user } = context;
+      const { authError, profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
           extensions: { code: authError.code },
         });
       }
       const { outing_id, start_date_and_time, emails } = args;
+
+      // iterate through emails and remove those who are already accepted
+      // get the accepted profiles
+      const acceptedProfiles = await GetAcceptedProfilesInOuting(outing_id);
+      if (acceptedProfiles.status === 'Failure') {
+        // TODO what do we do here?
+        // allow the invites to be sent anyway?
+        // worst case scenario someone who is already accepted gets an invite
+      }
+      // get the accepted accounts from the accepted profiles
+      const acceptedAccounts = acceptedProfiles.data.map(
+        async (profile: Profile) => {
+          return await GetAccountByAccountId(profile.account_Id);
+        }
+      );
+      const resolvedAcceptedAccounts = await Promise.all(acceptedAccounts);
+      // filter out the emails that are already accepted
+      const emailsToSend = emails.filter((email: string) => {
+        if (
+          resolvedAcceptedAccounts.find(
+            (account: any) => account.data.email === email
+          )
+        ) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+      console.log('\n\nEMAILS TO SEND', emailsToSend);
+
       const inviteArgs = {
         outing_id,
         start_date_and_time,
-        emails,
-        senderName: user.data.name,
+        emails: emailsToSend,
+        senderName: profile.data.name,
       };
       console.log('\n\nINVITE ARGS', inviteArgs);
 
       const outing = await SendOutingInvites(inviteArgs);
+
       if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot send outing invites', {
           extensions: {
@@ -459,7 +492,6 @@ const resolvers: Resolvers = {
         });
       }
       const { outing_id, profile_id } = args;
-      console.log('DOES THE RESOLVER GET HIT?', outing_id, profile_id);
 
       const connectedUser = await ConnectUserWithOuting(outing_id, profile_id);
       if (connectedUser.status === 'Failure') {
