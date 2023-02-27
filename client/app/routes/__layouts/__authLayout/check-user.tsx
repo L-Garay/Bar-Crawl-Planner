@@ -105,7 +105,7 @@ export default function CheckUser() {
 
       getAccountFunction();
     }
-  }, [email, getAccountByEmail, inviteData, navigate]);
+  }, [ConnectProfile, email, getAccountByEmail, inviteData, navigate]);
 
   // NOTE this would indicate that there is no account, that the user is coming from an invite, and they signed into Auth0 with a different email than the one they were invited with
   // If account does not exist, fire off a mutation using the social pin to find the pre-created profile, find the associated account, and update account with the email just recieved from Auth0
