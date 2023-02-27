@@ -37,7 +37,8 @@
     "codegen": "graphql-codegen --config codegen.yml",
     "createPrismaMigration": "npx prisma migrate dev --create-only",
     "prismaMigrate": "npx prisma migrate dev",
-    "unitTests": "jest --config ../jest.config.js"
+    "unitTests": "jest --config ../jest.config.js",
+    "getGoogleLocations": "npx ts-node src/prisma/querries/mapQuerries.ts"
   },
   "author": "",
   "license": "ISC",

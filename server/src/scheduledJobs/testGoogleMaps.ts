@@ -32,6 +32,10 @@ const testGoogleQueue = new Bull('Test Google Maps Queue', {
   },
 });
 
+// TODO refactor some of the code and logic within the functions in this test job to match what was done to the manual google maps jobs found in the mapQueries folder (GetLocationDetails and GetGoogleLocations)
+// NOTE while I know some things will be slightly different in terms of we are dealing with a job processor here, the main changes should still be applicable
+// mainly have to do with promise returning/resolving
+
 testGoogleQueue.process('Fetch all location data', async (job, done) => {
   const ExecuteSearch = async (searchParams: any, city: string) => {
     const googleClient = new Client({});
