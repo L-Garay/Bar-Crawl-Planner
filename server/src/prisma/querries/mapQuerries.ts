@@ -244,10 +244,6 @@ export const GetGoogleLocations = async (searchParams: any, city: string) => {
       message: response.data.error_message,
     };
     console.log(
-      `\n\nFirst search for city: ${city} with status ${response.data.status}\n\n`
-    );
-
-    console.log(
       `Error fetching first page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
     );
     return { locationResults, error };
@@ -310,9 +306,6 @@ export const GetGoogleLocations = async (searchParams: any, city: string) => {
       message: secondResponse.data.error_message,
     };
     console.log(
-      `\n\Second search for city: ${city} with status ${response.data.status}\n\n`
-    );
-    console.log(
       `Error fetching second page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
     );
     return { locationResults, error };
@@ -368,9 +361,6 @@ export const GetGoogleLocations = async (searchParams: any, city: string) => {
       message: thirdResponse.data.error_message,
     };
     console.log(
-      `\n\n Third search for city: ${city} with status ${response.data.status}\n\n`
-    );
-    console.log(
       `Error fetching third page of search results for city: ${city} and location type: ${searchParams.query}\nError: ${error.name} ${error.message}`
     );
     return { locationResults, error };
@@ -406,7 +396,7 @@ export const GetGoogleLocations = async (searchParams: any, city: string) => {
   return { locationResults, error: undefined };
 };
 
-export const GetLocationDetails = async (
+export const GetLocationData = async (
   city: CitySelectOptions,
   locationType: string
 ): Promise<LocationDetails[]> => {
@@ -615,7 +605,7 @@ export const SaveLocationsToDB = async () => {
 
   await Promise.allSettled(
     allQueryCombos.map(
-      async (combo) => await GetLocationDetails(combo.typedCity, combo.query)
+      async (combo) => await GetLocationData(combo.typedCity, combo.query)
     )
   )
     .then(async (resultsArray) => {
@@ -645,4 +635,5 @@ export const SaveLocationsToDB = async () => {
     });
 };
 
-SaveLocationsToDB();
+// NOTE uncomment this out for testing/as needed
+// SaveLocationsToDB();
