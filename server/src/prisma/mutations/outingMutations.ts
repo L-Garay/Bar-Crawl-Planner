@@ -92,17 +92,17 @@ export async function SendOutingInvites({
         email: email,
       },
     });
-    return Promise.resolve(account);
+    return account;
   });
   const resolvedAccounts = await Promise.allSettled(accounts);
 
   // if an account doesn't exist, create one
   const createdAccounts: Promise<Account | null>[] = resolvedAccounts.map(
     async (account, index) => {
-      if (account.status === 'rejected') return Promise.resolve(null);
+      if (account.status === 'rejected') return null; // don't expect this to happen
       if (account.status === 'fulfilled' && account.value) {
         // if there is a valid account, return it
-        return Promise.resolve(account.value);
+        return account.value;
       } else {
         // otherwise, create a new account
         const newAccount: Account = await prismaClient.account.create({
@@ -111,7 +111,7 @@ export async function SendOutingInvites({
             created_at: new Date().toISOString(),
           },
         });
-        return Promise.resolve(newAccount);
+        return newAccount;
       }
     }
   );
@@ -124,7 +124,7 @@ export async function SendOutingInvites({
   // if a profile doesn't exist, create one
   const profiles: Promise<Profile | null>[] = resolvedCreatedAccounts.map(
     async (account) => {
-      if (account.status === 'rejected') return Promise.resolve(null);
+      if (account.status === 'rejected') return null;
       if (account.status === 'fulfilled' && account.value !== null) {
         const profile = await prismaClient.profile.findFirst({
           where: {
@@ -141,11 +141,11 @@ export async function SendOutingInvites({
               social_pin: short.generate(),
             },
           });
-          return Promise.resolve(newProfile);
+          return newProfile;
         }
-        return Promise.resolve(profile);
+        return profile;
       } else {
-        return Promise.resolve(null);
+        return null;
       }
     }
   );
