@@ -17,8 +17,6 @@ import {
 import { testGoogleJob } from './scheduledJobs/testGoogleMaps';
 import { GetProfileByAccountId } from './prisma/querries/profileQuerries';
 import { DisconnectUserWithOuting } from './prisma/mutations/outingMutations';
-// import { readFileSync } from 'fs';
-// import path from 'path';
 
 const prismaClient = new PrismaClient({
   log: ['warn', 'error'],
@@ -52,15 +50,19 @@ async function StartServer() {
 
   await server.start();
 
+  // NOTE will likely need to expand/modify this going forward
+  // this is a basic example to be able to test connection
+  const corsOptions = {
+    origin: 'http://localhost:3000',
+    credentials: true,
+  };
+
   app.get('/healthcheck', (req, res) => {
     res.status(200).send('Healthy!');
   });
 
+  // this route is used as a 'background' check so to speak
   app.get('/validate', async (req, res) => {
-    // NOTE this route is used as a 'background' check so to speak, so we really don't care about specific errors or ensuring we log them in this situation
-    // However, this runTokenValidation() is used elsewhere that does care about errors and logging them
-    // which means that every time it's used here, it will log error messages when there is no token/the token is invalid, which creates unnecessary noise
-    // TODO look into ways to prevent that if possible
     const decodedToken = await runTokenValidation(req);
 
     // Even though these are errors, we don't want to treat them like actual errors here
@@ -76,6 +78,7 @@ async function StartServer() {
     }
   });
 
+  // main auth route
   app.get('/authenticate', async (req, res) => {
     const decodedToken = await runTokenValidation(req);
 
@@ -85,7 +88,6 @@ async function StartServer() {
         decodedToken.error.name,
         decodedToken.error.message
       );
-
       return res.status(400).send(null);
     }
     if (
@@ -93,18 +95,15 @@ async function StartServer() {
       typeof decodedToken.decoded === 'undefined'
     ) {
       console.log('this means the decoded token is a string or undefined');
-
-      // TODO need to look into how to handle if the decoded token is a string
       return res.status(500).send(null);
     }
-    console.log('should be returning status 200');
-
     return res.status(200).send('Success');
   });
 
   app.post(
     '/disconnect-user',
     bodyParser.text(),
+    // TODO testing config
     cors({ origin: 'http://localhost:3000', credentials: false }), // not sure how I feel about this, will likely need to change this after looking into cors more
     // but for right now in testing, this works
     async (req, res) => {
@@ -123,13 +122,6 @@ async function StartServer() {
       return res.status(200).send(response.data);
     }
   );
-
-  // NOTE will likely need to expand/modify this going forward
-  // this is a basic example to be able to test connection
-  const corsOptions = {
-    origin: 'http://localhost:3000',
-    credentials: true,
-  };
 
   // Set up our Express middleware to handle CORS, body parsing,
   // and our expressMiddleware function.
@@ -177,10 +169,8 @@ async function StartServer() {
         const user = await GetAccountByEmail(email);
         const profile = await GetProfileByAccountId(user.data.id);
 
-        // NOTE need to clear this when user logs out
-        // NOTE this may need to be handled client side see:
+        // NOTE may need to clear this when user logs out
         // https://www.apollographql.com/docs/react/caching/advanced-topics/
-        //  OR just make query against the server called like 'LogoutAndClear' that will have a specific header that we can check for, and if it is present we know to just return an empty context object ('clear it out')
         return { decodedToken: decodedToken.decoded, user, profile };
       },
     })

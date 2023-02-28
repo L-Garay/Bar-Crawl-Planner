@@ -116,8 +116,6 @@ export async function SendOutingInvites({
     }
   );
   const resolvedCreatedAccounts = await Promise.allSettled(createdAccounts);
-  console.log('\n\nRESOLVED ACCOUNTS', resolvedAccounts);
-  console.log('\n\nCREATED ACCOUNTS', createdAccounts);
 
   // get the profiles associated with the accounts
   // if the profile is already connected to the outing (accepted), don't include it
@@ -160,7 +158,6 @@ export async function SendOutingInvites({
         social_pin: profile?.social_pin,
       } as OutingInviteProfiles;
     });
-  console.log('\n\nRESOLVED PROFILES', resolvedProfiles);
 
   // connect the profiles to the outing
   resolvedProfiles.map(async (profile) => {
@@ -207,7 +204,6 @@ export async function SendOutingInvites({
   const emailResponse = await Promise.allSettled(
     mailOptions.map((mailOption) => transporter.sendMail(mailOption))
   );
-  console.log('\n\nEMAIL RESPONSE', emailResponse);
 
   // log failed emails
   emailResponse.forEach((response, index, array) => {

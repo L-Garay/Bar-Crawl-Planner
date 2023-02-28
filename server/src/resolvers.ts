@@ -70,7 +70,6 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
-      console.log('args.email: ', args.email);
 
       const account = await GetAccountByEmail(args.email);
       if (account.status === 'Failure') {
@@ -83,7 +82,6 @@ const resolvers: Resolvers = {
           },
         });
       } else {
-        console.log('should be return user: ', account.data);
         return account.data;
       }
     },
@@ -435,11 +433,6 @@ const resolvers: Resolvers = {
       // iterate through emails and remove those who are already accepted
       // get the accepted profiles
       const acceptedProfiles = await GetAcceptedProfilesInOuting(outing_id);
-      if (acceptedProfiles.status === 'Failure') {
-        // TODO what do we do here?
-        // allow the invites to be sent anyway?
-        // worst case scenario someone who is already accepted gets an invite
-      }
       // get the accepted accounts from the accepted profiles
       const acceptedAccounts = acceptedProfiles.data.map(
         async (profile: Profile) => {
@@ -459,7 +452,6 @@ const resolvers: Resolvers = {
           return true;
         }
       });
-      console.log('\n\nEMAILS TO SEND', emailsToSend);
 
       const inviteArgs = {
         outing_id,
@@ -467,7 +459,6 @@ const resolvers: Resolvers = {
         emails: emailsToSend,
         senderName: profile.data.name,
       };
-      console.log('\n\nINVITE ARGS', inviteArgs);
 
       const outing = await SendOutingInvites(inviteArgs);
 
@@ -567,7 +558,7 @@ const resolvers: Resolvers = {
       }
       const { name, picture, email, verified } = args;
 
-      const account: any = await CreateAccount(email, verified);
+      const account = await CreateAccount(email, verified);
       if (account.status === 'Failure') {
         throw new GraphQLError('Cannot create user account', {
           extensions: {
@@ -579,7 +570,7 @@ const resolvers: Resolvers = {
         });
       }
 
-      const profile: any = await CreateProfile(name, picture, account.data.id);
+      const profile = await CreateProfile(name, picture, account.data.id);
       if (profile.status === 'Failure') {
         throw new GraphQLError('Cannot create user profile', {
           extensions: {

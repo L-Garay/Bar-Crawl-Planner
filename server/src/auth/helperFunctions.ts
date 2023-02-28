@@ -35,7 +35,6 @@ export const checkTokenExpiration = (
   ) {
     return false;
   }
-  // TODO need to figure out how to handle the decodedToken being a string
 
   // Setting the time to 0 will always force isBefore() to resolve to false
   // this will cause the user to get logged out if they present either an expired/invalid/no token

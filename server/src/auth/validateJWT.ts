@@ -5,6 +5,9 @@ import { TokenValidationResponse } from '../types/sharedTypes';
 
 dotenv.config();
 
+// client to access JSON Web Key Set (JWKS) endpoint
+// which is used to sign all auth0 issued jwts signed with RS256
+// RS256 good (asymmetirc), HS256 bad (symmetric)
 const client = jwksClient({
   jwksUri: `https://${process.env.AUTH0_DOMAIN}/.well-known/jwks.json`,
 });
@@ -32,6 +35,7 @@ const isTokenValid = async (
         issuer: `${process.env.AUTH0_ISSUER_URL}/`,
         algorithms: ['RS256'],
       },
+      // since we provide this asynchronous callback, the jwt.verify function will never return a string
       (error, decoded) => {
         if (error) {
           resolve({ status: 401, error });

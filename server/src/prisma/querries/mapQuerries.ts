@@ -635,5 +635,6 @@ export const SaveLocationsToDB = async () => {
     });
 };
 
+// TODO set up quotas to limit requests to google apis in google cloud dashboard
 // NOTE uncomment this out for testing/as needed
 // SaveLocationsToDB();
