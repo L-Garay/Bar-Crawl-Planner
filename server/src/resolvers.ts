@@ -16,6 +16,7 @@ import { GraphQLError } from 'graphql';
 import {
   GetAccountByAccountId,
   GetAccountByEmail,
+  GetAccountWithProfileData,
   GetAllAccounts,
 } from './prisma/querries/accountQuerries';
 import {
@@ -34,6 +35,7 @@ import { CitySelectOptions, OutingInput } from './types/sharedTypes';
 import {
   ConnectUserWithOuting,
   CreateOuting,
+  DeleteOuting,
   DisconnectUserWithOuting,
   SendOutingInvites,
 } from './prisma/mutations/outingMutations';
@@ -93,6 +95,28 @@ const resolvers: Resolvers = {
         });
       }
       return user.data;
+    },
+    getAccountWithProfileData: async (parent, args, context, info) => {
+      const { authError, user } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const account = await GetAccountWithProfileData(args.email);
+      if (account.status === 'Failure') {
+        throw new GraphQLError('Cannot get account', {
+          extensions: {
+            code: account.error?.name,
+            message: account.error?.message,
+            prismaMeta: account.error?.meta,
+            prismaErrorCode: account.error?.errorCode,
+          },
+        });
+      } else {
+        return account.data;
+      }
     },
     profiles: async (parent, args, context, info) => {
       const { authError } = context;
@@ -410,6 +434,27 @@ const resolvers: Resolvers = {
       const outing = await CreateOuting(outingData);
       if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot create outing', {
+          extensions: {
+            code: outing.error?.name,
+            message: outing.error?.message,
+            prismaMeta: outing.error?.meta,
+            prismaErrorCode: outing.error?.errorCode,
+          },
+        });
+      } else {
+        return outing.data;
+      }
+    },
+    deleteOuting: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const outing = await DeleteOuting(args.id);
+      if (outing.status === 'Failure') {
+        throw new GraphQLError('Cannot delete outing', {
           extensions: {
             code: outing.error?.name,
             message: outing.error?.message,

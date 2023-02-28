@@ -70,6 +70,7 @@ export type Mutation = {
   createOuting?: Maybe<Outing>;
   createProfile?: Maybe<Profile>;
   deactivateUserAccount?: Maybe<Account>;
+  deleteOuting?: Maybe<Scalars['String']>;
   removeFriend?: Maybe<Profile>;
   sendOutingInvites?: Maybe<Scalars['String']>;
   updateUserAccount?: Maybe<Account>;
@@ -135,6 +136,11 @@ export type MutationDeactivateUserAccountArgs = {
 };
 
 
+export type MutationDeleteOutingArgs = {
+  id: Scalars['Int'];
+};
+
+
 export type MutationRemoveFriendArgs = {
   friend_id: Scalars['Int'];
   id: Scalars['Int'];
@@ -195,6 +201,7 @@ export type Query = {
   findFriendById?: Maybe<Profile>;
   findFriendByPin?: Maybe<Profile>;
   getAccountByEmail?: Maybe<Account>;
+  getAccountWithProfileData?: Maybe<Account>;
   getAllFriends?: Maybe<Array<Maybe<Profile>>>;
   getAllOutings?: Maybe<Array<Maybe<Outing>>>;
   getOuting?: Maybe<Outing>;
@@ -217,6 +224,11 @@ export type QueryFindFriendByPinArgs = {
 
 
 export type QueryGetAccountByEmailArgs = {
+  email: Scalars['String'];
+};
+
+
+export type QueryGetAccountWithProfileDataArgs = {
   email: Scalars['String'];
 };
 
@@ -389,6 +401,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, Partial<MutationCreateOutingArgs>>;
   createProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, Partial<MutationCreateProfileArgs>>;
   deactivateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationDeactivateUserAccountArgs, 'id'>>;
+  deleteOuting?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationDeleteOutingArgs, 'id'>>;
   removeFriend?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<MutationRemoveFriendArgs, 'friend_id' | 'id'>>;
   sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
@@ -435,6 +448,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   findFriendById?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<QueryFindFriendByIdArgs, 'id'>>;
   findFriendByPin?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<QueryFindFriendByPinArgs, 'social_pin'>>;
   getAccountByEmail?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountByEmailArgs, 'email'>>;
+  getAccountWithProfileData?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountWithProfileDataArgs, 'email'>>;
   getAllFriends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;

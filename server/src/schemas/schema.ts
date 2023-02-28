@@ -112,6 +112,7 @@ const typeDefs = `#graphql
     findFriendById(id: Int!): Profile
     findFriendByPin(social_pin: String!): Profile
     searchCity(city: String!, locationType: String!): [LocationDetails]
+    getAccountWithProfileData(email: String!): Account
   }
 
   type Mutation {
@@ -127,6 +128,7 @@ const typeDefs = `#graphql
     start_date_and_time: String
     place_ids: [String]
     ): Outing
+    deleteOuting(id: Int!): String
     sendOutingInvites(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
     ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing

@@ -23,6 +23,19 @@ export const GET_ACCOUNT_BY_EMAIL = gql`
   }
 `;
 
+export const GET_ACCOUNT_WITH_PROFILE_DATA = gql`
+  query getAccountWithProfileData($email: String!) {
+    getAccountWithProfileData(email: $email) {
+      id
+      email
+      profile {
+        name
+        id
+      }
+    }
+  }
+`;
+
 export const UPDATE_ACCOUNT = gql`
   mutation updateUserAccount($email: String, $phone_number: String) {
     updateUserAccount(email: $email, phone_number: $phone_number) {
@@ -144,6 +157,12 @@ export const CREATE_OUTING = gql`
       start_date_and_time
       place_ids
     }
+  }
+`;
+
+export const DELETE_OUTING = gql`
+  mutation deleteOuting($id: Int!) {
+    deleteOuting(id: $id)
   }
 `;
 

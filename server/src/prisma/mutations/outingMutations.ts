@@ -43,6 +43,23 @@ export async function CreateOuting({
   }
 }
 
+export async function DeleteOuting(outingId: number) {
+  try {
+    await prismaClient.outing.delete({
+      where: {
+        id: outingId,
+      },
+    });
+    return {
+      status: 'Success',
+      data: 'Successfully deleted outing',
+      error: null,
+    };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
 export async function SendOutingInvites({
   outing_id,
   start_date_and_time,

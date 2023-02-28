@@ -87,6 +87,7 @@ type Query {
   findFriendById(id: Int!): Profile
   findFriendByPin(social_pin: String!): Profile
   searchCity(city: String!, locationType: String!): [LocationDetails]
+  getAccountWithProfileData(email: String!): Account
 }
 
 type Mutation {
@@ -102,6 +103,7 @@ type Mutation {
     start_date_and_time: String
     place_ids: [String]
   ): Outing
+  deleteOuting(id: Int!): String
   sendOutingInvites(
     outing_id: Int!
     start_date_and_time: String!

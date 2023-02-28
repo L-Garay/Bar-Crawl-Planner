@@ -1,8 +1,12 @@
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { useState } from 'react';
 import { getNewClient } from '~/apollo/getClient';
+import { authenticator } from '~/auth/authenticator';
 import {
+  DELETE_OUTING,
+  GET_ACCOUNT_WITH_PROFILE_DATA,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   SEND_OUTING_EMAIL,
@@ -13,35 +17,63 @@ import logApolloError from '~/utils/getApolloError';
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
   const formData = await request.formData();
+  const intent = formData.get('intent');
 
-  const emails = formData.get('profile-email') as string;
-  const emailsArray = emails.split(',');
+  switch (intent) {
+    case 'post':
+      const emails = formData.get('profile-email') as string;
+      const emailsArray = emails.split(',');
 
-  const start_date_and_time = formData.get('start-date-and-time') as string;
-  const outing_id = Number(params.outingId);
+      const start_date_and_time = formData.get('start-date-and-time') as string;
+      const outing_id = Number(params.outingId);
 
-  try {
-    const data = await client.mutate({
-      mutation: SEND_OUTING_EMAIL,
-      variables: {
-        emails: emailsArray,
-        start_date_and_time,
-        outing_id,
-      },
-    });
-    return data;
-  } catch (error) {
-    logApolloError(error);
-    // Don't throw an error here, because if the email fails they should still be able to interact with the rest of the page
-    // throw new Response(JSON.stringify(error), { status: 500 });
+      try {
+        const data = await client.mutate({
+          mutation: SEND_OUTING_EMAIL,
+          variables: {
+            emails: emailsArray,
+            start_date_and_time,
+            outing_id,
+          },
+        });
+        return data;
+      } catch (error) {
+        logApolloError(error);
+        // Don't throw an error here, because if the email fails they should still be able to interact with the rest of the page
+        // throw new Response(JSON.stringify(error), { status: 500 });
+      }
+      break;
+    case 'delete':
+      const outingId = Number(params.outingId);
+      try {
+        await client.mutate({
+          mutation: DELETE_OUTING,
+          variables: {
+            id: outingId,
+          },
+        });
+        return redirect('/outings/my-outings/');
+      } catch (error) {
+        logApolloError(error);
+        // Don't throw an error here, because if they can't delete an outing they should still be able to interact with the rest of the page
+      }
+      break;
+
+    default:
+      console.log('I hate switch statements for this reason');
+      break;
   }
 };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
+  // should never not be authenticated at this point
+  const user = await authenticator.isAuthenticated(request);
+  const email = user!.authData.profile.emails[0].value;
 
   let outing: any;
   let profiles: any;
+  let currentUserProfile: any;
 
   try {
     outing = await client.query({
@@ -56,19 +88,29 @@ export const loader: LoaderFunction = async ({ request, params }) => {
         id: Number(params.outingId),
       },
     });
+    currentUserProfile = await client.query({
+      query: GET_ACCOUNT_WITH_PROFILE_DATA,
+      variables: {
+        email,
+      },
+    });
   } catch (error) {
     logApolloError(error);
     throw new Response(JSON.stringify(error), { status: 500 });
   }
-  return { outing, profiles };
+  return { outing, profiles, currentUserProfile };
 };
 
 export default function OutingDetails() {
-  const { outing, profiles } = useLoaderData();
+  const { outing, profiles, currentUserProfile } = useLoaderData();
   const [shouldDisableSend, setShouldDisableSend] = useState(true);
   const { getOuting } = outing.data;
   const { accepted_profiles, pending_profiles, declined_profiles } =
     profiles.data.getProfilesInOuting;
+
+  const { getAccountWithProfileData } = currentUserProfile.data;
+  const showDeleteButton =
+    accepted_profiles[0].id === getAccountWithProfileData.profile.id;
 
   const EMAIL_MIN_LENGTH = 7;
 
@@ -102,7 +144,12 @@ export default function OutingDetails() {
                 name="start-date-and-time"
                 value={getOuting.start_date_and_time}
               />
-              <button type="submit" disabled={shouldDisableSend}>
+              <button
+                type="submit"
+                name="intent"
+                value="post"
+                disabled={shouldDisableSend}
+              >
                 Send Invite
               </button>
             </form>
@@ -149,6 +196,21 @@ export default function OutingDetails() {
                 );
               })}
             </>
+          ) : null}
+          <br />
+          {showDeleteButton ? (
+            <div className="delete-outing-container">
+              <form method="post">
+                <button
+                  className="delete-outing"
+                  name="intent"
+                  value="delete"
+                  type="submit"
+                >
+                  Delete Outing
+                </button>
+              </form>
+            </div>
           ) : null}
         </>
       ) : (
