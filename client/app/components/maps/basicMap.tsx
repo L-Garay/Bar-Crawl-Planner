@@ -13,6 +13,7 @@ import {
 import { CITY_COORDINATES } from '~/constants/mapConstants';
 import { useLazyQuery } from '@apollo/client';
 import martiniImg from '~/assets/martini32px.png';
+import beerImg from '~/assets/beerIcon32px.png';
 import LocationListItem from './locationListItem';
 import OutingListItem from './outingListItem';
 import { Form } from '@remix-run/react';
@@ -50,6 +51,9 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
 
   // create outing variables
   const [selectedOutings, setSelectedOutings] = useState<LocationDetails[]>([]);
+  const [outingMapMarkers, setOutingMapMarkers] = useState<
+    google.maps.Marker[]
+  >([]);
   const [noName, setNoName] = useState<boolean>(true);
   const [noTime, setNoTime] = useState<boolean>(true);
   const shouldDisableCreateOuting = useMemo(
@@ -69,6 +73,12 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
   const addLocationToOutings = (location: LocationDetails) => {
     if (selectedOutings.length < MAX_SELECTED_OUTINGS) {
       setSelectedOutings([...selectedOutings, location]);
+      const locationIndex = locations.findIndex(
+        (targetLocation) => location.id === targetLocation.id
+      );
+      const marker = mapMarkers[locationIndex];
+      marker.setIcon(beerImg);
+      setOutingMapMarkers([...outingMapMarkers, marker]);
     }
   };
   const removeLocationFromOutings = (locationId: number) => {
@@ -76,6 +86,14 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
       (outing) => outing.id !== locationId
     );
     setSelectedOutings(filteredOutings);
+    const locationIndex = locations.findIndex(
+      (location) => location.id === locationId
+    );
+    const marker = mapMarkers[locationIndex];
+    marker.setIcon(martiniImg);
+    setOutingMapMarkers(
+      outingMapMarkers.filter((targetMarker) => targetMarker !== marker)
+    );
   };
 
   // Search results pagination
@@ -174,6 +192,8 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
 
   // set the current markers on the map
   currentMapMarkers.forEach((marker) => marker.setMap(map!));
+  // set the current outing markers on the map
+  outingMapMarkers.forEach((marker) => marker.setMap(map!));
 
   // basic google info window to display location details
   const getInfoWindowContent = useCallback(
@@ -200,6 +220,21 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
     const marker = currentMapMarkers[index];
     const infoWindowContent = getInfoWindowContent(undefined, location);
     infoWindow.setContent(infoWindowContent);
+    infoWindow.open({
+      anchor: marker,
+      map,
+    });
+  };
+
+  const openOutingInfoWindow = (index: number, location: LocationDetails) => {
+    const locationIndex = selectedOutings.findIndex(
+      (desiredLocation) => desiredLocation.place_id === location.place_id
+    );
+    const marker = outingMapMarkers[locationIndex];
+    // marker.setIcon(beerImg);
+    const infoWindowContent = getInfoWindowContent(undefined, location);
+    infoWindow.setContent(infoWindowContent);
+    // marker.setMap(map!);
     infoWindow.open({
       anchor: marker,
       map,
@@ -362,7 +397,7 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
                       key={location.place_id}
                       location={location}
                       index={index}
-                      openInfoWindow={openInfoWindow}
+                      openOutingInfoWindow={openOutingInfoWindow}
                       removeLocationFromOutings={removeLocationFromOutings}
                     />
                   );
@@ -395,6 +430,12 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
             title="martini icons"
           >
             Martini icons created by Freepik - Flaticon
+          </a>
+          <a
+            href="https://www.flaticon.com/free-icons/food-and-restaurant"
+            title="food and restaurant icons"
+          >
+            Food and restaurant icons created by Freepik - Flaticon
           </a>
         </small>
       </div>

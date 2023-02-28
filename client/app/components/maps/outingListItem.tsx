@@ -5,14 +5,14 @@ import MinusCircle from '../svgs/minusCircle';
 export type OutingListItemProps = {
   location: LocationDetails;
   index: number;
-  openInfoWindow: (index: number, location: LocationDetails) => void;
+  openOutingInfoWindow: (index: number, location: LocationDetails) => void;
   removeLocationFromOutings: (locationId: number) => void;
 };
 
 export const OutingListItem = ({
   location,
   index,
-  openInfoWindow,
+  openOutingInfoWindow,
   removeLocationFromOutings,
 }: OutingListItemProps) => {
   const [isHoveringPlus, setIsHoveringPlus] = useState<boolean>(false);
@@ -21,7 +21,7 @@ export const OutingListItem = ({
     <li key={location.id} className="results-list-items">
       <span
         className="results-list-name"
-        onClick={() => openInfoWindow(index, location)}
+        onClick={() => openOutingInfoWindow(index, location)}
       >
         {location.name}
         {' --- '}
