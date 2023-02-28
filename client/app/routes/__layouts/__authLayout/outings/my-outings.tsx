@@ -1,4 +1,3 @@
-import { gql } from '@apollo/client';
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';

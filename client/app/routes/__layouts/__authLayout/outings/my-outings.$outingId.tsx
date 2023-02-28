@@ -1,5 +1,6 @@
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
-import { useLoaderData, useParams } from '@remix-run/react';
+import { useLoaderData } from '@remix-run/react';
+import { useState } from 'react';
 import { getNewClient } from '~/apollo/getClient';
 import {
   GET_OUTING,
@@ -15,6 +16,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
   const emails = formData.get('profile-email') as string;
   const emailsArray = emails.split(',');
+
   const start_date_and_time = formData.get('start-date-and-time') as string;
   const outing_id = Number(params.outingId);
 
@@ -63,11 +65,12 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 
 export default function OutingDetails() {
   const { outing, profiles } = useLoaderData();
+  const [shouldDisableSend, setShouldDisableSend] = useState(true);
   const { getOuting } = outing.data;
-  const { getProfilesInOuting } = profiles.data;
   const { accepted_profiles, pending_profiles, declined_profiles } =
-    getProfilesInOuting;
-  console.log(accepted_profiles, pending_profiles);
+    profiles.data.getProfilesInOuting;
+
+  const EMAIL_MIN_LENGTH = 7;
 
   return (
     <div>
@@ -87,14 +90,21 @@ export default function OutingDetails() {
                 // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
                 // pattern={`${VALID_EMAIL_REGEX}`}
                 title="figure out what pattern(s) to show here"
-                minLength={5} // what should this be?
+                minLength={EMAIL_MIN_LENGTH} // what should this be?
+                onChange={(e) => {
+                  setShouldDisableSend(
+                    e.target.value.length < EMAIL_MIN_LENGTH
+                  );
+                }}
               />
               <input
                 type="hidden"
                 name="start-date-and-time"
                 value={getOuting.start_date_and_time}
               />
-              <button type="submit">Send Invite</button>
+              <button type="submit" disabled={shouldDisableSend}>
+                Send Invite
+              </button>
             </form>
           </div>
           <h4>Profiles in Outing</h4>

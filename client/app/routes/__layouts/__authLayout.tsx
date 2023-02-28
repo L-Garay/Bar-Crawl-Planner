@@ -1,7 +1,26 @@
-import type { LoaderFunction } from '@remix-run/node';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import { Outlet } from '@remix-run/react';
 import { logout } from '~/auth/authenticator';
+import { BasicFooter } from '~/components/organisms/Footers';
+import { BasicHeader } from '~/components/organisms/Headers';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
+import footerStyles from '~/generatedStyles/footer.css';
+import headerStyles from '~/generatedStyles/header.css';
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: headerStyles,
+      as: 'style',
+    },
+    {
+      rel: 'stylesheet',
+      href: footerStyles,
+      as: 'style',
+    },
+  ];
+};
 
 // Having this pathless auth layout route handle user validation will protect all of it's child routes from unauthenticated users
 export const loader: LoaderFunction = async ({ request }) => {
@@ -15,7 +34,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function AuthLayout() {
-  return <Outlet />;
+  return (
+    <>
+      <BasicHeader />
+      <Outlet />
+      <BasicFooter />
+    </>
+  );
 }
 
 // Don't believe I should need an Error or Catch boundary here, as the only way to get to this route is to be authenticated

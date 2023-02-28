@@ -209,7 +209,7 @@ export async function SendOutingInvites({
   emailResponse.forEach((response, index, array) => {
     if (response.status === 'rejected') {
       // TODO log to some loggin service
-      console.log(`Email in array: ${array[index]}\n` + response.reason);
+      console.log(`Error sending some emails\n` + response.reason);
     }
   });
   const successfulEmails = emailResponse.filter(

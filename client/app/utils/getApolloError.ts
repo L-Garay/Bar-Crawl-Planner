@@ -2,6 +2,7 @@
 // TODO
 const logApolloError = (error: any): void => {
   const { graphQLErrors, networkError, clientErrors } = error;
+  // networkError is either an object or null
   if (networkError !== null) {
     const networkStatus = networkError.statusCode;
     const networkErrors = networkError.result.errors;
@@ -11,7 +12,8 @@ const logApolloError = (error: any): void => {
       );
     });
   }
-
+  // graphQLErrors is an array of objects, with each object representing one specific error
+  // there could be multiple errors in a single request (multiple mispelled fields, for example)
   if (graphQLErrors.length) {
     const graphErrors = graphQLErrors.map((error: Record<string, any>) => {
       return {

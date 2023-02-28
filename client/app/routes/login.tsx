@@ -29,17 +29,18 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   let config: any = {};
   let valid: boolean | undefined = undefined;
   let url: URL | undefined = undefined;
+  // NOTE each resource page or other, will be responsible for setting the proper returnTo value in the url parameters when redirecting to login page
+  let returnTo: string | null = null;
 
   try {
     config = getConfig();
     const { valid: isValid } = await validateUserAndSession(request);
     valid = isValid;
     url = new URL(request.url);
+    returnTo = url.searchParams.get('returnTo');
   } catch (error: any) {
     throw new Response(error.message, { status: 400 });
   }
-  // NOTE each resource page or other, will be responsible for setting the proper returnTo value in the url parameters when redirecting to login page
-  const returnTo = url.searchParams.get('returnTo');
 
   // if valid and has returnTo, redirect the returnTo url
   if (valid && returnTo) {

@@ -74,7 +74,7 @@ export default function CheckUser() {
               outing_id: Number(outingId),
             },
           });
-          // if there is an error at this step, we don't want to throw anything, since this isn't breaking anything
+          // if there is an error at this step, we don't want to throw anything, worst case scenario they stay pending
           if (connectProfileData.errors) {
             console.log(
               'error connecting profile after getting account by email',
@@ -131,6 +131,12 @@ export default function CheckUser() {
           },
         });
         if (data.errors) {
+          // TODO not sure what to do in this situation, if they can't claim the account/profile
+          // should we just put them in the regular flow and have them create a new account/profile?
+          // we should be able to clean up the pre-created, bad, unclaimed account/profile by using the social pin and profile id
+          // and then also disconnect the pre-created profile from the outing
+          // then as part of the regular flow, maybe we can include some logic to check if they are coming from a failed claim attempt
+          // and then try to connect the new account/profile to the outing
           console.log('error updating account by social pin');
           console.log(data.errors);
         }

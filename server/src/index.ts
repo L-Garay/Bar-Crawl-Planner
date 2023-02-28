@@ -161,8 +161,6 @@ async function StartServer() {
         // in which case, I'm thinking we just don't set a user account or profile
         // I don't believe that there will be any issues, as once the invite flow is done the user will have claimed their account
         if (req.headers.invitedata) {
-          console.log('inviteData header was passed', req.headers.invitedata);
-
           return { decodedToken: decodedToken.decoded };
         }
         const email = decodedToken.decoded?.email;

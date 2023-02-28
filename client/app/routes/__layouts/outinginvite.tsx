@@ -44,6 +44,7 @@ export default function OutingInvite() {
   }, [outingId, profileId, socialPin, isValid]);
 
   const handleAccept = async () => {
+    // if they have a valid user/session, connect them to the outing (pending to accepted)
     if (isValid) {
       await ConnectProfile({
         variables: {
@@ -53,6 +54,7 @@ export default function OutingInvite() {
       });
       navigate(`/outings/my-outings/${outingId}`);
     } else {
+      // if they don't have a valid user/session, check if inviteData is set and set if not, then navigate to login
       const inviteData = window.localStorage.getItem('inviteData');
       if (!inviteData) {
         const inviteData = {
@@ -68,6 +70,7 @@ export default function OutingInvite() {
   };
 
   const handleDecline = async () => {
+    // if they have a valid user/session, disconnect them from the outing (pending to declined)
     if (isValid) {
       await DisconnectProfile({
         variables: {

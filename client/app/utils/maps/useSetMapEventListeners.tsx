@@ -3,22 +3,8 @@ import { useEffect } from 'react';
 const useSetMapEventListeners = (
   map?: google.maps.Map,
   onClick?: (event: google.maps.MapMouseEvent) => void,
-  onIdle?: (map: google.maps.Map) => void,
-  events?: { [key: string]: any }
+  onIdle?: (map: google.maps.Map) => void
 ) => {
-  // useEffect(() => {
-  //   if (map && events) {
-  //     // clear all listeners
-  //     Object.keys(events).forEach((key) => {
-  //       google.maps.event.clearListeners(map, key);
-  //     });
-  //     // add new listeners
-  //     Object.keys(events).forEach((key) => {
-  //       map.addListener(key, events[key]);
-  //     });
-  //   }
-  // }, [map, events]);
-
   useEffect(() => {
     if (map) {
       ['click', 'idle'].forEach((eventName) =>

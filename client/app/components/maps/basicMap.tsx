@@ -29,21 +29,14 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
   >([]);
 
   // Map setup
+  // TODO fetch user's current location and set as default in map (either pass down here or in useCheckEnvironmentAndSetMap itself)
+  // use navigator.geolocation.getCurrentPosition() to get user's current location
   useCheckEnvironmentAndSetMap(mapsRef, setMap, map);
   useSetMapOptions(map, mapOptions);
   useSetMapEventListeners(map);
 
   // create Info Window for pop ups on markers
   const infoWindow = useMemo(() => new google.maps.InfoWindow(), []);
-  const openInfoWindow = (index: number, location: LocationDetails) => {
-    const marker = currentMapMarkers[index];
-    const infoWindowContent = getInfoWindowContent(undefined, location);
-    infoWindow.setContent(infoWindowContent);
-    infoWindow.open({
-      anchor: marker,
-      map,
-    });
-  };
 
   // Search variables
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('Boise');
@@ -51,10 +44,7 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
     useState<LocationSelectOptions>('bars');
   const [locations, setLocations] = useState<LocationDetails[]>([]);
   // Search query
-  const [
-    searchCity,
-    { loading: cityLoading, error: cityError, data: cityData },
-  ] = useLazyQuery(CITY_SEARCH, {
+  const [searchCity, { data: cityData }] = useLazyQuery(CITY_SEARCH, {
     fetchPolicy: 'no-cache', // testing purposes only
   });
 
@@ -205,6 +195,17 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
     [locations]
   );
 
+  // dynamically generate the content, set it, and then open the window
+  const openInfoWindow = (index: number, location: LocationDetails) => {
+    const marker = currentMapMarkers[index];
+    const infoWindowContent = getInfoWindowContent(undefined, location);
+    infoWindow.setContent(infoWindowContent);
+    infoWindow.open({
+      anchor: marker,
+      map,
+    });
+  };
+
   // add click listener to each marker to open info window
   useEffect(() => {
     mapMarkers.forEach((marker, index) => {
@@ -267,6 +268,7 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
       </div>
       <br />
       <div className="locations-map-results">
+        {/* MAP */}
         <div className="map" ref={mapsRef} style={style}></div>
         <div className="results">
           Current Locations: <br />
