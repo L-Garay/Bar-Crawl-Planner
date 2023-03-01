@@ -16,21 +16,23 @@ export async function GetOutingByOutingId(
   }
 }
 
-export async function GetAllOutings(creatorId: number): Promise<PrismaData> {
+export async function GetAllOutings(
+  creator_profile_id: number
+): Promise<PrismaData> {
   try {
     const createdOutings = await prismaClient.outing.findMany({
       where: {
-        creator_profile_id: creatorId,
+        creator_profile_id: creator_profile_id,
       },
     });
     const joinedOutings = await prismaClient.outing.findMany({
       where: {
         creator_profile_id: {
-          not: creatorId,
+          not: creator_profile_id,
         },
         accepted_profiles: {
           some: {
-            id: creatorId,
+            id: creator_profile_id,
           },
         },
       },

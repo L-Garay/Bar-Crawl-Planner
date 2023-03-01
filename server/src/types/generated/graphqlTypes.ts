@@ -73,6 +73,7 @@ export type Mutation = {
   deleteOuting?: Maybe<Scalars['String']>;
   removeFriend?: Maybe<Profile>;
   sendOutingInvites?: Maybe<Scalars['String']>;
+  updateOuting?: Maybe<Outing>;
   updateUserAccount?: Maybe<Account>;
 };
 
@@ -154,6 +155,12 @@ export type MutationSendOutingInvitesArgs = {
 };
 
 
+export type MutationUpdateOutingArgs = {
+  id: Scalars['Int'];
+  outingInput: OutingUpdateInput;
+};
+
+
 export type MutationUpdateUserAccountArgs = {
   email?: InputMaybe<Scalars['String']>;
   phone_number?: InputMaybe<Scalars['String']>;
@@ -177,6 +184,11 @@ export type OutingProfileStates = {
   accepted_profiles?: Maybe<Array<Maybe<Profile>>>;
   declined_profiles?: Maybe<Array<Maybe<Profile>>>;
   pending_profiles?: Maybe<Array<Maybe<Profile>>>;
+};
+
+export type OutingUpdateInput = {
+  name: Scalars['String'];
+  start_date_and_time: Scalars['String'];
 };
 
 export type Profile = {
@@ -326,6 +338,7 @@ export type ResolversTypes = ResolversObject<{
   Mutation: ResolverTypeWrapper<{}>;
   Outing: ResolverTypeWrapper<Outing>;
   OutingProfileStates: ResolverTypeWrapper<OutingProfileStates>;
+  OutingUpdateInput: OutingUpdateInput;
   Profile: ResolverTypeWrapper<Profile>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
@@ -341,6 +354,7 @@ export type ResolversParentTypes = ResolversObject<{
   Mutation: {};
   Outing: Outing;
   OutingProfileStates: OutingProfileStates;
+  OutingUpdateInput: OutingUpdateInput;
   Profile: Profile;
   Query: {};
   String: Scalars['String'];
@@ -404,6 +418,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deleteOuting?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationDeleteOutingArgs, 'id'>>;
   removeFriend?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<MutationRemoveFriendArgs, 'friend_id' | 'id'>>;
   sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
+  updateOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationUpdateOutingArgs, 'id' | 'outingInput'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
 }>;
 

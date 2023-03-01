@@ -6,6 +6,7 @@ import {
   PrismaError,
   PrismaData,
   SendingOutingsInvitesInput,
+  OutingUpdateInput,
 } from '../../types/sharedTypes';
 
 import Mailgen from 'mailgen';
@@ -22,20 +23,37 @@ export async function CreateOuting({
   created_at,
   start_date_and_time,
   place_ids,
-  creatorId,
-}: OutingInput & { creatorId: number }): Promise<PrismaData> {
+  creator_profile_id,
+}: OutingInput): Promise<PrismaData> {
   try {
     const outing = await prismaClient.outing.create({
       data: {
         name,
-        creator_profile_id: creatorId,
+        creator_profile_id: creator_profile_id,
         created_at,
         start_date_and_time,
         place_ids,
         accepted_profiles: {
-          connect: { id: creatorId },
+          connect: { id: creator_profile_id },
         },
       },
+    });
+    return { status: 'Success', data: outing, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function UpdateOuting(
+  outingId: number,
+  outingInput: OutingUpdateInput
+): Promise<PrismaData> {
+  try {
+    const outing = await prismaClient.outing.update({
+      where: {
+        id: outingId,
+      },
+      data: outingInput,
     });
     return { status: 'Success', data: outing, error: null };
   } catch (error) {

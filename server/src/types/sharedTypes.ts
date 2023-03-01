@@ -68,6 +68,12 @@ export type OutingInput = {
   created_at: string;
   start_date_and_time: string;
   place_ids: string[];
+  creator_profile_id: number;
+};
+
+export type OutingUpdateInput = {
+  name?: string;
+  start_date_and_time?: string;
 };
 
 export type SendingOutingsInvitesInput = {

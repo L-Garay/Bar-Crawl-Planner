@@ -38,6 +38,7 @@ import {
   DeleteOuting,
   DisconnectUserWithOuting,
   SendOutingInvites,
+  UpdateOuting,
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
 
@@ -430,10 +431,32 @@ const resolvers: Resolvers = {
       }
       const outingInput = { ...args } as OutingInput;
       const userId = user.data.id;
-      const outingData = { ...outingInput, creatorId: userId };
+      const outingData = { ...outingInput, creator_profile_id: userId };
       const outing = await CreateOuting(outingData);
       if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot create outing', {
+          extensions: {
+            code: outing.error?.name,
+            message: outing.error?.message,
+            prismaMeta: outing.error?.meta,
+            prismaErrorCode: outing.error?.errorCode,
+          },
+        });
+      } else {
+        return outing.data;
+      }
+    },
+    updateOuting: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const outing = await UpdateOuting(args.id, args.outingInput);
+      if (outing.status === 'Failure') {
+        throw new GraphQLError('Cannot update outing', {
           extensions: {
             code: outing.error?.name,
             message: outing.error?.message,

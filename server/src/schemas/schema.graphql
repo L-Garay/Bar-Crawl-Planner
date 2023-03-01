@@ -74,6 +74,11 @@ type LocationDetails {
   expiration_date: String
 }
 
+input OutingUpdateInput {
+  name: String!
+  start_date_and_time: String!
+}
+
 type Query {
   getAccountByEmail(email: String!): Account
   getUserAccount: Account
@@ -104,6 +109,7 @@ type Mutation {
     place_ids: [String]
   ): Outing
   deleteOuting(id: Int!): String
+  updateOuting(id: Int!, outingInput: OutingUpdateInput!): Outing
   sendOutingInvites(
     outing_id: Int!
     start_date_and_time: String!

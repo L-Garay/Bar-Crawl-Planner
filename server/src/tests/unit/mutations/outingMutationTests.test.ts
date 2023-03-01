@@ -14,7 +14,7 @@ describe('outing mutations', () => {
         start_date_and_time: '12/12/2020',
         created_at: '12/30/2020',
         place_ids: ['123', '456'],
-        creatorId: 1,
+        creator_profile_id: 1,
       };
       // @ts-ignore
       prismaMock.outing.create.mockResolvedValue(outing);

@@ -96,6 +96,11 @@ const typeDefs = `#graphql
     expiration_date: String
   }
 
+  input OutingUpdateInput {
+    name: String!
+    start_date_and_time: String!
+  }
+
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "basicUsers" query returns an array of zero or more BasicUsers (defined above).
@@ -128,6 +133,7 @@ const typeDefs = `#graphql
     start_date_and_time: String
     place_ids: [String]
     ): Outing
+    updateOuting(id: Int!, outingInput: OutingUpdateInput!): Outing
     deleteOuting(id: Int!): String
     sendOutingInvites(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
     ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
