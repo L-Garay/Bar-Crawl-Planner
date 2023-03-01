@@ -454,7 +454,11 @@ const resolvers: Resolvers = {
         });
       }
 
-      const outing = await UpdateOuting(args.id, args.outingInput);
+      const { id, name, start_date_and_time } = args;
+      const validName = name ? name : undefined;
+      const validDate = start_date_and_time ? start_date_and_time : undefined;
+
+      const outing = await UpdateOuting(id, validName, validDate);
       if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot update outing', {
           extensions: {

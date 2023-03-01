@@ -42,8 +42,6 @@ export default function AccountIndex() {
 
   const { getUserAccount: accountData } = loaderData.data;
 
-  const phoneRef = React.useRef<HTMLInputElement>(null);
-
   // Optimistically show the user's updated values, or their current value
   // Then once the sumbission process is over, the updated value should have then become their current value and it will remain in the UI
   const phoneToShow = transition.submission
@@ -77,7 +75,7 @@ export default function AccountIndex() {
           <div className="form-container">
             <Form method="patch" action="/account">
               <label htmlFor="phone_number">Phone</label>
-              <input type="text" name="phone_number" ref={phoneRef} />
+              <input type="text" name="phone_number" />
               <button type="submit">Submit</button>
             </Form>
           </div>

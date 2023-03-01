@@ -160,6 +160,26 @@ export const CREATE_OUTING = gql`
   }
 `;
 
+export const UPDATE_OUTING = gql`
+  mutation updateOuting(
+    $id: Int!
+    $name: String
+    $start_date_and_time: String
+  ) {
+    updateOuting(
+      id: $id
+      name: $name
+      start_date_and_time: $start_date_and_time
+    ) {
+      id
+      name
+      creator_profile_id
+      start_date_and_time
+      place_ids
+    }
+  }
+`;
+
 export const DELETE_OUTING = gql`
   mutation deleteOuting($id: Int!) {
     deleteOuting(id: $id)

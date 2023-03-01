@@ -46,14 +46,18 @@ export async function CreateOuting({
 
 export async function UpdateOuting(
   outingId: number,
-  outingInput: OutingUpdateInput
+  name?: string,
+  start_date_and_time?: string
 ): Promise<PrismaData> {
   try {
     const outing = await prismaClient.outing.update({
       where: {
         id: outingId,
       },
-      data: outingInput,
+      data: {
+        name,
+        start_date_and_time,
+      },
     });
     return { status: 'Success', data: outing, error: null };
   } catch (error) {

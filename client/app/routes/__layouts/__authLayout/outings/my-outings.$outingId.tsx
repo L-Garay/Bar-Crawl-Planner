@@ -1,7 +1,7 @@
 import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { useState } from 'react';
+import { Form, useLoaderData, useTransition } from '@remix-run/react';
+import { useEffect, useMemo, useState } from 'react';
 import { getNewClient } from '~/apollo/getClient';
 import { authenticator } from '~/auth/authenticator';
 import {
@@ -10,9 +10,12 @@ import {
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   SEND_OUTING_EMAIL,
+  UPDATE_OUTING,
 } from '~/constants/graphqlConstants';
 import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
+import EditIcon from '~/components/svgs/editIcon';
+import moment from 'moment';
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -25,7 +28,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       const emailsArray = emails.split(',');
 
       const start_date_and_time = formData.get('start-date-and-time') as string;
-      const outing_id = Number(params.outingId);
+      const outingId = Number(params.outingId);
 
       try {
         const data = await client.mutate({
@@ -33,23 +36,43 @@ export const action: ActionFunction = async ({ request, params }) => {
           variables: {
             emails: emailsArray,
             start_date_and_time,
-            outing_id,
+            outing_id: outingId,
           },
         });
-        return data;
+        return data.data;
       } catch (error) {
         logApolloError(error);
         // Don't throw an error here, because if the email fails they should still be able to interact with the rest of the page
         // throw new Response(JSON.stringify(error), { status: 500 });
       }
       break;
+    case 'put':
+      const outingName = formData.get('outing-name') as string;
+      const outingDate = formData.get('outing-date') as string;
+      const outing_id = Number(params.outingId);
+
+      try {
+        const data = await client.mutate({
+          mutation: UPDATE_OUTING,
+          variables: {
+            id: outing_id,
+            name: outingName,
+            start_date_and_time: outingDate,
+          },
+        });
+        return data.data;
+      } catch (error) {
+        logApolloError(error);
+      }
+
+      break;
     case 'delete':
-      const outingId = Number(params.outingId);
+      const outingid = Number(params.outingId);
       try {
         await client.mutate({
           mutation: DELETE_OUTING,
           variables: {
-            id: outingId,
+            id: outingid,
           },
         });
         return redirect('/outings/my-outings/');
@@ -60,8 +83,7 @@ export const action: ActionFunction = async ({ request, params }) => {
       break;
 
     default:
-      console.log('I hate switch statements for this reason');
-      break;
+      return 'test';
   }
 };
 
@@ -102,24 +124,127 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 };
 
 export default function OutingDetails() {
-  const { outing, profiles, currentUserProfile } = useLoaderData();
   const [shouldDisableSend, setShouldDisableSend] = useState(true);
+  const [isHoveringNameIcon, setIsHoveringNameIcon] = useState(false);
+  const [showEditName, setShowEditName] = useState(false);
+  const [isHoveringDateIcon, setIsHoveringDateIcon] = useState(false);
+  const [showEditDate, setShowEditDate] = useState(false);
+
+  const transition = useTransition();
+
+  const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;
   const { accepted_profiles, pending_profiles, declined_profiles } =
     profiles.data.getProfilesInOuting;
-
   const { getAccountWithProfileData } = currentUserProfile.data;
-  const showDeleteButton =
-    accepted_profiles[0].id === getAccountWithProfileData.profile.id;
 
+  const isOutingCreator =
+    accepted_profiles[0].id === getAccountWithProfileData.profile.id;
   const EMAIL_MIN_LENGTH = 7;
+
+  const currentDay = new Date();
+  const currentDayInputValue = moment(currentDay).format('YYYY-MM-DDTHH:mm');
+  const maxDate = currentDay.setFullYear(currentDay.getFullYear() + 1);
+  const maxDateValue = moment(maxDate).format('YYYY-MM-DDTHH:mm');
+
+  useEffect(() => {
+    if (transition.state === 'loading') {
+      setShowEditDate(false);
+      setShowEditName(false);
+    }
+  }, [transition.state]);
+
+  const transitionName = useMemo(
+    () => transition.submission?.formData.get('outing-name'),
+    [transition.submission]
+  );
+  const transitionDate = useMemo(
+    () => transition.submission?.formData.get('outing-date'),
+    [transition.submission]
+  );
+
+  const nameToShow = transitionName ? transitionName : getOuting.name;
+
+  const dateToShow = transitionDate
+    ? transitionDate
+    : getOuting.start_date_and_time;
 
   return (
     <div>
       {getOuting ? (
         <>
-          <h1>{getOuting.name}</h1>
-          <p>{getOuting.start_date_and_time}</p>
+          {showEditName === false ? (
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <h1>{nameToShow}</h1>
+              {isOutingCreator ? (
+                <span
+                  onMouseEnter={() => setIsHoveringNameIcon(true)}
+                  onMouseLeave={() => setIsHoveringNameIcon(false)}
+                  onClick={() => {
+                    setShowEditDate(false);
+                    setShowEditName(true);
+                    setIsHoveringNameIcon(false);
+                  }}
+                >
+                  <EditIcon
+                    pathId={getOuting.name}
+                    fill={isHoveringNameIcon ? '#20b2aa' : undefined}
+                    size="medium"
+                  />
+                </span>
+              ) : null}
+            </span>
+          ) : (
+            <Form method="post" style={{ paddingTop: 15 }}>
+              <input
+                type="text"
+                name="outing-name"
+                id="outing-name"
+                spellCheck
+                defaultValue={getOuting.name}
+              />
+              <button type="submit" name="intent" value="put">
+                Save Change
+              </button>
+            </Form>
+          )}
+          {showEditDate === false ? (
+            <span style={{ display: 'flex', alignItems: 'center' }}>
+              <p>{dateToShow}</p>
+              {isOutingCreator ? (
+                <span
+                  onMouseEnter={() => setIsHoveringDateIcon(true)}
+                  onMouseLeave={() => setIsHoveringDateIcon(false)}
+                  onClick={() => {
+                    setShowEditName(false);
+                    setShowEditDate(true);
+                    setIsHoveringDateIcon(false);
+                  }}
+                >
+                  <EditIcon
+                    pathId={getOuting.start_date_and_time}
+                    fill={isHoveringDateIcon ? '#20b2aa' : undefined}
+                    size="small"
+                  />
+                </span>
+              ) : null}
+            </span>
+          ) : (
+            <Form method="post" style={{ paddingTop: 15 }}>
+              <input
+                type="datetime-local"
+                name="outing-date"
+                id="outing-date"
+                min={currentDayInputValue}
+                max={maxDateValue}
+                defaultValue={getOuting.start_date_and_time}
+              />
+              <button type="submit" name="intent" value="put">
+                Save Change
+              </button>
+            </Form>
+          )}
+
           <br />
           <div className="add-profiles">
             <form method="post">
@@ -198,7 +323,7 @@ export default function OutingDetails() {
             </>
           ) : null}
           <br />
-          {showDeleteButton ? (
+          {isOutingCreator ? (
             <div className="delete-outing-container">
               <form method="post">
                 <button

@@ -14,6 +14,7 @@ export const authenticator = new Authenticator<AuthenticatorUser | null>(
   sessionStorage
 );
 
+// TODO find out where auth0 state params are stored during auth flow
 let auth0Strategy = new Auth0Strategy(
   {
     callbackURL: config.AUTH0.CALLBACK_URL,
