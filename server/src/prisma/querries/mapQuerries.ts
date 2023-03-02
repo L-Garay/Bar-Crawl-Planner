@@ -421,51 +421,96 @@ export const GetLocationData = async (
   );
 
   // if there are locations, we need to get their details
-  if (locationResults.length > 0) {
-    console.log('ABOUT TO FORMAT RESULTS');
+  if (locationResults.length == 0 && error) {
+    // if we log the error from GetGoogleLocations, what should we do here?
+    console.error(error);
+    return [];
+  }
+  if (locationResults.length == 0 && !error) {
+    return [];
+  }
 
-    // iterate over the results and get the details for each location
-    // format the results into a LocationDetails object
-    const formattedResults: Promise<LocationDetails | null>[] =
-      locationResults.map(async (result) => {
-        if (!result.place_id) {
-          console.log('\nNO PLACE ID\n');
+  console.log('ABOUT TO FORMAT RESULTS');
 
-          return null;
-        }
-        // get the photo reference pointed to photo's storage location in google
-        // attach the photo's width, height, and attributions to the reference
-        const photoReferences = result.photos
-          ? result.photos.map(
-              (photo) =>
-                photo.photo_reference +
-                `&maxwidth=${photo.width}&maxheight=${
-                  photo.height
-                }&attributions=${JSON.stringify(photo.html_attributions)}`
-            )
-          : [];
-        // pull off the relevant text search result data
-        const textSearchResult = {
-          business_status: result.business_status,
-          formatted_address: result.formatted_address,
-          lat: result.geometry?.location.lat,
-          lng: result.geometry?.location.lng,
-          icon: result.icon,
-          icon_mask_base_uri: result.icon_mask_base_uri,
-          icon_background_color: result.icon_background_color,
-          name: result.name,
-          place_id: result.place_id,
-          rating: result.rating,
-          user_ratings_total: result.user_ratings_total,
-          types: result.types,
-          plus_compound_code: result.plus_code?.compound_code,
-          plus_global_code: result.plus_code?.global_code,
-          photos_references: photoReferences,
-        };
+  // iterate over the results and get the details for each location
+  // format the results into a LocationDetails object
+  const formattedTextSearchResults: Partial<LocationDetails | null>[] =
+    locationResults.map((result) => {
+      if (!result.place_id) {
+        console.log('\nNO PLACE ID\n');
 
-        let detailsData;
-        console.log('ABOUT TO FETCH DETAILS');
-        // get the details for each location based on the place_id
+        return null;
+      }
+      // get the photo reference pointed to photo's storage location in google
+      // attach the photo's width, height, and attributions to the reference
+      const photoReferences = result.photos
+        ? result.photos.map(
+            (photo) =>
+              photo.photo_reference +
+              `&maxwidth=${photo.width}&maxheight=${
+                photo.height
+              }&attributions=${JSON.stringify(photo.html_attributions)}`
+          )
+        : [];
+      // pull off the relevant text search result data
+      const textSearchResult = {
+        business_status: result.business_status,
+        formatted_address: result.formatted_address,
+        lat: result.geometry?.location.lat,
+        lng: result.geometry?.location.lng,
+        icon: result.icon,
+        icon_mask_base_uri: result.icon_mask_base_uri,
+        icon_background_color: result.icon_background_color,
+        name: result.name,
+        place_id: result.place_id,
+        rating: result.rating,
+        user_ratings_total: result.user_ratings_total,
+        types: result.types,
+        plus_compound_code: result.plus_code?.compound_code,
+        plus_global_code: result.plus_code?.global_code,
+        photos_references: photoReferences,
+      };
+      return textSearchResult;
+    });
+
+  const formattedDetailResults: Promise<Partial<LocationDetails> | null>[] =
+    locationResults.map(async (result) => {
+      let detailsData;
+      console.log('ABOUT TO FETCH DETAILS');
+      // get the details for each location based on the place_id
+      detailsData = await googleClient.placeDetails({
+        params: {
+          place_id: result.place_id!,
+          fields: DETAILS_FIELDS_TO_RETURN,
+          key: process.env.GOOGLE_MAPS_API_KEY!,
+        },
+        timeout: 10000,
+        timeoutErrorMessage: `Error fetching details for place: ${result.name}`,
+      });
+      console.log('JUST FETCHED DETAILS');
+
+      // if the request status is one of these, there is no point in retrying at this time
+      if (
+        (detailsData.data && detailsData.data.status === 'NOT_FOUND') ||
+        (detailsData.data && detailsData.data.status === 'ZERO_RESULTS') ||
+        (detailsData.data && detailsData.data.status === 'OVER_QUERY_LIMIT') ||
+        (detailsData.data && detailsData.data.status === 'REQUEST_DENIED')
+      ) {
+        console.log(
+          `\n\nError fetching details with status: ${detailsData.data.status}\n\n`
+        );
+        console.log(`Error fetching details for place: ${result.place_id}`);
+        return null;
+      } else if (
+        /* if the request status is one of these two, we can try to make another request. Although, I'm not sure what could be invalid for this simple request. */
+        (detailsData.data && detailsData.data.status === 'INVALID_REQUEST') ||
+        (detailsData.data && detailsData.data.status === 'UNKNOWN_ERROR')
+      ) {
+        console.log(
+          '\n\nRETRYING FETCHING DETAILS\n\n',
+          detailsData.data.status
+        );
+
         detailsData = await googleClient.placeDetails({
           params: {
             place_id: result.place_id!,
@@ -475,122 +520,105 @@ export const GetLocationData = async (
           timeout: 10000,
           timeoutErrorMessage: `Error fetching details for place: ${result.name}`,
         });
-        console.log('JUST FETCHED DETAILS');
-
-        // if the request status is one of these, there is no point in retrying at this time
-        if (
-          (detailsData.data && detailsData.data.status === 'NOT_FOUND') ||
-          (detailsData.data && detailsData.data.status === 'ZERO_RESULTS') ||
-          (detailsData.data &&
-            detailsData.data.status === 'OVER_QUERY_LIMIT') ||
-          (detailsData.data && detailsData.data.status === 'REQUEST_DENIED')
-        ) {
-          console.log(
-            `\n\nError fetching details with status: ${detailsData.data.status}\n\n`
-          );
-          console.log(`Error fetching details for place: ${result.place_id}`);
-          return null;
-        } else if (
-          /* if the request status is one of these two, we can try to make another request. Although, I'm not sure what could be invalid for this simple request. */
-          (detailsData.data && detailsData.data.status === 'INVALID_REQUEST') ||
-          (detailsData.data && detailsData.data.status === 'UNKNOWN_ERROR')
-        ) {
-          console.log(
-            '\n\nRETRYING FETCHING DETAILS\n\n',
-            detailsData.data.status
-          );
-
-          detailsData = await googleClient.placeDetails({
-            params: {
-              place_id: result.place_id!,
-              fields: DETAILS_FIELDS_TO_RETURN,
-              key: process.env.GOOGLE_MAPS_API_KEY!,
-            },
-            timeout: 10000,
-            timeoutErrorMessage: `Error fetching details for place: ${result.name}`,
-          });
-        }
-        // if after the retry, the status is still not OK, we can't do anything with this result so we return null and log the error
-        if (detailsData.data && detailsData.data.status !== 'OK') {
-          const error: GoogleError = {
-            status: detailsData.status,
-            name: detailsData.data.status,
-            message: detailsData.data.error_message,
-          };
-          console.log(
-            '\n\nERROR RETRYING FETCHING DETAILS\n\n',
-            detailsData.data.status
-          );
-          console.log(
-            `Error re-fetching details for location: ${result.place_id}`
-          );
-          return null;
-        }
-        // this means there was no error getting the details
-        const detailsResult = detailsData.data.result;
-
-        //format the details data into a LocationDetails object compatible structure
-        const openPeriods = detailsResult.opening_hours?.periods.map((period) =>
-          JSON.stringify(period)
-        );
-
-        const reviews = detailsResult.reviews?.map((review) =>
-          JSON.stringify(review)
-        );
-
-        const cityType = 'locality' as PlaceType2;
-        const city = detailsResult.address_components
-          ? detailsResult.address_components.find((component) =>
-              component.types.includes(cityType)
-            )?.long_name
-          : '';
-        const stateType = 'administrative_area_level_1' as PlaceType2;
-        const state = detailsResult.address_components
-          ? detailsResult.address_components.find((component) =>
-              component.types.includes(stateType)
-            )?.long_name
-          : '';
-
-        const formattedDetailsResponse = {
-          price_level: detailsResult.price_level,
-          reviews,
-          formatted_phone_number: detailsResult.formatted_phone_number,
-          open_periods: openPeriods,
-          weekday_text: detailsResult.opening_hours?.weekday_text,
-          url: detailsResult.url,
-          website: detailsResult.website,
-          vicinity: detailsResult.vicinity,
-          utc_offset_minutes: detailsResult.utc_offset,
-          city,
-          state,
+      }
+      // if after the retry, the status is still not OK, we can't do anything with this result so we return null and log the error
+      if (detailsData.data && detailsData.data.status !== 'OK') {
+        const error: GoogleError = {
+          status: detailsData.status,
+          name: detailsData.data.status,
+          message: detailsData.data.error_message,
         };
-        console.log('JUST FORMATTED DETAILS');
+        console.log(
+          '\n\nERROR RETRYING FETCHING DETAILS\n\n',
+          detailsData.data.status
+        );
+        console.log(
+          `Error re-fetching details for location: ${result.place_id}`
+        );
+        return null;
+      }
+      // this means there was no error getting the details
+      const detailsResult = detailsData.data.result;
 
-        // combine the text search result and the details result into a single LocationDetails object
-        const formattedResult: LocationDetails = {
-          ...textSearchResult,
-          ...formattedDetailsResponse,
-          expiration_date: new Date(
-            new Date().getTime() +
-              LOCATION_DATA_EXPIRATION_DAYS * 24 * 60 * 60 * 1000
-          ).toISOString(),
-        };
-        console.log('ABOUT TO RETURN FORMATTED RESULT');
+      //format the details data into a LocationDetails object compatible structure
+      const openPeriods = detailsResult.opening_hours?.periods.map((period) =>
+        JSON.stringify(period)
+      );
 
-        return formattedResult;
-      });
+      const reviews = detailsResult.reviews?.map((review) =>
+        JSON.stringify(review)
+      );
 
-    const resolvedFormattedResults = await Promise.all(formattedResults);
-    console.log('ABOUT TO FILTER RESOLVED FORMATTED RESULTS');
+      const cityType = 'locality' as PlaceType2;
+      const city = detailsResult.address_components
+        ? detailsResult.address_components.find((component) =>
+            component.types.includes(cityType)
+          )?.long_name
+        : '';
+      const stateType = 'administrative_area_level_1' as PlaceType2;
+      const state = detailsResult.address_components
+        ? detailsResult.address_components.find((component) =>
+            component.types.includes(stateType)
+          )?.long_name
+        : '';
 
-    const filteredResolvedFormattedResults = resolvedFormattedResults.filter(
+      const formattedDetailsResponse = {
+        price_level: detailsResult.price_level,
+        reviews,
+        formatted_phone_number: detailsResult.formatted_phone_number,
+        open_periods: openPeriods,
+        weekday_text: detailsResult.opening_hours?.weekday_text,
+        url: detailsResult.url,
+        website: detailsResult.website,
+        vicinity: detailsResult.vicinity,
+        utc_offset_minutes: detailsResult.utc_offset,
+        city,
+        state,
+      };
+      console.log('JUST FORMATTED DETAILS');
+      return formattedDetailsResponse;
+    });
+
+  console.log('ABOUT TO FILTER RESOLVED FORMATTED RESULTS');
+  const filteredFormattedTextSearchResults = formattedTextSearchResults.filter(
+    (result) => result !== null
+  ) as LocationDetails[];
+
+  const resolvedFormattedDetailResults = await Promise.all(
+    formattedDetailResults
+  );
+  const filteredResolvedFormattedDetailResults =
+    resolvedFormattedDetailResults.filter(
       (result) => result !== null
     ) as LocationDetails[];
-    console.log('ABOUT TO RETURN FILTERED RESOLVED FORMATTED RESULTS');
-    return filteredResolvedFormattedResults;
-  } else {
-    return [];
-  }
+
+  // combine the text search result and the details result into a single LocationDetails object
+  const combinedFormattedResults = filteredFormattedTextSearchResults.map(
+    (result, index) => {
+      return {
+        ...result,
+        ...filteredResolvedFormattedDetailResults[index],
+        expiration_date: new Date(
+          new Date().getTime() +
+            LOCATION_DATA_EXPIRATION_DAYS * 24 * 60 * 60 * 1000
+        ).toISOString(),
+      };
+    }
+  );
+
+  // const formattedFinalResult: LocationDetails = {
+  //   ...formattedTextSearchResults,
+  //   ...formattedDetailResults,
+  //   expiration_date: new Date(
+  //     new Date().getTime() +
+  //       LOCATION_DATA_EXPIRATION_DAYS * 24 * 60 * 60 * 1000
+  //   ).toISOString(),
+  // };
+  // not sure Promise.all() is needed?
+  // const resolvedFormattedResults = await Promise.all(combinedFormattedResults);
+
+  console.log('ABOUT TO RETURN FILTERED RESOLVED FORMATTED RESULTS');
+  return combinedFormattedResults;
 };
 
 export const SaveLocationsToDB = async () => {
