@@ -258,50 +258,70 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
   return (
     <>
       <div className="map-search-container">
-        <label htmlFor="cities">Select City:</label>
-        <select
-          name="cities"
-          id="cities"
-          onChange={(e) => {
-            const city = e.target.value as CitySelectOptions;
-            setSelectedCity(city);
-            map?.setCenter(CITY_COORDINATES[city]);
-          }}
-        >
-          <option value="Boise">Boise</option>
-          <option value="Slc">Salt Lake City</option>
-          <option value="Seattle">Seattle</option>
-          <option value="Denver">Denver</option>
-          <option value="Portland">Portland</option>
-        </select>
-        <label htmlFor="locations">Search:</label>
-        <select
-          name="locations"
-          id="locations"
-          onChange={(e) => {
-            const type = e.target.value as LocationSelectOptions;
-            setSelectedType(type);
-          }}
-        >
-          <option value="bars">Bars</option>
-          <option value="taverns">Taverns</option>
-          <option value="breweries">Breweries</option>
-          <option value="wineries">Wineries</option>
-          <option value="pubs">Pubs</option>
-          <option value="restaurants">Restaurants</option>
-        </select>
-        <button
-          type="button"
-          onClick={() =>
-            searchCity({
-              variables: { city: selectedCity, locationType: selectedType },
-            })
-          }
-        >
-          Submit
-        </button>
+        <div className="search-container">
+          <div className="city-container">
+            <label htmlFor="cities">Select City: </label>
+            <select
+              name="cities"
+              id="cities"
+              onChange={(e) => {
+                const city = e.target.value as CitySelectOptions;
+                setSelectedCity(city);
+                map?.setCenter(CITY_COORDINATES[city]);
+              }}
+            >
+              <option value="Boise">Boise</option>
+              <option value="Slc">Salt Lake City</option>
+              <option value="Seattle">Seattle</option>
+              <option value="Denver">Denver</option>
+              <option value="Portland">Portland</option>
+            </select>
+          </div>
+          <div className="types-container">
+            <label htmlFor="locations">Search: </label>
+            <select
+              name="locations"
+              id="locations"
+              onChange={(e) => {
+                const type = e.target.value as LocationSelectOptions;
+                setSelectedType(type);
+              }}
+            >
+              <option value="bars">Bars</option>
+              <option value="taverns">Taverns</option>
+              <option value="breweries">Breweries</option>
+              <option value="wineries">Wineries</option>
+              <option value="pubs">Pubs</option>
+              <option value="restaurants">Restaurants</option>
+            </select>
+          </div>
+          <div className="city-search-button-container">
+            <button
+              type="button"
+              className="city-search-button"
+              onClick={() =>
+                searchCity({
+                  variables: { city: selectedCity, locationType: selectedType },
+                })
+              }
+            >
+              Submit
+            </button>
+          </div>
+        </div>
+        <div className="map-key-container">
+          <div className="key" style={{ textAlign: 'center', marginRight: 10 }}>
+            <small style={{ display: 'block' }}>Unsaved location</small>
+            <img src={martiniImg} alt="martini glass" />
+          </div>
+          <div className="key" style={{ textAlign: 'center' }}>
+            <small style={{ display: 'block' }}>Saved locations</small>
+            <img src={beerImg} alt="beer mug" />
+          </div>
+        </div>
       </div>
       <br />
+
       <div className="locations-map-results">
         {/* MAP */}
         <div className="map" ref={mapsRef} style={style}></div>

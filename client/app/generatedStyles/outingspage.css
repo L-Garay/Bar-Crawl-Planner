@@ -1,3 +1,39 @@
+.map-search-container {
+  display: flex;
+}
+.map-search-container .search-container {
+  min-width: 500px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr, 1fr, auto);
+  gap: 10px;
+  grid-template-rows: 3;
+}
+.map-search-container .search-container .city-container,
+.map-search-container .search-container .types-container,
+.map-search-container .search-container .city-search-button-container {
+  grid-row: 3;
+  align-self: end;
+}
+.map-search-container .search-container .city-container {
+  grid-column: 1/2;
+}
+.map-search-container .search-container .types-container {
+  grid-column: 2/3;
+}
+.map-search-container .search-container .city-search-button-container {
+  grid-column: 3/4;
+}
+.map-search-container .map-key-container {
+  display: flex;
+  justify-content: center;
+  min-width: 230px;
+  width: 320px;
+  background-color: #20b2aa;
+  margin-left: 20px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
 .locations-map-results {
   display: flex;
 }

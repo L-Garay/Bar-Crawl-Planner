@@ -1,3 +1,46 @@
+
+.map-search-container{
+  display: flex;
+
+  .search-container {
+    min-width: 500px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr, 1fr, auto);
+    gap: 10px;
+    grid-template-rows: 3;
+
+    .city-container,
+    .types-container,
+    .city-search-button-container {
+      grid-row: 3;
+      align-self: end;
+    }
+    .city-container {
+      grid-column: 1 / 2;
+    }
+
+    .types-container {
+      grid-column: 2 / 3;
+    }
+
+    .city-search-button-container {
+      grid-column: 3 / 4;
+    }
+  }
+
+  .map-key-container {
+    display: flex;
+    justify-content: center;
+    min-width: 230px;
+    width: 320px;
+    background-color: #20b2aa;
+    margin-left: 20px;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+}
+
+
 .locations-map-results {
   display: flex;
 
