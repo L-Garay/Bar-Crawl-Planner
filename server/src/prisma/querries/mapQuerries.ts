@@ -218,6 +218,8 @@ export const SearchCity = async (
   }
 };
 
+// NOTE most recent changes to this flow have not been tested yet against the google api
+// NOTE most of the changes are in the GetLocationData function
 export const GetGoogleLocations = async (searchParams: any, city: string) => {
   const googleClient = new Client({});
 
