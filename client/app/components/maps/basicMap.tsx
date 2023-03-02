@@ -14,6 +14,7 @@ import { CITY_COORDINATES } from '~/constants/mapConstants';
 import { useLazyQuery } from '@apollo/client';
 import martiniImg from '~/assets/martini32px.png';
 import beerImg from '~/assets/beerIcon32px.png';
+import coconutImg from '~/assets/coconut32px.svg';
 import LocationListItem from './locationListItem';
 import OutingListItem from './outingListItem';
 import { Form } from '@remix-run/react';
@@ -218,6 +219,8 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
   // dynamically generate the content, set it, and then open the window
   const openInfoWindow = (index: number, location: LocationDetails) => {
     const marker = currentMapMarkers[index];
+    marker.setZIndex(1000);
+
     const infoWindowContent = getInfoWindowContent(undefined, location);
     infoWindow.setContent(infoWindowContent);
     infoWindow.open({
@@ -226,15 +229,15 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
     });
   };
 
-  const openOutingInfoWindow = (index: number, location: LocationDetails) => {
+  const openOutingInfoWindow = (location: LocationDetails) => {
     const locationIndex = selectedOutings.findIndex(
       (desiredLocation) => desiredLocation.place_id === location.place_id
     );
     const marker = outingMapMarkers[locationIndex];
-    // marker.setIcon(beerImg);
+    marker.setZIndex(1000);
+
     const infoWindowContent = getInfoWindowContent(undefined, location);
     infoWindow.setContent(infoWindowContent);
-    // marker.setMap(map!);
     infoWindow.open({
       anchor: marker,
       map,
@@ -315,7 +318,11 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
             <img src={martiniImg} alt="martini glass" />
           </div>
           <div className="key" style={{ textAlign: 'center' }}>
-            <small style={{ display: 'block' }}>Saved locations</small>
+            <small style={{ display: 'block' }}>Current location</small>
+            <img src={coconutImg} alt="beer mug" />
+          </div>
+          <div className="key" style={{ textAlign: 'center' }}>
+            <small style={{ display: 'block' }}>Saved location</small>
             <img src={beerImg} alt="beer mug" />
           </div>
         </div>

@@ -5,7 +5,7 @@ import MinusCircle from '../svgs/minusCircle';
 export type OutingListItemProps = {
   location: LocationDetails;
   index: number;
-  openOutingInfoWindow: (index: number, location: LocationDetails) => void;
+  openOutingInfoWindow: (location: LocationDetails) => void;
   removeLocationFromOutings: (locationId: number) => void;
 };
 
@@ -21,7 +21,7 @@ export const OutingListItem = ({
     <li key={location.id} className="results-list-items">
       <span
         className="results-list-name"
-        onClick={() => openOutingInfoWindow(index, location)}
+        onClick={() => openOutingInfoWindow(location)}
       >
         {location.name}
         {' --- '}

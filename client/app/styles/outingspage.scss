@@ -32,11 +32,18 @@
     display: flex;
     justify-content: center;
     min-width: 230px;
-    width: 320px;
-    background-color: #20b2aa;
+    width: 25rem;
+    background-color: lightgrey;
     margin-left: 20px;
     padding: 5px;
     box-sizing: border-box;
+
+    .key {
+      text-align: center;
+    }
+    .key:not(:last-child) {
+      margin-right: 10px;
+    }
   }
 }
 
@@ -47,6 +54,7 @@
 }
 .results {
   min-width: 20rem;
+  width: 25rem;
   margin-left: 20px;
   background-color: lightgray;
 }
