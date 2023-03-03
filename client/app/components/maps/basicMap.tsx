@@ -29,6 +29,9 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
   const [currentMapMarkers, setCurrentMapMarkers] = useState<
     google.maps.Marker[]
   >([]);
+  const [selectedMapMarker, setSelectedMapMarker] =
+    useState<google.maps.Marker>();
+  const [hasClosedInfoWindow, setHasClosedInfoWindow] = useState<boolean>();
 
   // Map setup
   // TODO fetch user's current location and set as default in map (either pass down here or in useCheckEnvironmentAndSetMap itself)
@@ -38,7 +41,13 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
   useSetMapEventListeners(map);
 
   // create Info Window for pop ups on markers
-  const infoWindow = useMemo(() => new google.maps.InfoWindow(), []);
+  const infoWindow = useMemo(() => {
+    const window = new google.maps.InfoWindow();
+    window.addListener('closeclick', () => {
+      setHasClosedInfoWindow(true);
+    });
+    return window;
+  }, []);
 
   // Search variables
   const [selectedCity, setSelectedCity] = useState<CitySelectOptions>('Boise');
@@ -46,6 +55,7 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
     useState<LocationSelectOptions>('bars');
   const [locations, setLocations] = useState<LocationDetails[]>([]);
   // Search query
+  // TODO when you change cities, we need to ensure that we clear/reset all of the different map markers and locations that are saved in one state array or another
   const [searchCity, { data: cityData }] = useLazyQuery(CITY_SEARCH, {
     fetchPolicy: 'no-cache', // testing purposes only
   });
@@ -79,6 +89,7 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
       );
       const marker = mapMarkers[locationIndex];
       marker.setIcon(beerImg);
+      marker.setZIndex(990);
       setOutingMapMarkers([...outingMapMarkers, marker]);
     }
   };
@@ -92,6 +103,7 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
     );
     const marker = mapMarkers[locationIndex];
     marker.setIcon(martiniImg);
+    marker.setZIndex(0);
     setOutingMapMarkers(
       outingMapMarkers.filter((targetMarker) => targetMarker !== marker)
     );
@@ -201,32 +213,39 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
     (index?: number, location?: LocationDetails): string => {
       const locationData = index ? locations[index] : location;
       return `<div className="info-window-content-container">
-          <div className="info-window-content-header">
-            <h3>${locationData?.name}</h3>
-            <h3>${locationData?.name}</h3>
-          </div>
-          <div className="info-window-content-body">
-            <p>${locationData?.formatted_address}</p>
-            <p>${locationData?.formatted_phone_number}</p>
-            <p>${locationData?.website}</p>
-            <p>${locationData?.rating}</p>
-          </div>
-        </div>`;
+        <div className="info-window-content-header">
+          <h3>${locationData?.name}</h3>
+          <h3>${locationData?.name}</h3>
+        </div>
+        <div className="info-window-content-body">
+          <p>${locationData?.formatted_address}</p>
+          <p>${locationData?.formatted_phone_number}</p>
+          <p>${locationData?.website}</p>
+          <p>${locationData?.rating}</p>
+        </div>
+      </div>`;
     },
     [locations]
   );
 
-  // dynamically generate the content, set it, and then open the window
-  const openInfoWindow = (index: number, location: LocationDetails) => {
-    const marker = currentMapMarkers[index];
-    marker.setZIndex(1000);
-
+  const infoWindowActions = (
+    marker: google.maps.Marker,
+    location: LocationDetails
+  ) => {
     const infoWindowContent = getInfoWindowContent(undefined, location);
     infoWindow.setContent(infoWindowContent);
     infoWindow.open({
       anchor: marker,
       map,
     });
+    setHasClosedInfoWindow(false);
+    setSelectedMapMarker(marker);
+  };
+
+  // dynamically generate the content, set it, and then open the window
+  const openInfoWindow = (index: number, location: LocationDetails) => {
+    const marker = currentMapMarkers[index];
+    infoWindowActions(marker, location);
   };
 
   const openOutingInfoWindow = (location: LocationDetails) => {
@@ -234,17 +253,77 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
       (desiredLocation) => desiredLocation.place_id === location.place_id
     );
     const marker = outingMapMarkers[locationIndex];
-    marker.setZIndex(1000);
-
-    const infoWindowContent = getInfoWindowContent(undefined, location);
-    infoWindow.setContent(infoWindowContent);
-    infoWindow.open({
-      anchor: marker,
-      map,
-    });
+    infoWindowActions(marker, location);
   };
 
+  // this effect is soley responsible for just setting the currently selected marker styles
+  useEffect(() => {
+    if (selectedMapMarker) {
+      selectedMapMarker.setIcon(coconutImg);
+      selectedMapMarker.setZIndex(1000);
+    }
+  }, [selectedMapMarker]);
+
+  // this hook will run after the new selected marker is set
+  // it then sets the styles for all other markers back to what they were before
+  useEffect(() => {
+    if (selectedMapMarker) {
+      currentMapMarkers.forEach((marker: google.maps.Marker) => {
+        if (
+          marker !== selectedMapMarker &&
+          outingMapMarkers.indexOf(marker) === -1
+        ) {
+          marker.setIcon(martiniImg);
+          marker.setZIndex(0);
+        }
+        if (
+          marker !== selectedMapMarker &&
+          outingMapMarkers.indexOf(marker) !== -1
+        ) {
+          marker.setIcon(beerImg);
+          marker.setZIndex(990);
+        }
+      });
+    }
+  }, [selectedMapMarker, outingMapMarkers, currentMapMarkers]);
+
+  // this hook should only run right after the info window is closed
+  // it runs the same check as before, but this is bound to the 'closeclick' info window event
+  useEffect(() => {
+    if (hasClosedInfoWindow && selectedMapMarker) {
+      currentMapMarkers.forEach((marker: google.maps.Marker) => {
+        console.log(
+          marker !== selectedMapMarker,
+          outingMapMarkers.indexOf(marker)
+        );
+
+        if (
+          marker === selectedMapMarker &&
+          outingMapMarkers.indexOf(marker) === -1
+        ) {
+          marker.setIcon(martiniImg);
+          marker.setZIndex(0);
+          setSelectedMapMarker(undefined);
+        }
+        if (
+          marker === selectedMapMarker &&
+          outingMapMarkers.indexOf(marker) !== -1
+        ) {
+          marker.setIcon(beerImg);
+          marker.setZIndex(990);
+          setSelectedMapMarker(undefined);
+        }
+      });
+    }
+  }, [
+    currentMapMarkers,
+    hasClosedInfoWindow,
+    outingMapMarkers,
+    selectedMapMarker,
+  ]);
+
   // add click listener to each marker to open info window
+  // need to set that the window is open
   useEffect(() => {
     mapMarkers.forEach((marker, index) => {
       const infoWindowContent = getInfoWindowContent(index);
@@ -254,6 +333,8 @@ export default function BasicMap({ style, mapOptions }: MapProps) {
           anchor: marker,
           map,
         });
+        setHasClosedInfoWindow(false);
+        setSelectedMapMarker(marker);
       });
     });
   }, [mapMarkers, map, infoWindow, getInfoWindowContent]);
