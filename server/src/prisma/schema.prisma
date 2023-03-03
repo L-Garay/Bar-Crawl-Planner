@@ -22,18 +22,50 @@ model Account {
 }
 
 model Profile {
-  id               Int       @id @default(autoincrement())
-  name             String    @default("") @db.VarChar(255)
-  profile_img      String    @default("") @db.VarChar(255)
-  updated_at       String    @default("") @db.VarChar(255)
-  account          Account   @relation(fields: [account_Id], references: [id])
-  account_Id       Int       @unique
-  accepted_outings Outing[]  @relation(name: "Accepted_Profiles")
-  pending_outings  Outing[]  @relation(name: "Pending_Profiles")
-  declined_outings Outing[]  @relation(name: "Declined_Profiles")
-  social_pin       String    @unique @default("") @db.VarChar(255)
-  friends          Profile[] @relation("Friends")
-  friendsRelation  Profile[] @relation("Friends")
+  id                       Int                @id @unique @default(autoincrement())
+  name                     String             @default("") @db.VarChar(255)
+  profile_img              String             @default("") @db.VarChar(255)
+  updated_at               String             @default("") @db.VarChar(255)
+  account                  Account            @relation(fields: [account_Id], references: [id])
+  account_Id               Int                @unique
+  accepted_outings         Outing[]           @relation(name: "Accepted_Profiles")
+  pending_outings          Outing[]           @relation(name: "Pending_Profiles")
+  declined_outings         Outing[]           @relation(name: "Declined_Profiles")
+  social_pin               String             @unique @default("") @db.VarChar(255)
+  requestor_relation       Friendship[]       @relation("Friend_Requestor")
+  addressee_relation       Friendship[]       @relation("Friend_Addressee")
+  modifier_status_relation FriendshipStatus[] @relation("Friend_Status_Modifier")
+}
+
+model Friendship {
+  requestor_profile_id       Int
+  requestor_relation         Profile            @relation("Friend_Requestor", fields: [requestor_profile_id], references: [id])
+  addressee_profile_id       Int
+  addressee_relation         Profile            @relation("Friend_Addressee", fields: [addressee_profile_id], references: [id])
+  created_at                 String             @db.VarChar(255)
+  friendship_status_relation FriendshipStatus[] @relation("FriendshipStatus_Friendship")
+
+  @@id([requestor_profile_id, addressee_profile_id])
+  @@unique([requestor_profile_id, addressee_profile_id]) // this means that there can't be two rows where the requestor_profile_id and addressee_profile_id are BOTH the same (i.e. a friendship can't be duplicated)
+}
+
+model FriendshipStatusStates {
+  status_code                String             @id @db.VarChar(1)
+  status_name                String             @db.VarChar(20)
+  friendship_status_relation FriendshipStatus[]
+}
+
+model FriendshipStatus {
+  status_code          String                 @db.VarChar(1)
+  status               FriendshipStatusStates @relation(fields: [status_code], references: [status_code])
+  created_at           DateTime
+  requestor_profile_id Int
+  addressee_profile_id Int
+  friendship_relation  Friendship             @relation("FriendshipStatus_Friendship", fields: [requestor_profile_id, addressee_profile_id], references: [requestor_profile_id, addressee_profile_id])
+  modifier_profile_id  Int
+  modifier             Profile                @relation("Friend_Status_Modifier", fields: [modifier_profile_id], references: [id])
+
+  @@unique([requestor_profile_id, addressee_profile_id, created_at])
 }
 
 model Outing {
