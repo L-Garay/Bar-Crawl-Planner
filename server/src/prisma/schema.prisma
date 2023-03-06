@@ -48,7 +48,7 @@ model Friendship {
   created_at                 String             @db.VarChar(255)
   friendship_status_relation FriendshipStatus[] @relation("FriendshipStatus_Friendship")
 
-  @@id([requestor_profile_id, addressee_profile_id])
+  @@id([requestor_profile_id, addressee_profile_id], name: "Friendship_id")
   @@unique([requestor_profile_id, addressee_profile_id]) // this means that there can't be two rows where the requestor_profile_id and addressee_profile_id are BOTH the same (i.e. a friendship can't be duplicated)
 }
 
@@ -111,7 +111,7 @@ model Notification {
   requires_action          Boolean            @default(false)
   action_taken             Boolean            @default(false)
 
-  @@id([sender_profile_id, recipient_profile_id])
+  @@id([sender_profile_id, recipient_profile_id], name: "Notification_id")
   @@unique([sender_profile_id, recipient_profile_id, created_at, notification_type_code]) // this means that there can't be two rows with the same ids, where the notification type is the same and it was created at the same time; there can be two friend requests sent to the same person by the same sender, however they would need to be at different times
 }
 

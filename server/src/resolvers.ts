@@ -3,9 +3,6 @@ import {
   GetOutingByOutingId,
 } from './prisma/querries/outingsQuerries';
 import {
-  FindFriendById,
-  FindFriendByPin,
-  GetAllFriends,
   GetAllProfiles,
   GetAcceptedProfilesInOuting,
   GetPendingProfilesInOuting,
@@ -25,11 +22,7 @@ import {
   UpdateAccountBySocialPin,
   UpdateUserAccount,
 } from './prisma/mutations/accountMutations';
-import {
-  AddFriend,
-  CreateProfile,
-  RemoveFriend,
-} from './prisma/mutations/profileMutations';
+import { CreateProfile } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import { CitySelectOptions, OutingInput } from './types/sharedTypes';
 import {
@@ -235,72 +228,6 @@ const resolvers: Resolvers = {
         return outing.data;
       }
     },
-    getAllFriends: async (parent, args, context, info) => {
-      const { authError, user } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const friends = await GetAllFriends(user.data.id);
-      if (friends.status === 'Failure') {
-        throw new GraphQLError('Cannot get all friends', {
-          extensions: {
-            code: friends.error?.name,
-            message: friends.error?.message,
-            prismaMeta: friends.error?.meta,
-            prismaErrorCode: friends.error?.errorCode,
-          },
-        });
-      } else {
-        return friends.data;
-      }
-    },
-    findFriendById: async (parent, args, context, info) => {
-      const { authError, user } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const friend = await FindFriendById(args.id);
-      if (friend.status === 'Failure') {
-        throw new GraphQLError('Cannot get friend by id', {
-          extensions: {
-            code: friend.error?.name,
-            message: friend.error?.message,
-            prismaMeta: friend.error?.meta,
-            prismaErrorCode: friend.error?.errorCode,
-          },
-        });
-      } else {
-        return friend.data;
-      }
-    },
-    findFriendByPin: async (parent, args, context, info) => {
-      const { authError, user } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const friend = await FindFriendByPin(args.social_pin);
-      if (friend.status === 'Failure') {
-        throw new GraphQLError('Cannot get friend by pin', {
-          extensions: {
-            code: friend.error?.name,
-            message: friend.error?.message,
-            prismaMeta: friend.error?.meta,
-            prismaErrorCode: friend.error?.errorCode,
-          },
-        });
-      } else {
-        return friend.data;
-      }
-    },
     searchCity: async (parent, args, context, info) => {
       const { authError } = context;
       if (authError) {
@@ -374,52 +301,6 @@ const resolvers: Resolvers = {
         });
       } else {
         return deactivatedUser.data;
-      }
-    },
-    addFriend: async (parent, args, context, info) => {
-      const { authError, user } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const { id, friend_id } = args;
-      const addedFriend = await AddFriend(id, friend_id);
-      if (addedFriend.status === 'Failure') {
-        throw new GraphQLError('Cannot add friend', {
-          extensions: {
-            code: addedFriend.error?.name,
-            message: addedFriend.error?.message,
-            prismaMeta: addedFriend.error?.meta,
-            prismaErrorCode: addedFriend.error?.errorCode,
-          },
-        });
-      } else {
-        return addedFriend.data;
-      }
-    },
-    removeFriend: async (parent, args, context, info) => {
-      const { authError, user } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const { id, friend_id } = args;
-      const removedFriend = await RemoveFriend(id, friend_id);
-      if (removedFriend.status === 'Failure') {
-        throw new GraphQLError('Cannot remove friend', {
-          extensions: {
-            code: removedFriend.error?.name,
-            message: removedFriend.error?.message,
-            prismaMeta: removedFriend.error?.meta,
-            prismaErrorCode: removedFriend.error?.errorCode,
-          },
-        });
-      } else {
-        return removedFriend.data;
       }
     },
     createOuting: async (parent, args, context, info) => {
