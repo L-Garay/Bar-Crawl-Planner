@@ -97,37 +97,17 @@ const typeDefs = `#graphql
   }
 
   type Friendship {
-    requester_profile_id: Int
+    requestor_profile_id: Int
     addressee_profile_id: Int
     created_at: String
   }
 
   type FriendshipStatus {
-    status_code: String
-    created_at: String
-    requester_profile_id: Int
+    requestor_profile_id: Int
     addressee_profile_id: Int
     modifier_profile_id: Int
-  }
-
-  type Notification {
-    sender_profile_id: Int
-    recipient_profile_id: Int
     created_at: String
-    notification_type_code: String
-    notification_status_code: String
-    requires_action: Boolean
-    action_taken: Boolean
-    title: String
-    message: String
-  }
-
-  type NotificationStatus {
     status_code: String
-    created_at: String
-    sender_profile_id: Int
-    recipient_profile_id: Int
-    modifier_profile_id: Int
   }
 
   # The "Query" type is special: it lists all of the available queries that
@@ -164,8 +144,9 @@ const typeDefs = `#graphql
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
-    generateOutingNotification( outing_id: Int!): String
-
+    testAddFriend(
+    addressee_profile_id: Int!
+  ): FriendshipStatus
   }
 `;
 
