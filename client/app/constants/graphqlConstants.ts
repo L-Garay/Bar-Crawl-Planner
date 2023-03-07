@@ -110,6 +110,20 @@ export const TEST_ADD_FRIEND = gql`
   }
 `;
 
+export const GET_ALL_FRIENDSHIPS = gql`
+  query getAllFriendships {
+    getAllFriendships {
+      requestor_profile_id
+      addressee_profile_id
+      created_at
+      frienshipStatus_friendship_relation {
+        status_code
+        modifier_profile_id
+      }
+    }
+  }
+`;
+
 // ------------------- Outings -------------------
 export const CITY_SEARCH = gql`
   query searchCity($city: String!, $locationType: String!) {
