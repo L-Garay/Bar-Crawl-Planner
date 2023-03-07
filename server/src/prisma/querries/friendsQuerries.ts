@@ -28,10 +28,15 @@ export async function GetAllFriendships(id: number): Promise<PrismaData> {
           select: {
             status_code: true,
             modifier_profile_id: true,
+            created_at: true,
+          },
+          orderBy: {
+            created_at: 'desc', // grab the most recent status
           },
         },
       },
     });
+    console.log('friends: ', friends[0].frienshipStatus_friendship_relation);
 
     return { status: 'Success', data: friends, error: null };
   } catch (error) {

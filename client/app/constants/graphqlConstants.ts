@@ -115,10 +115,10 @@ export const GET_ALL_FRIENDSHIPS = gql`
     getAllFriendships {
       requestor_profile_id
       addressee_profile_id
-      created_at
       frienshipStatus_friendship_relation {
         status_code
         modifier_profile_id
+        created_at
       }
     }
   }

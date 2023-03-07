@@ -33,7 +33,10 @@ export default function FriendsIndex() {
       >
         <h1>This will be the friends page</h1>
         {getAllFriendships.map((friendship: any) => (
-          <div key={friendship.created_at} style={{ padding: 10 }}>
+          <div
+            key={friendship.frienshipStatus_friendship_relation[0].created_at}
+            style={{ padding: 10 }}
+          >
             <small style={{ paddingRight: 10 }}>
               Requestor: {friendship.requestor_profile_id}
             </small>
@@ -51,7 +54,10 @@ export default function FriendsIndex() {
               Status:{' '}
               {friendship.frienshipStatus_friendship_relation[0].status_code}
             </small>
-            <small>Created at: {friendship.created_at}</small>
+            <small>
+              Created at:{' '}
+              {friendship.frienshipStatus_friendship_relation[0].created_at}
+            </small>
           </div>
         ))}
         <p>I'm not entirely sure how I want this page to look</p>
