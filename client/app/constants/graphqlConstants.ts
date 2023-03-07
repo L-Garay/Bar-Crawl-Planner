@@ -100,6 +100,16 @@ export const GET_PROFILES_IN_OUTING = gql`
   }
 `;
 
+export const TEST_ADD_FRIEND = gql`
+  mutation testAddFriend($addressee_profile_id: Int!) {
+    testAddFriend(addressee_profile_id: $addressee_profile_id) {
+      requestor_profile_id
+      addressee_profile_id
+      created_at
+    }
+  }
+`;
+
 // ------------------- Outings -------------------
 export const CITY_SEARCH = gql`
   query searchCity($city: String!, $locationType: String!) {

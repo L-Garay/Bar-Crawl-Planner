@@ -10,12 +10,14 @@ import {
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   SEND_OUTING_EMAIL,
+  TEST_ADD_FRIEND,
   UPDATE_OUTING,
 } from '~/constants/graphqlConstants';
 import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
 import EditIcon from '~/components/svgs/editIcon';
 import moment from 'moment';
+import { useMutation } from '@apollo/client';
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -131,6 +133,8 @@ export default function OutingDetails() {
   const [showEditDate, setShowEditDate] = useState(false);
 
   const transition = useTransition();
+
+  const [addFriend] = useMutation(TEST_ADD_FRIEND);
 
   const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;
@@ -289,6 +293,17 @@ export default function OutingDetails() {
                       {profile.name} with id {profile.id}
                     </p>
                     <p>(Accepted)</p>
+                    <button
+                      onClick={() => {
+                        addFriend({
+                          variables: {
+                            addressee_profile_id: profile.id,
+                          },
+                        });
+                      }}
+                    >
+                      Add Friend
+                    </button>
                   </div>
                 );
               })}
@@ -303,6 +318,17 @@ export default function OutingDetails() {
                       {profile.name} with id {profile.id}
                     </p>
                     <p>(Pending)</p>
+                    <button
+                      onClick={() => {
+                        addFriend({
+                          variables: {
+                            addressee_profile_id: profile.id,
+                          },
+                        });
+                      }}
+                    >
+                      Add Friend
+                    </button>
                   </div>
                 );
               })}
