@@ -52,6 +52,7 @@ export default function OutingInvite() {
           outing_id: Number(outingId),
         },
       });
+      // TODO need to trigger a notificaiton to rest of outing members that this user has joined
       navigate(`/outings/my-outings/${outingId}`);
     } else {
       // if they don't have a valid user/session, check if inviteData is set and set if not, then navigate to login

@@ -243,3 +243,9 @@ export const GET_OUTINGS = gql`
     }
   }
 `;
+
+export const GENERATE_OUTING_NOTIFICATIONS = gql`
+  mutation generateOutingNotification($outing_id: Int!) {
+    generateOutingNotification(outing_id: $outing_id)
+  }
+`;

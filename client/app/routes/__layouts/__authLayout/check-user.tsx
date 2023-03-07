@@ -9,6 +9,7 @@ import {
   UPDATE_ACCOUNT_BY_SOCIAL_PIN,
   CREATE_ACCOUNT_AND_PROFILE,
   CONNECT_PROFILE,
+  GENERATE_OUTING_NOTIFICATIONS,
 } from '~/constants/graphqlConstants';
 
 export const loader: LoaderFunction = async ({ request, context }) => {
@@ -38,6 +39,7 @@ export default function CheckUser() {
   });
   const [createAccountAndProfile] = useMutation(CREATE_ACCOUNT_AND_PROFILE);
   const [ConnectProfile] = useMutation(CONNECT_PROFILE);
+  const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
 
   // Attempt to get inviteData from local storage if there
   useEffect(() => {
@@ -85,6 +87,12 @@ export default function CheckUser() {
             'found and account by email and connected the profile to the outing, now redirecting to outing details page with outingId: ',
             outingId
           );
+          // TODO need to trigger a notificaiton to rest of outing members that this user has joined
+          await generateNotifications({
+            variables: {
+              outing_id: Number(outingId),
+            },
+          });
           window.localStorage.removeItem('inviteData');
           navigate(returnTo);
         } else if (data.data.getAccountByEmail && !inviteData) {
@@ -164,6 +172,7 @@ export default function CheckUser() {
             'successfully connected profile after updating account by social pin, attempting to redirect to returnTo: ',
             returnTo
           );
+          // TODO need to trigger a notificaiton to rest of outing members that this user has joined
           window.localStorage.removeItem('inviteData');
           navigate(returnTo);
         }
