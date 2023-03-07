@@ -24,11 +24,7 @@ import {
 } from './prisma/mutations/accountMutations';
 import { CreateProfile } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
-import {
-  CitySelectOptions,
-  OutingInput,
-  PrismaData,
-} from './types/sharedTypes';
+import { CitySelectOptions, OutingInput } from './types/sharedTypes';
 import {
   ConnectUserWithOuting,
   CreateOuting,
@@ -39,6 +35,7 @@ import {
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
 import { TestAddFriend } from './prisma/mutations/friendsMutations';
+import { GetAllFriendships } from './prisma/querries/friendsQuerries';
 
 const resolvers: Resolvers = {
   Query: {
@@ -253,6 +250,30 @@ const resolvers: Resolvers = {
         });
       } else {
         return locations.data;
+      }
+    },
+    getAllFriendships: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { id } = profile.data;
+      const friends = await GetAllFriendships(id);
+      if (friends.status === 'Failure') {
+        throw new GraphQLError('Cannot get all friends', {
+          extensions: {
+            code: friends.error?.name,
+            message: friends.error?.message,
+            prismaMeta: friends.error?.meta,
+            prismaErrorCode: friends.error?.errorCode,
+          },
+        });
+      } else {
+        console.log(friends.data);
+
+        return friends.data;
       }
     },
   },
