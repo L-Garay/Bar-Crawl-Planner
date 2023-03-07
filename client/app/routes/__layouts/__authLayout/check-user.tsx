@@ -37,9 +37,16 @@ export default function CheckUser() {
       },
     },
   });
-  const [createAccountAndProfile] = useMutation(CREATE_ACCOUNT_AND_PROFILE);
+  const [createAccountAndProfile] = useMutation(CREATE_ACCOUNT_AND_PROFILE, {
+    context: {
+      // NOTE hate this, this is for testing purposes
+      headers: {
+        inviteData: inviteData,
+      },
+    },
+  });
   const [ConnectProfile] = useMutation(CONNECT_PROFILE);
-  const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
+  // const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
 
   // Attempt to get inviteData from local storage if there
   useEffect(() => {
@@ -88,11 +95,11 @@ export default function CheckUser() {
             outingId
           );
           // TODO need to trigger a notificaiton to rest of outing members that this user has joined
-          await generateNotifications({
-            variables: {
-              outing_id: Number(outingId),
-            },
-          });
+          // await generateNotifications({
+          //   variables: {
+          //     outing_id: Number(outingId),
+          //   },
+          // });
           window.localStorage.removeItem('inviteData');
           navigate(returnTo);
         } else if (data.data.getAccountByEmail && !inviteData) {

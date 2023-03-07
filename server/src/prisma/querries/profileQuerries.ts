@@ -104,7 +104,7 @@ export async function GetAllFriendships(id: number): Promise<PrismaData> {
         ],
         AND: [
           {
-            friendship_status_relation: {
+            frienshipStatus_friendship_relation: {
               some: {
                 status_code: 'A', // accepted
               },

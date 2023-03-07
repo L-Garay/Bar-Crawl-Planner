@@ -30,7 +30,7 @@ export type Friendship = {
   __typename?: 'Friendship';
   addressee_profile_id?: Maybe<Scalars['Int']>;
   created_at?: Maybe<Scalars['String']>;
-  requester_profile_id?: Maybe<Scalars['Int']>;
+  requestor_profile_id?: Maybe<Scalars['Int']>;
 };
 
 export type FriendshipStatus = {
@@ -38,7 +38,7 @@ export type FriendshipStatus = {
   addressee_profile_id?: Maybe<Scalars['Int']>;
   created_at?: Maybe<Scalars['String']>;
   modifier_profile_id?: Maybe<Scalars['Int']>;
-  requester_profile_id?: Maybe<Scalars['Int']>;
+  requestor_profile_id?: Maybe<Scalars['Int']>;
   status_code?: Maybe<Scalars['String']>;
 };
 
@@ -86,8 +86,8 @@ export type Mutation = {
   createProfile?: Maybe<Profile>;
   deactivateUserAccount?: Maybe<Account>;
   deleteOuting?: Maybe<Scalars['String']>;
-  generateOutingNotification?: Maybe<Scalars['String']>;
   sendOutingInvites?: Maybe<Scalars['String']>;
+  testAddFriend?: Maybe<FriendshipStatus>;
   updateOuting?: Maybe<Outing>;
   updateUserAccount?: Maybe<Account>;
 };
@@ -151,16 +151,15 @@ export type MutationDeleteOutingArgs = {
 };
 
 
-export type MutationGenerateOutingNotificationArgs = {
-  outing_id: Scalars['Int'];
-  recipient_profile_ids: Array<Scalars['Int']>;
-};
-
-
 export type MutationSendOutingInvitesArgs = {
   emails: Array<Scalars['String']>;
   outing_id: Scalars['Int'];
   start_date_and_time: Scalars['String'];
+};
+
+
+export type MutationTestAddFriendArgs = {
+  addressee_profile_id: Scalars['Int'];
 };
 
 
@@ -174,28 +173,6 @@ export type MutationUpdateOutingArgs = {
 export type MutationUpdateUserAccountArgs = {
   email?: InputMaybe<Scalars['String']>;
   phone_number?: InputMaybe<Scalars['String']>;
-};
-
-export type Notification = {
-  __typename?: 'Notification';
-  action_taken?: Maybe<Scalars['Boolean']>;
-  created_at?: Maybe<Scalars['String']>;
-  message?: Maybe<Scalars['String']>;
-  notification_status_code?: Maybe<Scalars['String']>;
-  notification_type_code?: Maybe<Scalars['String']>;
-  recipient_profile_id?: Maybe<Scalars['Int']>;
-  requires_action?: Maybe<Scalars['Boolean']>;
-  sender_profile_id?: Maybe<Scalars['Int']>;
-  title?: Maybe<Scalars['String']>;
-};
-
-export type NotificationStatus = {
-  __typename?: 'NotificationStatus';
-  created_at?: Maybe<Scalars['String']>;
-  modifier_profile_id?: Maybe<Scalars['Int']>;
-  recipient_profile_id?: Maybe<Scalars['Int']>;
-  sender_profile_id?: Maybe<Scalars['Int']>;
-  status_code?: Maybe<Scalars['String']>;
 };
 
 export type Outing = {
@@ -352,8 +329,6 @@ export type ResolversTypes = ResolversObject<{
   Int: ResolverTypeWrapper<Scalars['Int']>;
   LocationDetails: ResolverTypeWrapper<LocationDetails>;
   Mutation: ResolverTypeWrapper<{}>;
-  Notification: ResolverTypeWrapper<Notification>;
-  NotificationStatus: ResolverTypeWrapper<NotificationStatus>;
   Outing: ResolverTypeWrapper<Outing>;
   OutingProfileStates: ResolverTypeWrapper<OutingProfileStates>;
   Profile: ResolverTypeWrapper<Profile>;
@@ -371,8 +346,6 @@ export type ResolversParentTypes = ResolversObject<{
   Int: Scalars['Int'];
   LocationDetails: LocationDetails;
   Mutation: {};
-  Notification: Notification;
-  NotificationStatus: NotificationStatus;
   Outing: Outing;
   OutingProfileStates: OutingProfileStates;
   Profile: Profile;
@@ -395,7 +368,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 export type FriendshipResolvers<ContextType = any, ParentType extends ResolversParentTypes['Friendship'] = ResolversParentTypes['Friendship']> = ResolversObject<{
   addressee_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  requester_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  requestor_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -403,7 +376,7 @@ export type FriendshipStatusResolvers<ContextType = any, ParentType extends Reso
   addressee_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   modifier_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  requester_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  requestor_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   status_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -451,32 +424,10 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, Partial<MutationCreateProfileArgs>>;
   deactivateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationDeactivateUserAccountArgs, 'id'>>;
   deleteOuting?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationDeleteOutingArgs, 'id'>>;
-  generateOutingNotification?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationGenerateOutingNotificationArgs, 'outing_id' | 'recipient_profile_ids'>>;
   sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
+  testAddFriend?: Resolver<Maybe<ResolversTypes['FriendshipStatus']>, ParentType, ContextType, RequireFields<MutationTestAddFriendArgs, 'addressee_profile_id'>>;
   updateOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationUpdateOutingArgs, 'id'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
-}>;
-
-export type NotificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Notification'] = ResolversParentTypes['Notification']> = ResolversObject<{
-  action_taken?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  message?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  notification_status_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  notification_type_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  recipient_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  requires_action?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  sender_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type NotificationStatusResolvers<ContextType = any, ParentType extends ResolversParentTypes['NotificationStatus'] = ResolversParentTypes['NotificationStatus']> = ResolversObject<{
-  created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  modifier_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  recipient_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  sender_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  status_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export type OutingResolvers<ContextType = any, ParentType extends ResolversParentTypes['Outing'] = ResolversParentTypes['Outing']> = ResolversObject<{
@@ -534,8 +485,6 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   FriendshipStatus?: FriendshipStatusResolvers<ContextType>;
   LocationDetails?: LocationDetailsResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
-  Notification?: NotificationResolvers<ContextType>;
-  NotificationStatus?: NotificationStatusResolvers<ContextType>;
   Outing?: OutingResolvers<ContextType>;
   OutingProfileStates?: OutingProfileStatesResolvers<ContextType>;
   Profile?: ProfileResolvers<ContextType>;
