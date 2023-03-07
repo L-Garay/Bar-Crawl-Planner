@@ -96,6 +96,8 @@ type Notification {
   notification_status_code: String
   requires_action: Boolean
   action_taken: Boolean
+  title: String
+  message: String
 }
 
 type NotificationStatus {
@@ -150,4 +152,5 @@ type Mutation {
     email: String!
     verified: Boolean!
   ): String
+  generateOutingNotification(outing_id: Int!): String
 }

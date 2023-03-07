@@ -24,7 +24,11 @@ import {
 } from './prisma/mutations/accountMutations';
 import { CreateProfile } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
-import { CitySelectOptions, OutingInput } from './types/sharedTypes';
+import {
+  CitySelectOptions,
+  OutingInput,
+  PrismaData,
+} from './types/sharedTypes';
 import {
   ConnectUserWithOuting,
   CreateOuting,
@@ -34,6 +38,7 @@ import {
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
+import { GenerateOutingNotification } from './prisma/mutations/notificationMutations';
 
 const resolvers: Resolvers = {
   Query: {
@@ -536,6 +541,57 @@ const resolvers: Resolvers = {
       }
 
       return `Account ${account.data.id} and Profile ${profile.data.id} created`;
+    },
+    generateOutingNotification: async (parent, args, context, info) => {
+      const { authError, profile: sender_profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { outing_id } = args;
+      const { data: outing } = await GetOutingByOutingId(outing_id);
+      const profilesInOuting = await GetAcceptedProfilesInOuting(outing_id);
+      // TODO add error handling
+
+      const notificationResponses = profilesInOuting.data.map(
+        async (profile: Profile) =>
+          await GenerateOutingNotification(
+            profile.id, // recipient_profile_id
+            sender_profile.data.id,
+            sender_profile.data.name,
+            outing.name
+          )
+      );
+      // notificationResponses is an array of objects each with a status, data and error property
+      // we need to loop  through all the responses and check if any of them have a status of Failure
+      // log that error
+      // if however at least one notifaction succeeds, we return a successful response
+      // if none of them succeed then we return a failure response
+      const resolvedNotificationResponses = await Promise.all(
+        notificationResponses
+      );
+      const successfulResponses = resolvedNotificationResponses.filter(
+        (response: any) => response.status === 'Success'
+      );
+      const failedResponses = resolvedNotificationResponses.filter(
+        (response: any) => response.status === 'Failure'
+      );
+      failedResponses.forEach((response: any) => console.log(response.error));
+      if (successfulResponses.length) {
+        return 'Notifications generated successfully';
+      } else {
+        // NOTE what kind data do we throw here?
+        // do we attach the data from the first failed response?
+        throw new GraphQLError('Cannot generate outing notifications', {
+          extensions: {
+            code: failedResponses[0].error?.name,
+            message: failedResponses[0].error?.message,
+            prismaMeta: failedResponses[0].error?.meta,
+            prismaErrorCode: failedResponses[0].error?.errorCode,
+          },
+        });
+      }
     },
   },
 };

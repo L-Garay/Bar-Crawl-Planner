@@ -118,6 +118,8 @@ const typeDefs = `#graphql
     notification_status_code: String
     requires_action: Boolean
     action_taken: Boolean
+    title: String
+    message: String
   }
 
   type NotificationStatus {
@@ -162,6 +164,8 @@ const typeDefs = `#graphql
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
+    generateOutingNotification( outing_id: Int!): String
+
   }
 `;
 
