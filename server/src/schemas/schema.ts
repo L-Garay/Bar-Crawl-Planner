@@ -100,6 +100,7 @@ const typeDefs = `#graphql
     requestor_profile_id: Int
     addressee_profile_id: Int
     created_at: String
+    frienshipStatus_friendship_relation: [FriendshipStatus]
   }
 
   type FriendshipStatus {
@@ -124,6 +125,7 @@ const typeDefs = `#graphql
     getAllOutings: [Outing]
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
+    getAllFriendships: [Friendship]
   }
 
   type Mutation {

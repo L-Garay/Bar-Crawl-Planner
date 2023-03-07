@@ -30,6 +30,7 @@ export type Friendship = {
   __typename?: 'Friendship';
   addressee_profile_id?: Maybe<Scalars['Int']>;
   created_at?: Maybe<Scalars['String']>;
+  frienshipStatus_friendship_relation?: Maybe<Array<Maybe<FriendshipStatus>>>;
   requestor_profile_id?: Maybe<Scalars['Int']>;
 };
 
@@ -216,6 +217,7 @@ export type Query = {
   accounts?: Maybe<Array<Maybe<Account>>>;
   getAccountByEmail?: Maybe<Account>;
   getAccountWithProfileData?: Maybe<Account>;
+  getAllFriendships?: Maybe<Array<Maybe<Friendship>>>;
   getAllOutings?: Maybe<Array<Maybe<Outing>>>;
   getOuting?: Maybe<Outing>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
@@ -368,6 +370,7 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 export type FriendshipResolvers<ContextType = any, ParentType extends ResolversParentTypes['Friendship'] = ResolversParentTypes['Friendship']> = ResolversObject<{
   addressee_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  frienshipStatus_friendship_relation?: Resolver<Maybe<Array<Maybe<ResolversTypes['FriendshipStatus']>>>, ParentType, ContextType>;
   requestor_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -470,6 +473,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   accounts?: Resolver<Maybe<Array<Maybe<ResolversTypes['Account']>>>, ParentType, ContextType>;
   getAccountByEmail?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountByEmailArgs, 'email'>>;
   getAccountWithProfileData?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountWithProfileDataArgs, 'email'>>;
+  getAllFriendships?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
