@@ -18,6 +18,7 @@ import logApolloError from '~/utils/getApolloError';
 import EditIcon from '~/components/svgs/editIcon';
 import moment from 'moment';
 import { useMutation } from '@apollo/client';
+import ProfileInOuting from '~/components/outings/profileInOuting';
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -288,23 +289,13 @@ export default function OutingDetails() {
             <>
               {accepted_profiles.map((profile: any) => {
                 return (
-                  <div key={profile.id} style={{ display: 'flex' }}>
-                    <p style={{ color: 'green', paddingRight: 10 }}>
-                      {profile.name} with id {profile.id}
-                    </p>
-                    <p>(Accepted)</p>
-                    <button
-                      onClick={() => {
-                        addFriend({
-                          variables: {
-                            addressee_profile_id: profile.id,
-                          },
-                        });
-                      }}
-                    >
-                      Add Friend
-                    </button>
-                  </div>
+                  <ProfileInOuting
+                    key={profile.id}
+                    profile={profile}
+                    addFriend={addFriend}
+                    attendanceStatus="Accepted"
+                    currentUser={getAccountWithProfileData.profile.id}
+                  />
                 );
               })}
             </>
@@ -313,23 +304,13 @@ export default function OutingDetails() {
             <>
               {pending_profiles.map((profile: any) => {
                 return (
-                  <div key={profile.id} style={{ display: 'flex' }}>
-                    <p style={{ color: 'grey', paddingRight: 10 }}>
-                      {profile.name} with id {profile.id}
-                    </p>
-                    <p>(Pending)</p>
-                    <button
-                      onClick={() => {
-                        addFriend({
-                          variables: {
-                            addressee_profile_id: profile.id,
-                          },
-                        });
-                      }}
-                    >
-                      Add Friend
-                    </button>
-                  </div>
+                  <ProfileInOuting
+                    key={profile.id}
+                    profile={profile}
+                    addFriend={addFriend}
+                    attendanceStatus="Pending"
+                    currentUser={getAccountWithProfileData.profile.id}
+                  />
                 );
               })}
             </>
@@ -338,12 +319,13 @@ export default function OutingDetails() {
             <>
               {declined_profiles.map((profile: any) => {
                 return (
-                  <div key={profile.id} style={{ display: 'flex' }}>
-                    <p style={{ color: 'red', paddingRight: 10 }}>
-                      {profile.name} with id {profile.id}
-                    </p>
-                    <p>(Declined)</p>
-                  </div>
+                  <ProfileInOuting
+                    key={profile.id}
+                    profile={profile}
+                    addFriend={addFriend}
+                    attendanceStatus="Declined"
+                    currentUser={getAccountWithProfileData.profile.id}
+                  />
                 );
               })}
             </>
