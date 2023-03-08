@@ -1,6 +1,7 @@
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';
+import { FriendListItem } from '~/components/friends/friendListItem';
 import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
 
@@ -32,34 +33,9 @@ export default function FriendsIndex() {
         }}
       >
         <h1>This will be the friends page</h1>
-        {getAllFriendships.map((friendship: any) => (
-          <div
-            key={friendship.frienshipStatus_friendship_relation[0].created_at}
-            style={{ padding: 10 }}
-          >
-            <small style={{ paddingRight: 10 }}>
-              Requestor: {friendship.requestor_profile_id}
-            </small>
-            <small style={{ paddingRight: 10 }}>
-              Addressee: {friendship.addressee_profile_id}
-            </small>
-            <small style={{ paddingRight: 10 }}>
-              Modifier:{' '}
-              {
-                friendship.frienshipStatus_friendship_relation[0]
-                  .modifier_profile_id
-              }
-            </small>
-            <small style={{ paddingRight: 10 }}>
-              Status:{' '}
-              {friendship.frienshipStatus_friendship_relation[0].status_code}
-            </small>
-            <small>
-              Created at:{' '}
-              {friendship.frienshipStatus_friendship_relation[0].created_at}
-            </small>
-          </div>
-        ))}
+        {getAllFriendships.map((friendship: any) => {
+          return <FriendListItem key={friendship.created_at} {...friendship} />;
+        })}
         <p>I'm not entirely sure how I want this page to look</p>
         <p>
           I think one option of UI should be just a list of friend information
