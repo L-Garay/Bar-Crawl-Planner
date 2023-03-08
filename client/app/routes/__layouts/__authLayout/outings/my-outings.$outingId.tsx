@@ -99,7 +99,9 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   let outing: any;
   let profiles: any;
   let currentUserProfile: any;
-
+  // TODO 1. add a query to get the friends of the user
+  // TODO 2. once that is working, combine the 4 querries into one large one that calls the 4 sub queries
+  //  since GET_PROFILES_IN_OUTING is also a parent query of 3 sub querries itself, there will actually be 6 total sub querries
   try {
     outing = await client.query({
       query: GET_OUTING,

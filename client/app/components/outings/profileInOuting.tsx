@@ -28,6 +28,8 @@ export const ProfileInOuting = ({
     }
   }, [profile, currentUser]);
 
+  // TODO check to see if already friends, and if so hide the add friend button
+
   return (
     <div className="profile-in-outing-container">
       <div className="profile-in-outing" style={{ display: 'flex' }}>
