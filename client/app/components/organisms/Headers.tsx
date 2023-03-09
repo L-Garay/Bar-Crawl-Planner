@@ -3,10 +3,20 @@ import { Link } from '@remix-run/react';
 import BeerIcon from '../../assets/basicBeerSvg';
 import { useOnClickOutside } from '~/utils/useOnClickOutside';
 
-const NavMenu = () => {
+export type HeaderNavProps = {
+  notificationsCount?: number;
+};
+
+const NavMenu = ({ notificationsCount }: HeaderNavProps) => {
   return (
     <div className="menu-container">
       <div className="menu-items">
+        <Link to="/notifications" className="menuLink">
+          Inbox{' '}
+          <div className="notification-circle">
+            <div className="notification-counter">{notificationsCount}</div>
+          </div>
+        </Link>
         <Link to="/profile" className="menuLink">
           Profile
         </Link>
@@ -24,10 +34,15 @@ const NavMenu = () => {
   );
 };
 
-export const BasicHeader = () => {
+export type HeaderProps = {
+  notificationsCount?: number;
+};
+
+export const BasicHeader = ({ notificationsCount }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
+  console.log('notificationsCount', notificationsCount);
 
   return (
     <div id="header-container">
@@ -36,6 +51,9 @@ export const BasicHeader = () => {
       </div>
       <div className="links-wrapper">
         <div className="links">
+          <Link to="/homepage" className="link">
+            Home
+          </Link>
           <Link to="/outings" className="link">
             Outings
           </Link>
@@ -47,8 +65,10 @@ export const BasicHeader = () => {
             onClick={() => setIsMenuOpen((oldValue) => !oldValue)}
             ref={menuRef}
           >
-            Menu
-            {isMenuOpen ? <NavMenu /> : null}
+            Menu <div className="notification-marker"></div>
+            {isMenuOpen ? (
+              <NavMenu notificationsCount={notificationsCount} />
+            ) : null}
           </div>
         </div>
       </div>
