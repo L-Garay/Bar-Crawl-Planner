@@ -111,6 +111,22 @@ const typeDefs = `#graphql
     status_code: String
   }
 
+  type Notification {
+    sender_profile_id: Int
+    addressee_profile_id: Int
+    created_at: String
+    type_code: String
+  }
+
+  type NotificationStatus {
+    sender_profile_id: Int
+    addressee_profile_id: Int
+    modifier_profile_id: Int
+    created_at: String
+    status_code: String
+    type_code: String
+  }
+
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "basicUsers" query returns an array of zero or more BasicUsers (defined above).
@@ -149,6 +165,7 @@ const typeDefs = `#graphql
     testAddFriend(
     addressee_profile_id: Int!
   ): FriendshipStatus
+  generateOutingNotification(outing_id: Int!): [Notification]
   }
 `;
 

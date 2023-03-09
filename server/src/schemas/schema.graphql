@@ -89,6 +89,23 @@ type FriendshipStatus {
   status_code: String
 }
 
+type Notification {
+  sender_profile_id: Int
+  addressee_profile_id: Int
+  created_at: String
+  type_code: String
+  notification_relation: [NotificationStatus]
+}
+
+type NotificationStatus {
+  sender_profile_id: Int
+  addressee_profile_id: Int
+  modifier_profile_id: Int
+  created_at: String
+  status_code: String
+  type_code: String
+}
+
 type Query {
   getAccountByEmail(email: String!): Account
   getUserAccount: Account
@@ -135,4 +152,5 @@ type Mutation {
     verified: Boolean!
   ): String
   testAddFriend(addressee_profile_id: Int!): FriendshipStatus
+  generateOutingNotification(outing_id: Int!): [Notification]
 }
