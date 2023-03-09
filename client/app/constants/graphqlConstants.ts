@@ -268,6 +268,8 @@ export const GET_OUTINGS = gql`
   }
 `;
 
+// ------------------- Notifications -------------------
+
 export const GENERATE_OUTING_NOTIFICATIONS = gql`
   mutation generateOutingNotification($outing_id: Int!) {
     generateOutingNotification(outing_id: $outing_id) {
@@ -275,5 +277,27 @@ export const GENERATE_OUTING_NOTIFICATIONS = gql`
       created_at
       type_code
     }
+  }
+`;
+
+export const GET_NOTIFICATIONS = gql`
+  query getAllNotifications {
+    getAllNotifications {
+      sender_profile_id
+      addressee_profile_id
+      created_at
+      type_code
+      notification_relation {
+        status_code
+        created_at
+        modifier_profile_id
+      }
+    }
+  }
+`;
+
+export const GET_NEW_NOTIFICATIONS_COUNT = gql`
+  query getNewNotificationCount {
+    getNewNotificationCount
   }
 `;
