@@ -595,18 +595,23 @@ const resolvers: Resolvers = {
         });
       }
       const { outing_id } = args;
+      console.log('notification resolver is called');
+
       const profilesInOuting = await GetAcceptedProfilesInOuting(outing_id);
       // TODO add error handling
+      console.log('Total profiles in outing', profilesInOuting.data.length);
 
       const notificationResponses = profilesInOuting.data.map(
         async (profile: Profile) => {
-          if (profile.id === sender_profile.data.id) {
-            return;
-          } else {
+          console.log(profile.id, sender_profile.data.id);
+
+          if (profile.id !== sender_profile.data.id) {
             return await GenerateOutingNotification(
               profile.id, // recipient_profile_id
               sender_profile.data.id
             );
+          } else {
+            return null;
           }
         }
       );
@@ -615,16 +620,44 @@ const resolvers: Resolvers = {
       // log that error
       // if however at least one notifaction succeeds, we return a successful response
       // if none of them succeed then we return a failure response
+      console.log(notificationResponses);
+
       const resolvedNotificationResponses = await Promise.all(
         notificationResponses
       );
-      const successfulResponses = resolvedNotificationResponses.filter(
-        (response: any) => response.status === 'Success'
+      const noNullResponses = resolvedNotificationResponses.filter(
+        (response) => {
+          if (response) {
+            return true;
+          } else {
+            return false;
+          }
+        }
       );
-      const failedResponses = resolvedNotificationResponses.filter(
-        (response: any) => response.status === 'Failure'
-      );
-      failedResponses.forEach((response: any) => console.log(response.error));
+      console.log('no null length', noNullResponses.length);
+
+      const successfulResponses = noNullResponses.filter((response: any) => {
+        console.log(response);
+        if (response.status === 'Success') {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      const failedResponses = noNullResponses.filter((response: any) => {
+        if (response.status === 'Failure') {
+          return true;
+        } else {
+          return false;
+        }
+      });
+
+      if (failedResponses.length) {
+        failedResponses.forEach((response: any) => console.log(response.error));
+      }
+
+      console.log(successfulResponses.length, failedResponses.length);
+
       if (successfulResponses.length) {
         return successfulResponses;
       } else {

@@ -94,7 +94,7 @@ export default function CheckUser() {
             'found and account by email and connected the profile to the outing, now redirecting to outing details page with outingId: ',
             outingId
           );
-          // TODO need to trigger a notificaiton to rest of outing members that this user has joined
+          // send notification that user has joined
           await generateNotifications({
             variables: {
               outing_id: Number(outingId),
@@ -163,10 +163,7 @@ export default function CheckUser() {
           console.log(data.errors);
         }
         if (data.data.UpdateAccountBySocialPin) {
-          console.log(
-            'successfully updated account by social pin, attempting to redirect to returnTo: ',
-            returnTo
-          );
+          console.log('successfully updated account by social pin');
         }
         const connectProfileData = await ConnectProfile({
           variables: {
@@ -181,12 +178,17 @@ export default function CheckUser() {
           );
           console.log(connectProfileData.errors);
         }
-        if (connectProfileData.data.UpdateAccountBySocialPin) {
+        if (connectProfileData.data.ConnectUserWithOuting) {
           console.log(
             'successfully connected profile after updating account by social pin, attempting to redirect to returnTo: ',
             returnTo
           );
-          // TODO need to trigger a notificaiton to rest of outing members that this user has joined
+          // send notification that user has joined
+          await generateNotifications({
+            variables: {
+              outing_id: Number(outingId),
+            },
+          });
           window.localStorage.removeItem('inviteData');
           navigate(returnTo);
         }
@@ -200,6 +202,7 @@ export default function CheckUser() {
     updateAccountBySocialPin,
     email,
     ConnectProfile,
+    generateNotifications,
   ]);
 
   // NOTE this would indicate that there is no account, that the user is not coming from an invite, and that they just signed up with Auth0
