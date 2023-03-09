@@ -37,6 +37,10 @@ import { Profile } from '@prisma/client';
 import { TestAddFriend } from './prisma/mutations/friendsMutations';
 import { GetAllFriendships } from './prisma/querries/friendsQuerries';
 import { GenerateOutingNotification } from './prisma/mutations/notificationMutations';
+import {
+  GetAllNotifications,
+  GetNewNotificationCount,
+} from './prisma/querries/notificationQuerries';
 
 const resolvers: Resolvers = {
   Query: {
@@ -275,6 +279,50 @@ const resolvers: Resolvers = {
         console.log(friends.data);
 
         return friends.data;
+      }
+    },
+    getAllNotifications: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { id } = profile.data;
+      const notifications = await GetAllNotifications(id);
+      if (notifications.status === 'Failure') {
+        throw new GraphQLError('Cannot get all notifications', {
+          extensions: {
+            code: notifications.error?.name,
+            message: notifications.error?.message,
+            prismaMeta: notifications.error?.meta,
+            prismaErrorCode: notifications.error?.errorCode,
+          },
+        });
+      } else {
+        return notifications.data;
+      }
+    },
+    getNewNotificationCount: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { id } = profile.data;
+      const count = await GetNewNotificationCount(id);
+      if (count.status === 'Failure') {
+        throw new GraphQLError('Cannot get new notification count', {
+          extensions: {
+            code: count.error?.name,
+            message: count.error?.message,
+            prismaMeta: count.error?.meta,
+            prismaErrorCode: count.error?.errorCode,
+          },
+        });
+      } else {
+        return count.data;
       }
     },
   },
