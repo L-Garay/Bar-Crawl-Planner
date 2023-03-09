@@ -270,6 +270,10 @@ export const GET_OUTINGS = gql`
 
 export const GENERATE_OUTING_NOTIFICATIONS = gql`
   mutation generateOutingNotification($outing_id: Int!) {
-    generateOutingNotification(outing_id: $outing_id)
+    generateOutingNotification(outing_id: $outing_id) {
+      addressee_profile_id
+      created_at
+      type_code
+    }
   }
 `;

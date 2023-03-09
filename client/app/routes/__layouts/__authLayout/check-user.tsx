@@ -46,7 +46,7 @@ export default function CheckUser() {
     },
   });
   const [ConnectProfile] = useMutation(CONNECT_PROFILE);
-  // const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
+  const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
 
   // Attempt to get inviteData from local storage if there
   useEffect(() => {
@@ -95,11 +95,11 @@ export default function CheckUser() {
             outingId
           );
           // TODO need to trigger a notificaiton to rest of outing members that this user has joined
-          // await generateNotifications({
-          //   variables: {
-          //     outing_id: Number(outingId),
-          //   },
-          // });
+          await generateNotifications({
+            variables: {
+              outing_id: Number(outingId),
+            },
+          });
           window.localStorage.removeItem('inviteData');
           navigate(returnTo);
         } else if (data.data.getAccountByEmail && !inviteData) {
@@ -120,7 +120,14 @@ export default function CheckUser() {
 
       getAccountFunction();
     }
-  }, [ConnectProfile, email, getAccountByEmail, inviteData, navigate]);
+  }, [
+    ConnectProfile,
+    email,
+    getAccountByEmail,
+    inviteData,
+    navigate,
+    generateNotifications,
+  ]);
 
   // NOTE this would indicate that there is no account, that the user is coming from an invite, and they signed into Auth0 with a different email than the one they were invited with
   // If account does not exist, fire off a mutation using the social pin to find the pre-created profile, find the associated account, and update account with the email just recieved from Auth0
