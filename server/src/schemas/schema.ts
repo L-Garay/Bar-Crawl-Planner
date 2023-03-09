@@ -116,6 +116,7 @@ const typeDefs = `#graphql
     addressee_profile_id: Int
     created_at: String
     type_code: String
+    notification_relation: [NotificationStatus]
   }
 
   type NotificationStatus {
@@ -142,6 +143,8 @@ const typeDefs = `#graphql
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]
+    getAllNotifications: [Notification]
+    getNewNotificationCount: Int
   }
 
   type Mutation {

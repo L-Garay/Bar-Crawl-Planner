@@ -118,6 +118,8 @@ type Query {
   searchCity(city: String!, locationType: String!): [LocationDetails]
   getAccountWithProfileData(email: String!): Account
   getAllFriendships: [Friendship]
+  getAllNotifications: [Notification]
+  getNewNotificationCount: Int
 }
 
 type Mutation {

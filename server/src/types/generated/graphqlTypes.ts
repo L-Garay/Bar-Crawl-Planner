@@ -243,7 +243,9 @@ export type Query = {
   getAccountByEmail?: Maybe<Account>;
   getAccountWithProfileData?: Maybe<Account>;
   getAllFriendships?: Maybe<Array<Maybe<Friendship>>>;
+  getAllNotifications?: Maybe<Array<Maybe<Notification>>>;
   getAllOutings?: Maybe<Array<Maybe<Outing>>>;
+  getNewNotificationCount?: Maybe<Scalars['Int']>;
   getOuting?: Maybe<Outing>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
   getUserAccount?: Maybe<Account>;
@@ -523,7 +525,9 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getAccountByEmail?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountByEmailArgs, 'email'>>;
   getAccountWithProfileData?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<QueryGetAccountWithProfileDataArgs, 'email'>>;
   getAllFriendships?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
+  getAllNotifications?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>;
   getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
+  getNewNotificationCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
   getUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
