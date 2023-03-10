@@ -1,0 +1,24 @@
+.notification-card-container {
+  width: 250px;
+  min-width: 150px;
+  height: 100px;
+  min-height: 80px;
+  outline: 1px solid black;
+  background: lightgrey;
+  margin: 5px 5px 10px 5px;
+  padding: 8px;
+}
+.notification-card-container:hover {
+  cursor: pointer;
+  outline: 2px solid lightseagreen;
+  background: white;
+  box-shadow: 0 0 3px 5px #ffb6c1;
+}
+.notification-card-container h5 {
+  margin: 0;
+}
+.notification-card-container .notification-body {
+  font-size: 0.8rem;
+}
+
+/*# sourceMappingURL=notifications.css.map */

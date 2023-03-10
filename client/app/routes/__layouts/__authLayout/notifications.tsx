@@ -1,9 +1,21 @@
-import type { LoaderFunction } from '@remix-run/node';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';
 import { FriendListItem } from '~/components/friends/friendListItem';
+import { OutingNotification } from '~/components/notifications/notificationCard';
 import { GET_NOTIFICATIONS } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
+import notificationStyles from '~/generatedStyles/notifications.css';
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: notificationStyles,
+      as: 'style',
+    },
+  ];
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
   const client = await getNewClient(request);
@@ -34,13 +46,10 @@ export default function Notifications() {
         <h1>This will be the Notifications page</h1>
         {getAllNotifications.map((notification: any) => {
           return (
-            <div key={notification.created_at} style={{ display: 'flex' }}>
-              <p style={{ paddingRight: 10 }}>
-                Sender: {notification.sender_profile_id}
-              </p>
-              <p style={{ paddingRight: 10 }}>Type: {notification.type_code}</p>
-              <p>Status: {notification.notification_relation[0].status_code}</p>
-            </div>
+            <OutingNotification
+              key={notification.created_at}
+              {...notification}
+            />
           );
         })}
         <p>

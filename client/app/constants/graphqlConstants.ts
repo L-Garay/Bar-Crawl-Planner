@@ -292,6 +292,10 @@ export const GET_NOTIFICATIONS = gql`
         created_at
         modifier_profile_id
       }
+      notification_addressee_relation {
+        name
+        profile_img
+      }
     }
   }
 `;
