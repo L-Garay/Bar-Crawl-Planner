@@ -186,6 +186,7 @@ export type Notification = {
   __typename?: 'Notification';
   addressee_profile_id?: Maybe<Scalars['Int']>;
   created_at?: Maybe<Scalars['String']>;
+  notification_addressee_relation?: Maybe<Profile>;
   notification_relation?: Maybe<Array<Maybe<NotificationStatus>>>;
   sender_profile_id?: Maybe<Scalars['Int']>;
   type_code?: Maybe<Scalars['String']>;
@@ -468,6 +469,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 export type NotificationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Notification'] = ResolversParentTypes['Notification']> = ResolversObject<{
   addressee_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  notification_addressee_relation?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   notification_relation?: Resolver<Maybe<Array<Maybe<ResolversTypes['NotificationStatus']>>>, ParentType, ContextType>;
   sender_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   type_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
