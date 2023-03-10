@@ -23,6 +23,12 @@ export async function GetAllNotifications(
             profile_img: true,
           },
         },
+        notification_sender_relation: {
+          select: {
+            name: true,
+            profile_img: true,
+          },
+        },
       },
     });
     console.log('notifications: ', notifications);

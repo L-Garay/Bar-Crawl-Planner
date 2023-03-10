@@ -118,6 +118,7 @@ const typeDefs = `#graphql
     type_code: String
     notification_relation: [NotificationStatus]
     notification_addressee_relation: Profile
+    notification_sender_relation: Profile
   }
 
   type NotificationStatus {
