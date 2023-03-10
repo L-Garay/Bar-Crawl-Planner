@@ -7,6 +7,9 @@ export type OutingNotificationProps = {
   notification_addressee_relation: {
     name: string;
   };
+  notification_sender_relation: {
+    name: string;
+  };
   sender_profile_id: string;
   type_code: string;
   notification_relation: [
@@ -15,6 +18,9 @@ export type OutingNotificationProps = {
       created_at: string;
     }
   ];
+} & {
+  setnotificationIndex: (index: number) => void;
+  index: number;
 };
 
 export const OutingNotification = ({
@@ -22,7 +28,10 @@ export const OutingNotification = ({
   sender_profile_id,
   type_code,
   notification_addressee_relation,
+  notification_sender_relation,
   notification_relation,
+  setnotificationIndex,
+  index,
 }: OutingNotificationProps) => {
   const hasJoined = useMemo(() => type_code === 'OJ', [type_code]);
   const relativeTime = useMemo(
@@ -30,7 +39,7 @@ export const OutingNotification = ({
     [created_at]
   );
   // TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification
-  const { name } = notification_addressee_relation;
+  const { name } = notification_sender_relation;
   const { status_code, created_at: notification_created_at } =
     notification_relation[0];
   const title = hasJoined
@@ -44,7 +53,10 @@ export const OutingNotification = ({
     );
 
   return (
-    <div className="notification-card-container">
+    <div
+      className="notification-card-container"
+      onClick={() => setnotificationIndex(index)}
+    >
       <div className="notification-card">
         <div className="notification-icon">{iconToRender}</div>
         <div className="notification-title">

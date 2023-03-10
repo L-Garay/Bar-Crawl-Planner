@@ -296,6 +296,10 @@ export const GET_NOTIFICATIONS = gql`
         name
         profile_img
       }
+      notification_sender_relation {
+        name
+        profile_img
+      }
     }
   }
 `;

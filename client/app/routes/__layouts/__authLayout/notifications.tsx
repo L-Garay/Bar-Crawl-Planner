@@ -1,11 +1,11 @@
 import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { getNewClient } from '~/apollo/getClient';
-import { FriendListItem } from '~/components/friends/friendListItem';
 import { OutingNotification } from '~/components/notifications/notificationCard';
 import { GET_NOTIFICATIONS } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
 import notificationStyles from '~/generatedStyles/notifications.css';
+import { useMemo, useState } from 'react';
 
 export const links: LinksFunction = () => {
   return [
@@ -33,7 +33,13 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function Notifications() {
   const { notifications } = useLoaderData();
   const { getAllNotifications } = notifications.data;
-  console.log(getAllNotifications);
+  const [notificationIndex, setnotificationIndex] = useState<number>();
+
+  const notification = useMemo(() => {
+    if (notificationIndex !== undefined) {
+      return getAllNotifications[notificationIndex];
+    }
+  }, [notificationIndex, getAllNotifications]);
 
   return (
     <>
@@ -44,14 +50,27 @@ export default function Notifications() {
         }}
       >
         <h1>This will be the Notifications page</h1>
-        {getAllNotifications.map((notification: any) => {
+        {getAllNotifications.map((notification: any, index: number) => {
           return (
             <OutingNotification
               key={notification.created_at}
               {...notification}
+              setnotificationIndex={setnotificationIndex}
+              index={index}
             />
           );
         })}
+        <div className="main-notification-container">
+          <h5>this will be the selected nofitication</h5>
+          {notification ? (
+            <>
+              <p> {notification.created_at}</p>
+              <p> {notification.type_code}</p>
+              <p> {notification.notification_sender_relation.name}</p>
+            </>
+          ) : null}
+        </div>
+
         <p>
           this will be pretty simple page, thinking that we just have an 'inbox'
           style list of notifications
