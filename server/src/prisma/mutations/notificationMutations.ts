@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification
 export async function GenerateOutingNotification(
   addressee_id: number,
   sender_profile_id: number

@@ -17,6 +17,12 @@ export async function GetAllNotifications(
             modifier_profile_id: true,
           },
         },
+        notification_addressee_relation: {
+          select: {
+            name: true,
+            profile_img: true,
+          },
+        },
       },
     });
     console.log('notifications: ', notifications);
