@@ -70,7 +70,10 @@ model FriendshipStatus {
   @@id([requestor_profile_id, addressee_profile_id, created_at])
 }
 
+// TODO give each notification a simple int id instead of the composite ids
+// see if that makes relationships easier to handle between notifications and statuses
 model Notification {
+  id                              Int                  @id @default(autoincrement())
   sender_profile_id               Int
   notification_sender_relation    Profile              @relation("Notification_Sender", fields: [sender_profile_id], references: [id])
   addressee_profile_id            Int
@@ -80,7 +83,7 @@ model Notification {
   notification_type_relation      NotificationType     @relation(fields: [type_code], references: [type_code])
   notification_relation           NotificationStatus[]
 
-  @@id([sender_profile_id, addressee_profile_id, created_at])
+  @@unique([sender_profile_id, addressee_profile_id, created_at])
 }
 
 model NotificationType {
@@ -97,18 +100,17 @@ model NotificationStates {
 }
 
 model NotificationStatus {
-  sender_profile_id                 Int
-  addressee_profile_id              Int
-  notification_relation             Notification       @relation(fields: [sender_profile_id, addressee_profile_id, created_at], references: [sender_profile_id, addressee_profile_id, created_at])
+  id                                Int                @id @default(autoincrement())
+  notification_id                   Int
+  notification_relation             Notification       @relation(fields: [notification_id], references: [id])
   modifier_profile_id               Int
   notification_modifier_relation    Profile            @relation("Notification_Modifier", fields: [modifier_profile_id], references: [id])
-  created_at                        String             @db.VarChar(255)
+  notification_created_at           String             @db.VarChar(255)
+  modified_at                       String             @db.VarChar(255)
   status_code                       String             @db.VarChar(5)
   notification_status_relation      NotificationStates @relation(fields: [status_code], references: [status_code])
   type_code                         String             @db.VarChar(5)
   notification_type_status_relation NotificationType   @relation(fields: [type_code], references: [type_code])
-
-  @@id([sender_profile_id, addressee_profile_id, created_at])
 }
 
 model Outing {
