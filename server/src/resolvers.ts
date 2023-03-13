@@ -36,7 +36,10 @@ import {
 import { Profile } from '@prisma/client';
 import { TestAddFriend } from './prisma/mutations/friendsMutations';
 import { GetAllFriendships } from './prisma/querries/friendsQuerries';
-import { GenerateOutingNotification } from './prisma/mutations/notificationMutations';
+import {
+  GenerateNotificationStatus,
+  GenerateOutingNotification,
+} from './prisma/mutations/notificationMutations';
 import {
   GetAllNotifications,
   GetNewNotificationCount,
@@ -619,9 +622,12 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+
       const { addressee_profile_id } = args;
       const { id } = profile.data;
+
       const addedFriend = await TestAddFriend(id, addressee_profile_id);
+
       if (addedFriend.status === 'Failure') {
         throw new GraphQLError('Cannot add friend', {
           extensions: {
@@ -719,6 +725,38 @@ const resolvers: Resolvers = {
             prismaErrorCode: failedResponses[0].error?.errorCode,
           },
         });
+      }
+    },
+    generateNotificationStatus: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { type_code, status_code, created_at, id: notification_id } = args;
+      const { id: modifier_profile_id } = profile.data;
+
+      const notificationStatus = await GenerateNotificationStatus(
+        modifier_profile_id,
+        type_code,
+        status_code,
+        created_at,
+        notification_id
+      );
+
+      if (notificationStatus.status === 'Failure') {
+        throw new GraphQLError('Cannot generate notification status', {
+          extensions: {
+            code: notificationStatus.error?.name,
+            message: notificationStatus.error?.message,
+            prismaMeta: notificationStatus.error?.meta,
+            prismaErrorCode: notificationStatus.error?.errorCode,
+          },
+        });
+      } else {
+        return notificationStatus.data;
       }
     },
   },

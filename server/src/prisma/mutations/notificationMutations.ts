@@ -10,7 +10,7 @@ export async function GenerateOutingNotification(
   sender_profile_id: number
 ): Promise<PrismaData> {
   // first create the notification
-  const created_at = new Date().toISOString();
+  const created_at = new Date().toISOString(); // need to get this once, so both the notification and status have EXACT same timestamp
   let notification: any;
   try {
     notification = await prismaClient.notification.create({
@@ -28,16 +28,40 @@ export async function GenerateOutingNotification(
   try {
     await prismaClient.notificationStatus.create({
       data: {
-        sender_profile_id,
-        addressee_profile_id: addressee_id,
+        notification_id: notification.id,
         modifier_profile_id: sender_profile_id,
         status_code: 'S',
         type_code: 'OJ',
-        created_at,
+        notification_created_at: created_at,
+        modified_at: created_at,
       },
     });
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
   return { status: 'Success', data: notification, error: null };
+}
+
+export async function GenerateNotificationStatus(
+  modifier_profile_id: number,
+  type_code: string,
+  status_code: string,
+  created_at: string,
+  notification_id: number
+): Promise<PrismaData> {
+  try {
+    const status = await prismaClient.notificationStatus.create({
+      data: {
+        modifier_profile_id,
+        status_code,
+        type_code,
+        modified_at: new Date().toISOString(),
+        notification_created_at: created_at, // need original notification created_at,
+        notification_id, // need original notification id
+      },
+    });
+    return { status: 'Success', data: status, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
 }

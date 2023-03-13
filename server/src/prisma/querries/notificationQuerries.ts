@@ -13,18 +13,20 @@ export async function GetAllNotifications(
         notification_relation: {
           select: {
             status_code: true,
-            created_at: true,
+            modified_at: true,
             modifier_profile_id: true,
           },
         },
         notification_addressee_relation: {
           select: {
+            id: true,
             name: true,
             profile_img: true,
           },
         },
         notification_sender_relation: {
           select: {
+            id: true,
             name: true,
             profile_img: true,
           },
