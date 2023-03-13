@@ -21,4 +21,21 @@
   font-size: 0.8rem;
 }
 
+.notifications-list {
+  min-height: 300px;
+  height: 500px;
+  min-width: 200px;
+  width: 300px;
+  overflow-y: scroll;
+  outline: 1px solid black;
+}
+
+.main-notification-container {
+  margin-left: 40px;
+  outline: 1px solid black;
+  padding: 8px;
+  min-width: 350px;
+  height: 300px;
+}
+
 /*# sourceMappingURL=notifications.css.map */

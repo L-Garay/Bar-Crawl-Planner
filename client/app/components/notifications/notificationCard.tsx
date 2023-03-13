@@ -1,8 +1,11 @@
+import { useMutation } from '@apollo/client';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { GENERATE_NOTIFICATION_STATUS } from '~/constants/graphqlConstants';
 import { ClosedEnvelope, OpenEnvelope } from '../svgs/envelopes';
 
 export type OutingNotificationProps = {
+  id: string;
   created_at: string;
   notification_addressee_relation: {
     name: string;
@@ -24,6 +27,7 @@ export type OutingNotificationProps = {
 };
 
 export const OutingNotification = ({
+  id,
   created_at,
   sender_profile_id,
   type_code,
@@ -37,6 +41,10 @@ export const OutingNotification = ({
   const relativeTime = useMemo(
     () => moment(created_at).fromNow(),
     [created_at]
+  );
+
+  const [generateNotificationStatus] = useMutation(
+    GENERATE_NOTIFICATION_STATUS
   );
   // TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification
   const { name } = notification_sender_relation;
@@ -52,10 +60,27 @@ export const OutingNotification = ({
       <OpenEnvelope pathId={created_at} size="small" />
     );
 
+  // TODO when a user clicks on the notification card, we need to create a new notification status to indiciate that this notification was opened
   return (
     <div
       className="notification-card-container"
-      onClick={() => setnotificationIndex(index)}
+      onClick={() => {
+        setnotificationIndex(index);
+        // the addresse in this status is the sender of the original notification
+        // the sender in this status is the user who received this notification
+        // only create status if the notification has not been opened yet
+        if (status_code === 'S') {
+          generateNotificationStatus({
+            variables: {
+              addressee_profile_id: sender_profile_id,
+              type_code,
+              status_code: 'O',
+              created_at,
+              id,
+            },
+          });
+        }
+      }}
     >
       <div className="notification-card">
         <div className="notification-icon">{iconToRender}</div>

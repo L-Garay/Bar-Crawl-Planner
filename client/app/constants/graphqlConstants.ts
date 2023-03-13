@@ -293,10 +293,12 @@ export const GET_NOTIFICATIONS = gql`
         modifier_profile_id
       }
       notification_addressee_relation {
+        id
         name
         profile_img
       }
       notification_sender_relation {
+        id
         name
         profile_img
       }
@@ -307,5 +309,28 @@ export const GET_NOTIFICATIONS = gql`
 export const GET_NEW_NOTIFICATIONS_COUNT = gql`
   query getNewNotificationCount {
     getNewNotificationCount
+  }
+`;
+
+export const GENERATE_NOTIFICATION_STATUS = gql`
+  mutation generateNotificationStatus(
+    $addressee_profile_id: Int!
+    $type_code: String!
+    $status_code: String!
+    $created_at: String!
+    $id: Int!
+  ) {
+    generateNotificationStatus(
+      addressee_profile_id: $addressee_profile_id
+      type_code: $type_code
+      status_code: $status_code
+      created_at: $created_at
+      id: $id
+    ) {
+      addressee_profile_id
+      status_code
+      type_code
+      created_at
+    }
   }
 `;

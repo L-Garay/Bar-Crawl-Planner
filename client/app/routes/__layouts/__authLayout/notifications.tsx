@@ -50,25 +50,35 @@ export default function Notifications() {
         }}
       >
         <h1>This will be the Notifications page</h1>
-        {getAllNotifications.map((notification: any, index: number) => {
-          return (
-            <OutingNotification
-              key={notification.created_at}
-              {...notification}
-              setnotificationIndex={setnotificationIndex}
-              index={index}
-            />
-          );
-        })}
-        <div className="main-notification-container">
-          <h5>this will be the selected nofitication</h5>
-          {notification ? (
-            <>
-              <p> {notification.created_at}</p>
-              <p> {notification.type_code}</p>
-              <p> {notification.notification_sender_relation.name}</p>
-            </>
-          ) : null}
+        <div style={{ display: 'flex' }}>
+          <div className="notifications-list">
+            {getAllNotifications.length ? (
+              <>
+                {getAllNotifications.map((notification: any, index: number) => {
+                  return (
+                    <OutingNotification
+                      key={notification.created_at}
+                      {...notification}
+                      setnotificationIndex={setnotificationIndex}
+                      index={index}
+                    />
+                  );
+                })}
+              </>
+            ) : (
+              <p>Nothing yet</p>
+            )}
+          </div>
+          <div className="main-notification-container">
+            <h5>this will be the selected nofitication</h5>
+            {notification ? (
+              <>
+                <p> {notification.created_at}</p>
+                <p> {notification.type_code}</p>
+                <p> {notification.notification_sender_relation.name}</p>
+              </>
+            ) : null}
+          </div>
         </div>
 
         <p>
