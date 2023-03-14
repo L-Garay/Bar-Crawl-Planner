@@ -44,6 +44,7 @@ export default function Notifications() {
                       {...notification}
                       setnotificationIndex={setnotificationIndex}
                       index={index}
+                      selectedNotification={notifications[notificationIndex!]}
                     />
                   );
                 })}

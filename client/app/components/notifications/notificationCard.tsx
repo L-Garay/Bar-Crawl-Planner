@@ -23,6 +23,7 @@ export type OutingNotificationProps = {
 } & {
   setnotificationIndex: (index: number) => void;
   index: number;
+  selectedNotification: any;
 };
 
 export const OutingNotification = ({
@@ -35,6 +36,7 @@ export const OutingNotification = ({
   notification_relation,
   setnotificationIndex,
   index,
+  selectedNotification,
 }: OutingNotificationProps) => {
   const { generateNotificationStatus } = useNotificationContext();
 
@@ -60,6 +62,14 @@ export const OutingNotification = ({
     <ClosedEnvelope pathId={created_at} size="small" />
   );
 
+  const isSelected = useMemo(() => {
+    if (selectedNotification) {
+      return id === selectedNotification.id;
+    }
+  }, [selectedNotification, id]);
+
+  // Not a fan of this, there's got to be a better way to dynamically set css variables
+  // or would it be better to just create the different states/themes/variations in SCSS and then programatically add/remove classes?
   useEffect(() => {
     if (isOpened) {
       document
@@ -67,6 +77,18 @@ export const OutingNotification = ({
         ?.style.setProperty('--notification-bg', 'white');
     }
   }, [isOpened, id]);
+
+  useEffect(() => {
+    if (isSelected) {
+      document
+        .getElementById(id)
+        ?.style.setProperty('--notification-outline-color', 'lightseagreen');
+    } else {
+      document
+        .getElementById(id)
+        ?.style.setProperty('--notification-outline-color', 'black');
+    }
+  }, [isSelected, id]);
 
   return (
     <div

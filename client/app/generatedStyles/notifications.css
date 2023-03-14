@@ -1,5 +1,6 @@
 :root {
   --notification-bg: lightgrey;
+  --notification-outline-color: black;
 }
 
 .notification-card-container {
@@ -7,7 +8,7 @@
   min-width: 150px;
   height: 100px;
   min-height: 80px;
-  outline: 1px solid black;
+  outline: 1px solid var(--notification-outline-color);
   background: var(--notification-bg);
   margin: 5px 5px 10px 5px;
   padding: 8px;
