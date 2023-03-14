@@ -48,23 +48,24 @@ export async function GetNewNotificationCount(
   user_id: number
 ): Promise<PrismaData> {
   try {
-    const notificationCount = await prismaClient.notification.count({
+    const notificationCount = await prismaClient.notification.findMany({
       where: {
-        AND: [
-          {
-            addressee_profile_id: user_id,
-          },
-          {
-            notification_relation: {
-              some: {
-                status_code: 'S', // we want 'S' (sent) and not 'O' (opened)
-              },
-            },
-          },
-        ],
+        addressee_profile_id: user_id,
+      },
+      include: {
+        notification_relation: true,
       },
     });
-    return { status: 'Success', data: notificationCount, error: null };
+    // NOTE not a fan of this, would like to be able to use .count()
+    // however, setting up the claueses and conditions is tricky when dealing with nested relations
+    // also, the notfication statuses are not aware of each other, meaning that if two point to the same notification, there's no easy way to say "for all the statuses for this notification, count the ones that are 'S' but also not 'O'"
+    let counter: number = 0;
+    notificationCount.forEach((notification) => {
+      const relation = notification.notification_relation;
+      if (relation[relation.length - 1].status_code === 'S') counter++;
+    });
+
+    return { status: 'Success', data: counter, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
