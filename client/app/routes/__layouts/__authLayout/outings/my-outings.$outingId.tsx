@@ -6,11 +6,11 @@ import { getNewClient } from '~/apollo/getClient';
 import { authenticator } from '~/auth/authenticator';
 import {
   DELETE_OUTING,
+  GENERATE_FRIEND_REQUEST,
   GET_ACCOUNT_WITH_PROFILE_DATA,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   SEND_OUTING_EMAIL,
-  TEST_ADD_FRIEND,
   UPDATE_OUTING,
 } from '~/constants/graphqlConstants';
 import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
@@ -137,7 +137,8 @@ export default function OutingDetails() {
 
   const transition = useTransition();
 
-  const [addFriend] = useMutation(TEST_ADD_FRIEND);
+  // TODO change this to send a friend request notification
+  const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST);
 
   const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;
@@ -294,7 +295,7 @@ export default function OutingDetails() {
                   <ProfileInOuting
                     key={profile.id}
                     profile={profile}
-                    addFriend={addFriend}
+                    sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Accepted"
                     currentUser={getAccountWithProfileData.profile.id}
                   />
@@ -309,7 +310,7 @@ export default function OutingDetails() {
                   <ProfileInOuting
                     key={profile.id}
                     profile={profile}
-                    addFriend={addFriend}
+                    sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Pending"
                     currentUser={getAccountWithProfileData.profile.id}
                   />
@@ -324,7 +325,7 @@ export default function OutingDetails() {
                   <ProfileInOuting
                     key={profile.id}
                     profile={profile}
-                    addFriend={addFriend}
+                    sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Declined"
                     currentUser={getAccountWithProfileData.profile.id}
                   />

@@ -1,15 +1,16 @@
 import { useMemo } from 'react';
+import { useNotificationContext } from '~/contexts/notificationContext';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
-  addFriend: ({ variables }: { variables: any }) => void;
+  sendFriendRequest: ({ variables }: { variables: any }) => void;
   attendanceStatus: string;
   currentUser: number;
 };
 
 export const ProfileInOuting = ({
   profile,
-  addFriend,
+  sendFriendRequest,
   attendanceStatus,
   currentUser,
 }: ProfileInOutingProps) => {
@@ -28,7 +29,14 @@ export const ProfileInOuting = ({
     }
   }, [profile, currentUser]);
 
-  // TODO check to see if already friends, and if so hide the add friend button
+  const { sentFriendRequests } = useNotificationContext();
+
+  const alreadyRequested = useMemo(() => {
+    if (!sentFriendRequests) return false;
+    return sentFriendRequests.some((request) => {
+      return request.addressee_profile_id === Number(profile.id);
+    });
+  }, [profile.id, sentFriendRequests]);
 
   return (
     <div className="profile-in-outing-container">
@@ -39,15 +47,16 @@ export const ProfileInOuting = ({
         <p>({attendanceStatus})</p>
         {sameProfile ? null : (
           <button
+            disabled={alreadyRequested}
             onClick={() => {
-              addFriend({
+              sendFriendRequest({
                 variables: {
-                  addressee_profile_id: profile.id,
+                  addressee_profile_id: Number(profile.id),
                 },
               });
             }}
           >
-            Add Friend
+            {alreadyRequested ? 'Request Pending' : 'Send Friend Request'}
           </button>
         )}
       </div>

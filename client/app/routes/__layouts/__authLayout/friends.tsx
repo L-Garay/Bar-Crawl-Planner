@@ -23,6 +23,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 export default function FriendsIndex() {
   const { friendships } = useLoaderData();
   const { getAllFriendships } = friendships.data;
+  console.log(getAllFriendships);
 
   return (
     <>
@@ -33,9 +34,18 @@ export default function FriendsIndex() {
         }}
       >
         <h1>This will be the friends page</h1>
-        {getAllFriendships.map((friendship: any) => {
-          return <FriendListItem key={friendship.created_at} {...friendship} />;
-        })}
+        {getAllFriendships && getAllFriendships.length ? (
+          <>
+            {getAllFriendships.map((friendship: any) => {
+              console.log(friendship.id);
+
+              return <FriendListItem key={friendship.id} {...friendship} />;
+            })}
+          </>
+        ) : (
+          <p>No friends</p>
+        )}
+
         <p>I'm not entirely sure how I want this page to look</p>
         <p>
           I think one option of UI should be just a list of friend information
