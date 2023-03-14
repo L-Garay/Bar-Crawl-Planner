@@ -32,6 +32,9 @@ export async function GetAllNotifications(
           },
         },
       },
+      orderBy: {
+        created_at: 'desc',
+      },
     });
     console.log('notifications: ', notifications);
 

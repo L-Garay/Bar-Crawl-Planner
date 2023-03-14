@@ -112,6 +112,7 @@ const typeDefs = `#graphql
   }
 
   type Notification {
+    id: Int
     sender_profile_id: Int
     addressee_profile_id: Int
     created_at: String
@@ -172,7 +173,6 @@ const typeDefs = `#graphql
   ): FriendshipStatus
   generateOutingNotification(outing_id: Int!): [Notification]
   generateNotificationStatus(
-    modifier_profile_id: Int!
     type_code: String!
     status_code: String!
     created_at: String!
