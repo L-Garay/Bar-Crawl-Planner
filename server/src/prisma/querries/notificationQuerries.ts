@@ -36,6 +36,85 @@ export async function GetAllNotifications(
         created_at: 'desc',
       },
     });
+
+    return { status: 'Success', data: notifications, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function GetSentFriendRequests(
+  user_id: number
+): Promise<PrismaData> {
+  try {
+    const notifications = await prismaClient.notification.findMany({
+      where: {
+        sender_profile_id: user_id,
+        type_code: 'FR',
+      },
+      include: {
+        notification_relation: {
+          select: {
+            status_code: true,
+            modified_at: true,
+            modifier_profile_id: true,
+          },
+        },
+        notification_addressee_relation: {
+          select: {
+            id: true,
+            name: true,
+            profile_img: true,
+          },
+        },
+        notification_sender_relation: {
+          select: {
+            id: true,
+            name: true,
+            profile_img: true,
+          },
+        },
+      },
+    });
+    console.log('notifications: ', notifications);
+
+    return { status: 'Success', data: notifications, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function GetFriendRequests(user_id: number): Promise<PrismaData> {
+  try {
+    const notifications = await prismaClient.notification.findMany({
+      where: {
+        addressee_profile_id: user_id,
+        type_code: 'FR',
+      },
+      include: {
+        notification_relation: {
+          select: {
+            status_code: true,
+            modified_at: true,
+            modifier_profile_id: true,
+          },
+        },
+        notification_addressee_relation: {
+          select: {
+            id: true,
+            name: true,
+            profile_img: true,
+          },
+        },
+        notification_sender_relation: {
+          select: {
+            id: true,
+            name: true,
+            profile_img: true,
+          },
+        },
+      },
+    });
     console.log('notifications: ', notifications);
 
     return { status: 'Success', data: notifications, error: null };

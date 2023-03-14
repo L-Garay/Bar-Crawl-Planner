@@ -42,6 +42,42 @@ export async function GenerateOutingNotification(
   return { status: 'Success', data: notification, error: null };
 }
 
+export async function GenerateFriendRequest(
+  addressee_profile_id: number,
+  sender_profile_id: number
+): Promise<PrismaData> {
+  const created_at = new Date().toISOString();
+  let notification: any;
+  try {
+    notification = await prismaClient.notification.create({
+      data: {
+        sender_profile_id,
+        addressee_profile_id,
+        type_code: 'FR',
+        created_at,
+      },
+    });
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+
+  try {
+    await prismaClient.notificationStatus.create({
+      data: {
+        notification_id: notification.id,
+        modifier_profile_id: sender_profile_id,
+        status_code: 'S',
+        type_code: 'FR',
+        notification_created_at: created_at,
+        modified_at: created_at,
+      },
+    });
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+  return { status: 'Success', data: notification, error: null };
+}
+
 export async function GenerateNotificationStatus(
   modifier_profile_id: number,
   type_code: string,
