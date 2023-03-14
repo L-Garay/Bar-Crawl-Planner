@@ -283,13 +283,14 @@ export const GENERATE_OUTING_NOTIFICATIONS = gql`
 export const GET_NOTIFICATIONS = gql`
   query getAllNotifications {
     getAllNotifications {
+      id
       sender_profile_id
       addressee_profile_id
       created_at
       type_code
       notification_relation {
         status_code
-        created_at
+        notification_created_at
         modifier_profile_id
       }
       notification_addressee_relation {
@@ -314,23 +315,22 @@ export const GET_NEW_NOTIFICATIONS_COUNT = gql`
 
 export const GENERATE_NOTIFICATION_STATUS = gql`
   mutation generateNotificationStatus(
-    $addressee_profile_id: Int!
     $type_code: String!
     $status_code: String!
     $created_at: String!
     $id: Int!
   ) {
     generateNotificationStatus(
-      addressee_profile_id: $addressee_profile_id
       type_code: $type_code
       status_code: $status_code
       created_at: $created_at
       id: $id
     ) {
-      addressee_profile_id
+      modifier_profile_id
       status_code
       type_code
-      created_at
+      notification_created_at
+      modified_at
     }
   }
 `;
