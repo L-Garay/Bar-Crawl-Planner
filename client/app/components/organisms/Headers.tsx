@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from '@remix-run/react';
 import BeerIcon from '../../assets/basicBeerSvg';
 import { useOnClickOutside } from '~/utils/useOnClickOutside';
+import { useNotificationContext } from '~/contexts/notificationContext';
 
 export type HeaderNavProps = {
   notificationsCount?: number;
@@ -34,19 +35,13 @@ const NavMenu = ({ notificationsCount }: HeaderNavProps) => {
   );
 };
 
-export type HeaderProps = {
-  notificationsCount?: number;
-};
-
-export const BasicHeader = ({ notificationsCount }: HeaderProps) => {
+export const BasicHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
-  console.log('notificationsCount', notificationsCount);
-  const hasNotifications = useMemo(
-    () => (notificationsCount ? notificationsCount > 0 : false),
-    [notificationsCount]
-  );
+  const { count } = useNotificationContext();
+
+  const hasNotifications = useMemo(() => (count ? count > 0 : false), [count]);
   return (
     <div id="header-container">
       <div className="logo-wrapper">
@@ -70,9 +65,7 @@ export const BasicHeader = ({ notificationsCount }: HeaderProps) => {
           >
             Menu{' '}
             {hasNotifications && <div className="notification-marker"></div>}
-            {isMenuOpen ? (
-              <NavMenu notificationsCount={notificationsCount} />
-            ) : null}
+            {isMenuOpen ? <NavMenu notificationsCount={count} /> : null}
           </div>
         </div>
       </div>

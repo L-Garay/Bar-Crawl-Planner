@@ -1,7 +1,6 @@
-import { useMutation } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
-import { GENERATE_NOTIFICATION_STATUS } from '~/constants/graphqlConstants';
+import { useNotificationContext } from '~/contexts/notificationContext';
 import { ClosedEnvelope, OpenEnvelope } from '../svgs/envelopes';
 
 export type OutingNotificationProps = {
@@ -37,15 +36,14 @@ export const OutingNotification = ({
   setnotificationIndex,
   index,
 }: OutingNotificationProps) => {
+  const { generateNotificationStatus } = useNotificationContext();
+
   const hasJoined = useMemo(() => type_code === 'OJ', [type_code]);
   const relativeTime = useMemo(
     () => moment(created_at).fromNow(),
     [created_at]
   );
 
-  const [generateNotificationStatus] = useMutation(
-    GENERATE_NOTIFICATION_STATUS
-  );
   // TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification
   const { name } = notification_sender_relation;
   const { status_code, created_at: notification_created_at } =

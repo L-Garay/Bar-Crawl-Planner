@@ -1,11 +1,8 @@
-import type { LinksFunction, LoaderFunction } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { getNewClient } from '~/apollo/getClient';
+import type { LinksFunction } from '@remix-run/node';
 import { OutingNotification } from '~/components/notifications/notificationCard';
-import { GET_NOTIFICATIONS } from '~/constants/graphqlConstants';
-import logApolloError from '~/utils/getApolloError';
 import notificationStyles from '~/generatedStyles/notifications.css';
 import { useMemo, useState } from 'react';
+import { useNotificationContext } from '~/contexts/notificationContext';
 
 export const links: LinksFunction = () => {
   return [
@@ -17,29 +14,15 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const client = await getNewClient(request);
-  try {
-    const notifications = await client.query({
-      query: GET_NOTIFICATIONS,
-    });
-    return { notifications };
-  } catch (error) {
-    logApolloError(error);
-    throw new Response(JSON.stringify(error), { status: 500 });
-  }
-};
-
 export default function Notifications() {
-  const { notifications } = useLoaderData();
-  const { getAllNotifications } = notifications.data;
+  const { notifications } = useNotificationContext();
   const [notificationIndex, setnotificationIndex] = useState<number>();
 
   const notification = useMemo(() => {
-    if (notificationIndex !== undefined) {
-      return getAllNotifications[notificationIndex];
+    if (notifications && notificationIndex !== undefined) {
+      return notifications[notificationIndex];
     }
-  }, [notificationIndex, getAllNotifications]);
+  }, [notificationIndex, notifications]);
 
   return (
     <>
@@ -52,9 +35,9 @@ export default function Notifications() {
         <h1>This will be the Notifications page</h1>
         <div style={{ display: 'flex' }}>
           <div className="notifications-list">
-            {getAllNotifications.length ? (
+            {notifications && notifications.length ? (
               <>
-                {getAllNotifications.map((notification: any, index: number) => {
+                {notifications.map((notification: any, index: number) => {
                   return (
                     <OutingNotification
                       key={notification.created_at}
