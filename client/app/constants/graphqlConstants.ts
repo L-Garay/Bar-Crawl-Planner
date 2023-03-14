@@ -110,9 +110,26 @@ export const TEST_ADD_FRIEND = gql`
   }
 `;
 
+export const GENERATE_FRIEND_REQUEST = gql`
+  mutation generateFriendRequest($addressee_profile_id: Int!) {
+    generateFriendRequest(addressee_profile_id: $addressee_profile_id) {
+      id
+      addressee_profile_id
+      created_at
+      type_code
+      notification_addressee_relation {
+        id
+        name
+        profile_img
+      }
+    }
+  }
+`;
+
 export const GET_ALL_FRIENDSHIPS = gql`
   query getAllFriendships {
     getAllFriendships {
+      id
       requestor_profile_id
       addressee_profile_id
       frienshipStatus_friendship_relation {
@@ -310,6 +327,26 @@ export const GET_NOTIFICATIONS = gql`
 export const GET_NEW_NOTIFICATIONS_COUNT = gql`
   query getNewNotificationCount {
     getNewNotificationCount
+  }
+`;
+
+export const GET_SENT_FRIEND_REQUESTS = gql`
+  query getSentFriendRequests {
+    getSentFriendRequests {
+      id
+      addressee_profile_id
+      created_at
+    }
+  }
+`;
+
+export const GET_FRIEND_REQUESTS = gql`
+  query getFriendRequests {
+    getFriendRequests {
+      id
+      addressee_profile_id
+      created_at
+    }
   }
 `;
 
