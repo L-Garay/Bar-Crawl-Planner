@@ -40,7 +40,6 @@ export const OutingNotification = ({
 }: OutingNotificationProps) => {
   const { generateNotificationStatus } = useNotificationContext();
 
-  const hasJoined = useMemo(() => type_code === 'OJ', [type_code]);
   const relativeTime = useMemo(
     () => moment(created_at).fromNow(),
     [created_at]
@@ -51,9 +50,10 @@ export const OutingNotification = ({
   const { status_code, created_at: notification_created_at } =
     notification_relation[notification_relation.length - 1];
 
-  const title = hasJoined
-    ? `${name} has joined (outing name)`
-    : `${name} has left (outing name)`;
+  const title =
+    type_code === 'OJ'
+      ? `${name} has joined (outing name)`
+      : `${name} sent you a friend request`;
 
   const isOpened = useMemo(() => status_code === 'O', [status_code]);
   const iconToRender = isOpened ? (
@@ -96,12 +96,7 @@ export const OutingNotification = ({
       className="notification-card-container"
       onClick={() => {
         setnotificationIndex(index);
-        // the addresse in this status is the sender of the original notification
-        // the sender in this status is the user who received this notification
-        // only create status if the notification has not been opened yet
         if (status_code === 'S') {
-          console.log(id);
-
           generateNotificationStatus({
             variables: {
               type_code,

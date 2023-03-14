@@ -55,6 +55,7 @@ export default function Notifications() {
           </div>
           <div className="main-notification-container">
             <h5>this will be the selected nofitication</h5>
+            {/* TODO if the selected notification is a friend request, we will need to show a different 'card' here than if it's a basic joined outing notification. We can check the notification.type_code property */}
             {notification ? (
               <>
                 <p> {notification.created_at}</p>
