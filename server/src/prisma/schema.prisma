@@ -41,6 +41,7 @@ model Profile {
 }
 
 model Friendship {
+  id                                  Int                @unique @default(autoincrement())
   requestor_profile_id                Int
   requestor_profile_relation          Profile            @relation("Requestor_Profile", fields: [requestor_profile_id], references: [id])
   addressee_profile_id                Int
