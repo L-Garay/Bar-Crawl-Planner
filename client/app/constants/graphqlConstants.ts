@@ -329,6 +329,14 @@ export const GET_SENT_FRIEND_REQUESTS = gql`
   }
 `;
 
+export const GET_FRIENDSHIP_STATUS = gql`
+  query getFriendshipStatus($target_id: Int!) {
+    getFriendshipStatus(target_id: $target_id) {
+      status_code
+    }
+  }
+`;
+
 export const GET_FRIEND_REQUESTS = gql`
   query getFriendRequests {
     getFriendRequests {

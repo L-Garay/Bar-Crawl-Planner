@@ -10,6 +10,7 @@ import {
   GET_ACCOUNT_WITH_PROFILE_DATA,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
+  GET_SENT_FRIEND_REQUESTS,
   SEND_OUTING_EMAIL,
   UPDATE_OUTING,
 } from '~/constants/graphqlConstants';
@@ -138,7 +139,9 @@ export default function OutingDetails() {
   const transition = useTransition();
 
   // TODO change this to send a friend request notification
-  const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST);
+  const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST, {
+    refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
+  });
 
   const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;

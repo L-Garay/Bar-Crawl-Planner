@@ -1,5 +1,6 @@
-import { useNavigate } from '@remix-run/react';
-import { useMemo } from 'react';
+import { useLazyQuery } from '@apollo/client';
+import { useEffect, useMemo } from 'react';
+import { GET_FRIENDSHIP_STATUS } from '~/constants/graphqlConstants';
 import { useNotificationContext } from '~/contexts/notificationContext';
 
 export type ProfileInOutingProps = {
@@ -15,7 +16,24 @@ export const ProfileInOuting = ({
   attendanceStatus,
   currentUser,
 }: ProfileInOutingProps) => {
-  const navigate = useNavigate();
+  const { sentFriendRequests, receivedFriendRequests } =
+    useNotificationContext();
+
+  const [
+    getFriendshipStatus,
+    { data: statusData, error: friendshipStatusError },
+  ] = useLazyQuery(GET_FRIENDSHIP_STATUS);
+
+  useEffect(() => {
+    if (profile) {
+      getFriendshipStatus({
+        variables: {
+          target_id: Number(profile.id),
+        },
+      });
+    }
+  }, [getFriendshipStatus, profile]);
+
   const color = useMemo(() => {
     if (attendanceStatus === 'Accepted') return 'green';
     if (attendanceStatus === 'Pending') return 'grey';
@@ -31,9 +49,6 @@ export const ProfileInOuting = ({
     }
   }, [profile, currentUser]);
 
-  const { sentFriendRequests, receivedFriendRequests } =
-    useNotificationContext();
-
   const alreadyRequested = useMemo(() => {
     if (!sentFriendRequests) return false;
     return sentFriendRequests.some((request) => {
@@ -47,7 +62,11 @@ export const ProfileInOuting = ({
       return request.sender_profile_id === Number(profile.id);
     });
   }, [profile.id, receivedFriendRequests]);
-  console.log(receivedFriendRequests, hasRecievedRequest);
+
+  const alreadyFriends = useMemo(() => {
+    if (!statusData || statusData.getFriendshipStatus === null) return false;
+    return statusData.getFriendshipStatus.status_code === 'A';
+  }, [statusData]);
 
   return (
     <div className="profile-in-outing-container">
@@ -56,9 +75,11 @@ export const ProfileInOuting = ({
           {profile.name} with id {profile.id}
         </p>
         <p>({attendanceStatus})</p>
-        {!sameProfile && !hasRecievedRequest ? (
+        {alreadyFriends ? (
+          <p>(Friend)</p>
+        ) : !sameProfile ? (
           <button
-            disabled={alreadyRequested}
+            disabled={alreadyRequested || hasRecievedRequest}
             onClick={() => {
               sendFriendRequest({
                 variables: {
@@ -67,11 +88,9 @@ export const ProfileInOuting = ({
               });
             }}
           >
-            {alreadyRequested ? 'Request Pending' : 'Send Friend Request'}
-          </button>
-        ) : hasRecievedRequest ? (
-          <button onClick={() => navigate('/friends')}>
-            Respond to friend request
+            {alreadyRequested || hasRecievedRequest
+              ? 'Request Pending'
+              : 'Send Friend Request'}
           </button>
         ) : null}
       </div>
