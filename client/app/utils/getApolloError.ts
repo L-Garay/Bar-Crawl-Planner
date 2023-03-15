@@ -4,13 +4,19 @@ const logApolloError = (error: any): void => {
   const { graphQLErrors, networkError, clientErrors } = error;
   // networkError is either an object or null
   if (networkError !== null) {
-    const networkStatus = networkError.statusCode;
-    const networkErrors = networkError.result.errors;
-    networkErrors.forEach((error: any) => {
-      console.log(
-        `APOLLO NETWORK ERROR:\n Name: ${error.extensions.code}\n  Message: ${error.message}\n Status: ${networkStatus}\n`
-      );
-    });
+    const networkStatus = networkError.statusCode
+      ? networkError.statusCode
+      : 'No Status Code';
+    const networkErrors = networkError.result ? networkError.result.errors : [];
+    if (networkErrors.length) {
+      networkErrors.forEach((error: any) => {
+        console.log(
+          `APOLLO NETWORK ERROR:\n Name: ${error.extensions.code}\n  Message: ${error.message}\n Status: ${networkStatus}\n`
+        );
+      });
+    } else {
+      console.log('APOLLO NETWORK ERROR', networkError);
+    }
   }
   // graphQLErrors is an array of objects, with each object representing one specific error
   // there could be multiple errors in a single request (multiple mispelled fields, for example)
