@@ -153,6 +153,7 @@ const typeDefs = `#graphql
     getFriendRequests: [Notification]
     getSentFriendRequests: [Notification]
     getNewNotificationCount: Int
+    getFriendshipStatus(target_id: Int!): FriendshipStatus
   }
 
   type Mutation {
