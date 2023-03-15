@@ -34,9 +34,13 @@ import {
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
-import { TestAddFriend } from './prisma/mutations/friendsMutations';
+import {
+  AddFriend,
+  GenerateFriendStatus,
+} from './prisma/mutations/friendsMutations';
 import { GetAllFriendships } from './prisma/querries/friendsQuerries';
 import {
+  GenerateFriendNotification,
   GenerateFriendRequest,
   GenerateNotificationStatus,
   GenerateOutingNotification,
@@ -662,7 +666,7 @@ const resolvers: Resolvers = {
 
       return `Account ${account.data.id} and Profile ${profile.data.id} created`;
     },
-    testAddFriend: async (parent, args, context, info) => {
+    addFriend: async (parent, args, context, info) => {
       const { authError, profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -670,10 +674,12 @@ const resolvers: Resolvers = {
         });
       }
 
-      const { addressee_profile_id } = args;
-      const { id } = profile.data;
+      const { addressee_profile_id, requestor_profile_id } = args;
 
-      const addedFriend = await TestAddFriend(id, addressee_profile_id);
+      const addedFriend = await AddFriend(
+        requestor_profile_id,
+        addressee_profile_id
+      );
 
       if (addedFriend.status === 'Failure') {
         throw new GraphQLError('Cannot add friend', {
@@ -703,6 +709,60 @@ const resolvers: Resolvers = {
       );
       if (notificationResponse.status === 'Failure') {
         throw new GraphQLError('Cannot generate friend request', {
+          extensions: {
+            code: notificationResponse.error?.name,
+            message: notificationResponse.error?.message,
+            prismaMeta: notificationResponse.error?.meta,
+            prismaErrorCode: notificationResponse.error?.errorCode,
+          },
+        });
+      } else {
+        return notificationResponse.data;
+      }
+    },
+    generateFriendNotification: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { addressee_profile_id, type_code, sender_profile_id } = args;
+
+      const notificationResponse = await GenerateFriendNotification(
+        sender_profile_id,
+        addressee_profile_id,
+        type_code
+      );
+      if (notificationResponse.status === 'Failure') {
+        throw new GraphQLError('Cannot generate friend notification', {
+          extensions: {
+            code: notificationResponse.error?.name,
+            message: notificationResponse.error?.message,
+            prismaMeta: notificationResponse.error?.meta,
+            prismaErrorCode: notificationResponse.error?.errorCode,
+          },
+        });
+      } else {
+        return notificationResponse.data;
+      }
+    },
+    generateFriendStatus: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { addressee_profile_id, status_code, requestor_profile_id } = args;
+
+      const notificationResponse = await GenerateFriendStatus(
+        requestor_profile_id,
+        addressee_profile_id,
+        status_code
+      );
+      if (notificationResponse.status === 'Failure') {
+        throw new GraphQLError('Cannot generate friend status', {
           extensions: {
             code: notificationResponse.error?.name,
             message: notificationResponse.error?.message,

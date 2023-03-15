@@ -1,19 +1,19 @@
 import prismaClient from '../..';
 import { PrismaData, PrismaError } from '../../types/sharedTypes';
 
-export async function TestAddFriend(
-  user_id: number,
-  friend_id: number
+export async function AddFriend(
+  requestor_profile_id: number,
+  addressee_profile_id: number
 ): Promise<PrismaData> {
-  console.log('user_id: ', user_id);
-  console.log('friend_id: ', friend_id);
+  console.log('requestor_profile_id: ', requestor_profile_id);
+  console.log('addressee_profile_id: ', addressee_profile_id);
 
   try {
     await prismaClient.friendship.create({
       data: {
         created_at: new Date().toISOString(),
-        requestor_profile_id: user_id,
-        addressee_profile_id: friend_id,
+        requestor_profile_id,
+        addressee_profile_id,
       },
     });
   } catch (error) {
@@ -23,11 +23,32 @@ export async function TestAddFriend(
   try {
     const friendStatus = await prismaClient.friendshipStatus.create({
       data: {
-        status_code: 'R',
+        status_code: 'A',
         created_at: new Date().toISOString(),
-        requestor_profile_id: user_id,
-        modifier_profile_id: user_id,
-        addressee_profile_id: friend_id,
+        requestor_profile_id,
+        modifier_profile_id: addressee_profile_id, // because the addressee is the one who accepted the request, they are the modifier
+        addressee_profile_id,
+      },
+    });
+    return { status: 'Success', data: friendStatus, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function GenerateFriendStatus(
+  requestor_profile_id: number,
+  addressee_profile_id: number,
+  status_code: string
+): Promise<PrismaData> {
+  try {
+    const friendStatus = await prismaClient.friendshipStatus.create({
+      data: {
+        status_code,
+        created_at: new Date().toISOString(),
+        requestor_profile_id,
+        modifier_profile_id: addressee_profile_id, // because the addressee is the one who accepted the request, they are the modifier
+        addressee_profile_id,
       },
     });
     return { status: 'Success', data: friendStatus, error: null };
