@@ -71,10 +71,12 @@ export const OutingNotification = ({
   const title = useMemo(() => {
     if (name && outingData) {
       return `${name} has joined ${outingData.getOuting.name}`;
-    } else if (name && !outingData) {
+    } else if (name && !outingData && type_code === 'FR') {
       return `${name} has sent you a friend request`;
+    } else if (name && !outingData && type_code === 'FRR') {
+      return `${name} has accepted your friend request`;
     }
-  }, [name, outingData]);
+  }, [name, outingData, type_code]);
 
   const isOpened = useMemo(() => status_code !== 'S', [status_code]);
   const iconToRender = isOpened ? (

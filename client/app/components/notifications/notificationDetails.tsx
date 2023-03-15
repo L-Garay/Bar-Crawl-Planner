@@ -61,10 +61,12 @@ export const NotificationDetails = ({
   const title = useMemo(() => {
     if (name && outingData) {
       return `${name} has joined ${outingData.getOuting.name}`;
-    } else if (name && !outingData) {
+    } else if (name && !outingData && type_code === 'FR') {
       return `${name} has sent you a friend request`;
+    } else if (name && !outingData && type_code === 'FRR') {
+      return `${name} has accepted your friend request`;
     }
-  }, [name, outingData]);
+  }, [name, outingData, type_code]);
 
   const handleAccept = async () => {
     try {
@@ -127,7 +129,7 @@ export const NotificationDetails = ({
               <a href={`/outings/my-outings/${outing_id}`}>here</a>.
             </p>
           </div>
-        ) : (
+        ) : type_code === 'FR' ? (
           <div>
             {' '}
             <p>Friend Request Details</p>
@@ -137,13 +139,16 @@ export const NotificationDetails = ({
               <>
                 <p>How would you like to respond?</p>
                 <div>
-                  {/* If they accept, we will need to fire mutation to add them as friends, but also create and send notification to sender that user accepted */}
                   <button onClick={handleAccept}>Accept</button>
                   <button onClick={handleDecline}>Decline</button>
                 </div>
               </>
             )}
           </div>
+        ) : (
+          <p>
+            Click <a href="/friends">here</a> to go to your Friends page
+          </p>
         )}
       </div>
     </div>
