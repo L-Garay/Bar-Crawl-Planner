@@ -207,6 +207,7 @@ export type Notification = {
   notification_addressee_relation?: Maybe<Profile>;
   notification_relation?: Maybe<Array<Maybe<NotificationStatus>>>;
   notification_sender_relation?: Maybe<Profile>;
+  outing_id?: Maybe<Scalars['Int']>;
   sender_profile_id?: Maybe<Scalars['Int']>;
   type_code?: Maybe<Scalars['String']>;
 };
@@ -498,6 +499,7 @@ export type NotificationResolvers<ContextType = any, ParentType extends Resolver
   notification_addressee_relation?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   notification_relation?: Resolver<Maybe<Array<Maybe<ResolversTypes['NotificationStatus']>>>, ParentType, ContextType>;
   notification_sender_relation?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
+  outing_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   sender_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   type_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

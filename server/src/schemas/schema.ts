@@ -122,6 +122,7 @@ const typeDefs = `#graphql
     notification_relation: [NotificationStatus]
     notification_addressee_relation: Profile
     notification_sender_relation: Profile
+    outing_id: Int
   }
 
   type NotificationStatus {

@@ -83,6 +83,7 @@ model Notification {
   type_code                       String               @db.VarChar(5)
   notification_type_relation      NotificationType     @relation(fields: [type_code], references: [type_code])
   notification_relation           NotificationStatus[]
+  outing_id                       Int?
 
   @@unique([sender_profile_id, addressee_profile_id, created_at])
 }
