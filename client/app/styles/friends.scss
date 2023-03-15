@@ -1,0 +1,12 @@
+
+.friends-lists {
+  display: flex;
+  min-height: 400px;
+
+  .list {
+    flex: 1;
+    margin: 0 10px;
+    text-align: center;
+    outline: 1px solid black;
+  }
+}

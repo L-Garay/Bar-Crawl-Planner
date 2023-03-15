@@ -59,6 +59,9 @@ export const NotificationProvider = (props: { children: React.ReactNode }) => {
     }
   );
 
+  // NOTE when a user logs out, these all get triggered because as noted above, when navigiating it seems that the querries are called
+  // and so when a user logs out, it 'navigates' to the resource route and then the login page and we get network errros saying there was an error attempting to fetch resources (even though the two pages in question are not wrapped in the provider)
+  // TODO I've suprressed the UI error boundary by properly catching the network error, but this is still a problem that needs to be addressed
   if (countError) logApolloError(countError);
   if (notificationsError) logApolloError(notificationsError);
   if (statusError) logApolloError(statusError);
