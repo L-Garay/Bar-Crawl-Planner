@@ -100,28 +100,15 @@ export const GET_PROFILES_IN_OUTING = gql`
   }
 `;
 
-export const TEST_ADD_FRIEND = gql`
-  mutation testAddFriend($addressee_profile_id: Int!) {
-    testAddFriend(addressee_profile_id: $addressee_profile_id) {
+export const ADD_FRIEND = gql`
+  mutation addFriend($requestor_profile_id: Int!, $addressee_profile_id: Int!) {
+    addFriend(
+      requestor_profile_id: $requestor_profile_id
+      addressee_profile_id: $addressee_profile_id
+    ) {
       requestor_profile_id
       addressee_profile_id
       created_at
-    }
-  }
-`;
-
-export const GENERATE_FRIEND_REQUEST = gql`
-  mutation generateFriendRequest($addressee_profile_id: Int!) {
-    generateFriendRequest(addressee_profile_id: $addressee_profile_id) {
-      id
-      addressee_profile_id
-      created_at
-      type_code
-      notification_addressee_relation {
-        id
-        name
-        profile_img
-      }
     }
   }
 `;
@@ -349,6 +336,64 @@ export const GET_FRIEND_REQUESTS = gql`
       addressee_profile_id
       sender_profile_id
       created_at
+    }
+  }
+`;
+
+export const GENERATE_FRIEND_REQUEST = gql`
+  mutation generateFriendRequest($addressee_profile_id: Int!) {
+    generateFriendRequest(addressee_profile_id: $addressee_profile_id) {
+      id
+      addressee_profile_id
+      created_at
+      type_code
+      notification_addressee_relation {
+        id
+        name
+        profile_img
+      }
+    }
+  }
+`;
+
+export const GENERATE_FRIEND_STATUS = gql`
+  mutation generateFriendStatus(
+    $requestor_profile_id: Int!
+    $addressee_profile_id: Int!
+    $status_code: String!
+  ) {
+    generateFriendStatus(
+      requestor_profile_id: $requestor_profile_id
+      addressee_profile_id: $addressee_profile_id
+      status_code: $status_code
+    ) {
+      requestor_profile_id
+      addressee_profile_id
+      status_code
+      created_at
+    }
+  }
+`;
+
+export const GENERATE_FRIEND_NOTIFICATION = gql`
+  mutation generateFriendNotification(
+    $sender_profile_id: Int!
+    $addressee_profile_id: Int!
+    $type_code: String!
+  ) {
+    generateFriendNotification(
+      sender_profile_id: $sender_profile_id
+      addressee_profile_id: $addressee_profile_id
+      type_code: $type_code
+    ) {
+      id
+      addressee_profile_id
+      type_code
+      created_at
+      notification_addressee_relation {
+        id
+        name
+      }
     }
   }
 `;

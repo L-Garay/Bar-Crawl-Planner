@@ -9,9 +9,11 @@ export type OutingNotificationProps = {
   id: string;
   created_at: string;
   notification_addressee_relation: {
+    id: number;
     name: string;
   };
   notification_sender_relation: {
+    id: number;
     name: string;
   };
   sender_profile_id: string;
@@ -62,7 +64,6 @@ export const OutingNotification = ({
     [created_at]
   );
 
-  // TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification, and also so we can link to it from the notification
   const { name } = notification_sender_relation;
   const { status_code, created_at: notification_created_at } =
     notification_relation[notification_relation.length - 1];
@@ -75,7 +76,7 @@ export const OutingNotification = ({
     }
   }, [name, outingData]);
 
-  const isOpened = useMemo(() => status_code === 'O', [status_code]);
+  const isOpened = useMemo(() => status_code !== 'S', [status_code]);
   const iconToRender = isOpened ? (
     <OpenEnvelope pathId={created_at} size="small" />
   ) : (

@@ -1,7 +1,13 @@
-import { useLazyQuery } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
-import { GET_OUTING } from '~/constants/graphqlConstants';
+import {
+  ADD_FRIEND,
+  GENERATE_FRIEND_NOTIFICATION,
+  GET_OUTING,
+} from '~/constants/graphqlConstants';
+import { useNotificationContext } from '~/contexts/notificationContext';
+import logApolloError from '~/utils/getApolloError';
 import type { OutingNotificationProps } from './notificationCard';
 
 export type NotificationDetailsProps = Omit<
@@ -19,8 +25,13 @@ export const NotificationDetails = ({
   notification_relation,
   outing_id,
 }: NotificationDetailsProps) => {
+  const { generateNotificationStatus } = useNotificationContext();
   const [getOuting, { error: outingError, data: outingData }] =
     useLazyQuery(GET_OUTING);
+
+  const [addFriend, { error: addFriendError }] = useMutation(ADD_FRIEND);
+  const [generateFriendNotification, { error: notificationError }] =
+    useMutation(GENERATE_FRIEND_NOTIFICATION);
 
   useEffect(() => {
     if (outing_id) {
@@ -44,6 +55,7 @@ export const NotificationDetails = ({
   }, [outingData]);
 
   const { name } = notification_sender_relation;
+  const { id: addressee_id } = notification_addressee_relation;
   const { status_code, created_at: notification_created_at } =
     notification_relation[notification_relation.length - 1];
   const title = useMemo(() => {
@@ -53,6 +65,49 @@ export const NotificationDetails = ({
       return `${name} has sent you a friend request`;
     }
   }, [name, outingData]);
+
+  const handleAccept = async () => {
+    try {
+      await addFriend({
+        variables: {
+          requestor_profile_id: Number(sender_profile_id),
+          addressee_profile_id: Number(addressee_id),
+        },
+      });
+      await generateNotificationStatus({
+        variables: {
+          id: Number(id),
+          status_code: 'A',
+          type_code: 'FR',
+          created_at: new Date().toISOString(),
+        },
+      });
+      await generateFriendNotification({
+        variables: {
+          sender_profile_id: Number(sender_profile_id),
+          addressee_profile_id: Number(addressee_id),
+          type_code: 'FRR',
+        },
+      });
+    } catch (error) {
+      logApolloError(error);
+    }
+  };
+
+  const handleDecline = async () => {
+    try {
+      await generateNotificationStatus({
+        variables: {
+          id: Number(id),
+          status_code: 'D',
+          type_code: 'FR',
+          created_at: new Date().toISOString(),
+        },
+      });
+    } catch (error) {
+      logApolloError(error);
+    }
+  };
 
   return (
     <div className="main-notification-container">
@@ -75,7 +130,19 @@ export const NotificationDetails = ({
         ) : (
           <div>
             {' '}
-            <p>Friend Request Details</p>{' '}
+            <p>Friend Request Details</p>
+            {status_code === 'A' || status_code === 'D' ? (
+              <p>Your response has been submitted!</p>
+            ) : (
+              <>
+                <p>How would you like to respond?</p>
+                <div>
+                  {/* If they accept, we will need to fire mutation to add them as friends, but also create and send notification to sender that user accepted */}
+                  <button onClick={handleAccept}>Accept</button>
+                  <button onClick={handleDecline}>Decline</button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </div>

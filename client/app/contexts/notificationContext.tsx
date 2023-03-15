@@ -59,9 +59,6 @@ export const NotificationProvider = (props: { children: React.ReactNode }) => {
     }
   );
 
-  console.log('sentRequestData', sentRequestData);
-  console.log('friendRequestData', friendRequestData);
-
   if (countError) logApolloError(countError);
   if (notificationsError) logApolloError(notificationsError);
   if (statusError) logApolloError(statusError);
