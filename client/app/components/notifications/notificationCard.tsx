@@ -1,5 +1,7 @@
+import { useLazyQuery } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
+import { GET_OUTING } from '~/constants/graphqlConstants';
 import { useNotificationContext } from '~/contexts/notificationContext';
 import { ClosedEnvelope, OpenEnvelope } from '../svgs/envelopes';
 
@@ -20,6 +22,7 @@ export type OutingNotificationProps = {
       created_at: string;
     }
   ];
+  outing_id: number;
 } & {
   setnotificationIndex: (index: number) => void;
   index: number;
@@ -37,23 +40,40 @@ export const OutingNotification = ({
   setnotificationIndex,
   index,
   selectedNotification,
+  outing_id,
 }: OutingNotificationProps) => {
   const { generateNotificationStatus } = useNotificationContext();
+
+  const [getOuting, { error: outingError, data: outingData }] =
+    useLazyQuery(GET_OUTING);
+
+  useEffect(() => {
+    if (outing_id) {
+      getOuting({
+        variables: {
+          id: Number(outing_id),
+        },
+      });
+    }
+  }, [outing_id, getOuting]);
 
   const relativeTime = useMemo(
     () => moment(created_at).fromNow(),
     [created_at]
   );
 
-  // TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification
+  // TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification, and also so we can link to it from the notification
   const { name } = notification_sender_relation;
   const { status_code, created_at: notification_created_at } =
     notification_relation[notification_relation.length - 1];
 
-  const title =
-    type_code === 'OJ'
-      ? `${name} has joined (outing name)`
-      : `${name} sent you a friend request`;
+  const title = useMemo(() => {
+    if (name && outingData) {
+      return `${name} has joined ${outingData.getOuting.name}`;
+    } else if (name && !outingData) {
+      return `${name} has sent you a friend request`;
+    }
+  }, [name, outingData]);
 
   const isOpened = useMemo(() => status_code === 'O', [status_code]);
   const iconToRender = isOpened ? (

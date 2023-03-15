@@ -305,6 +305,7 @@ export const GET_NOTIFICATIONS = gql`
       addressee_profile_id
       created_at
       type_code
+      outing_id
       notification_relation {
         status_code
         notification_created_at
@@ -335,6 +336,7 @@ export const GET_SENT_FRIEND_REQUESTS = gql`
     getSentFriendRequests {
       id
       addressee_profile_id
+      sender_profile_id
       created_at
     }
   }
@@ -345,6 +347,7 @@ export const GET_FRIEND_REQUESTS = gql`
     getFriendRequests {
       id
       addressee_profile_id
+      sender_profile_id
       created_at
     }
   }
