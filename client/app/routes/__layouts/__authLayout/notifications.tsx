@@ -3,6 +3,7 @@ import { OutingNotification } from '~/components/notifications/notificationCard'
 import notificationStyles from '~/generatedStyles/notifications.css';
 import { useMemo, useState } from 'react';
 import { useNotificationContext } from '~/contexts/notificationContext';
+import { NotificationDetails } from '~/components/notifications/notificationDetails';
 
 export const links: LinksFunction = () => {
   return [
@@ -53,17 +54,7 @@ export default function Notifications() {
               <p>Nothing yet</p>
             )}
           </div>
-          <div className="main-notification-container">
-            <h5>this will be the selected nofitication</h5>
-            {/* TODO if the selected notification is a friend request, we will need to show a different 'card' here than if it's a basic joined outing notification. We can check the notification.type_code property */}
-            {notification ? (
-              <>
-                <p> {notification.created_at}</p>
-                <p> {notification.type_code}</p>
-                <p> {notification.notification_sender_relation.name}</p>
-              </>
-            ) : null}
-          </div>
+          {notification ? <NotificationDetails {...notification} /> : null}
         </div>
 
         <p>
