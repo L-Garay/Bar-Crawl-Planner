@@ -1,3 +1,4 @@
+import { useNavigate } from '@remix-run/react';
 import { useMemo } from 'react';
 import { useNotificationContext } from '~/contexts/notificationContext';
 
@@ -14,6 +15,7 @@ export const ProfileInOuting = ({
   attendanceStatus,
   currentUser,
 }: ProfileInOutingProps) => {
+  const navigate = useNavigate();
   const color = useMemo(() => {
     if (attendanceStatus === 'Accepted') return 'green';
     if (attendanceStatus === 'Pending') return 'grey';
@@ -29,7 +31,8 @@ export const ProfileInOuting = ({
     }
   }, [profile, currentUser]);
 
-  const { sentFriendRequests } = useNotificationContext();
+  const { sentFriendRequests, receivedFriendRequests } =
+    useNotificationContext();
 
   const alreadyRequested = useMemo(() => {
     if (!sentFriendRequests) return false;
@@ -38,6 +41,14 @@ export const ProfileInOuting = ({
     });
   }, [profile.id, sentFriendRequests]);
 
+  const hasRecievedRequest = useMemo(() => {
+    if (!receivedFriendRequests) return false;
+    return receivedFriendRequests.some((request) => {
+      return request.sender_profile_id === Number(profile.id);
+    });
+  }, [profile.id, receivedFriendRequests]);
+  console.log(receivedFriendRequests, hasRecievedRequest);
+
   return (
     <div className="profile-in-outing-container">
       <div className="profile-in-outing" style={{ display: 'flex' }}>
@@ -45,7 +56,7 @@ export const ProfileInOuting = ({
           {profile.name} with id {profile.id}
         </p>
         <p>({attendanceStatus})</p>
-        {sameProfile ? null : (
+        {!sameProfile && !hasRecievedRequest ? (
           <button
             disabled={alreadyRequested}
             onClick={() => {
@@ -58,7 +69,11 @@ export const ProfileInOuting = ({
           >
             {alreadyRequested ? 'Request Pending' : 'Send Friend Request'}
           </button>
-        )}
+        ) : hasRecievedRequest ? (
+          <button onClick={() => navigate('/friends')}>
+            Respond to friend request
+          </button>
+        ) : null}
       </div>
     </div>
   );
