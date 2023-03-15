@@ -735,7 +735,8 @@ const resolvers: Resolvers = {
           if (profile.id !== sender_profile.data.id) {
             return await GenerateOutingNotification(
               profile.id, // recipient_profile_id
-              sender_profile.data.id
+              sender_profile.data.id,
+              outing_id
             );
           } else {
             return null;

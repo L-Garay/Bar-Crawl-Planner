@@ -7,7 +7,8 @@ dotenv.config();
 // TODO need to add outing id to the notification so we can then fetch it and use it's name in the notification
 export async function GenerateOutingNotification(
   addressee_id: number,
-  sender_profile_id: number
+  sender_profile_id: number,
+  outing_id: number
 ): Promise<PrismaData> {
   // first create the notification
   const created_at = new Date().toISOString(); // need to get this once, so both the notification and status have EXACT same timestamp
@@ -19,6 +20,7 @@ export async function GenerateOutingNotification(
         addressee_profile_id: addressee_id,
         type_code: 'OJ',
         created_at,
+        outing_id,
       },
     });
   } catch (error) {
