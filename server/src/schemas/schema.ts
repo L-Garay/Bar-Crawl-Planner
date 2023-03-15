@@ -173,17 +173,21 @@ const typeDefs = `#graphql
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
-    testAddFriend(
+    addFriend(requestor_profile_id: Int!, addressee_profile_id: Int!): FriendshipStatus
+    generateOutingNotification(outing_id: Int!): [Notification]
+    generateFriendRequest(addressee_profile_id: Int!): Notification
+    generateFriendNotification(sender_profile_id: Int!, addressee_profile_id: Int!, type_code: String!): Notification
+    generateFriendStatus(
+    requestor_profile_id: Int!
     addressee_profile_id: Int!
-  ): FriendshipStatus
-  generateOutingNotification(outing_id: Int!): [Notification]
-  generateFriendRequest(addressee_profile_id: Int!): Notification
-  generateNotificationStatus(
-    type_code: String!
     status_code: String!
-    created_at: String!
-    id: Int!
-  ): NotificationStatus
+    ): FriendshipStatus
+    generateNotificationStatus(
+      type_code: String!
+      status_code: String!
+      created_at: String!
+      id: Int!
+    ): NotificationStatus
   }
 `;
 
