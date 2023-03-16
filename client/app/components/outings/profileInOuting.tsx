@@ -16,8 +16,11 @@ export const ProfileInOuting = ({
   attendanceStatus,
   currentUser,
 }: ProfileInOutingProps) => {
-  const { sentFriendRequests, receivedFriendRequests } =
+  const { sentFriendRequests, receivedFriendRequests, setShouldQuery } =
     useNotificationContext();
+
+  // NOTE for testing purposes, this will be removed
+  useEffect(() => setShouldQuery(true), []);
 
   const [
     getFriendshipStatus,

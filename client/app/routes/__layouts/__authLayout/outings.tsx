@@ -4,6 +4,7 @@ import { Outlet } from '@remix-run/react';
 import SimpleNav from '~/components/molecules/simpleNav';
 import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
 import { Dynamic } from '~/components/animated/loadingSpinners';
+import { NotificationProvider } from '~/contexts/notificationContext';
 
 export const links: LinksFunction = () => {
   return [
@@ -55,7 +56,9 @@ export default function OutingsIndex() {
           </p>
 
           <SimpleNav links={navLinks} />
-          <Outlet />
+          <NotificationProvider>
+            <Outlet />
+          </NotificationProvider>
         </div>
       ) : (
         <Dynamic />
