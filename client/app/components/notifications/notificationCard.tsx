@@ -1,11 +1,16 @@
+import type {
+  ApolloCache,
+  DefaultContext,
+  MutationFunctionOptions,
+  OperationVariables,
+} from '@apollo/client';
 import { useLazyQuery } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
 import { GET_OUTING } from '~/constants/graphqlConstants';
-import { useNotificationContext } from '~/contexts/notificationContext';
 import { ClosedEnvelope, OpenEnvelope } from '../svgs/envelopes';
 
-export type OutingNotificationProps = {
+export type NotificationCardProps = {
   id: string;
   created_at: string;
   notification_addressee_relation: {
@@ -29,9 +34,19 @@ export type OutingNotificationProps = {
   setnotificationIndex: (index: number) => void;
   index: number;
   selectedNotification: any;
+  generateNotificationStatus: (
+    options?:
+      | MutationFunctionOptions<
+          any,
+          OperationVariables,
+          DefaultContext,
+          ApolloCache<any>
+        >
+      | undefined
+  ) => Promise<any>;
 };
 
-export const OutingNotification = ({
+export const NotificationCard = ({
   id,
   created_at,
   sender_profile_id,
@@ -43,9 +58,8 @@ export const OutingNotification = ({
   index,
   selectedNotification,
   outing_id,
-}: OutingNotificationProps) => {
-  const { generateNotificationStatus } = useNotificationContext();
-
+  generateNotificationStatus,
+}: NotificationCardProps) => {
   const [getOuting, { error: outingError, data: outingData }] =
     useLazyQuery(GET_OUTING);
 

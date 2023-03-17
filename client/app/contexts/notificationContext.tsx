@@ -34,20 +34,6 @@ interface NotificationController {
   setShouldQuery: (shouldQuery: boolean) => void;
 }
 
-//
-//
-//
-//
-//
-// TODO get rid of context for this case
-// each consumer of this context pulls off something different, and so it would be easier to just move the needed querries into the specific components that need them
-// if there are a couple of pages that need similar querries, just make the call in the page itself
-//
-//
-//
-//
-//
-
 // NOTE I think having these querries in a context, is causing them to be called A LOT
 // as in it appears whenever you navigate to a page that is wrapped in this provider, it triggers the querries
 // TODO look into ways to prevent this using the apollo cache (refetch policies, etc)

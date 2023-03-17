@@ -1,13 +1,14 @@
 import { useLazyQuery } from '@apollo/client';
 import { useEffect, useMemo } from 'react';
 import { GET_FRIENDSHIP_STATUS } from '~/constants/graphqlConstants';
-import { useNotificationContext } from '~/contexts/notificationContext';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
   sendFriendRequest: ({ variables }: { variables: any }) => void;
   attendanceStatus: string;
   currentUser: number;
+  sentRequests: Record<string, any>[];
+  recievedRequests: Record<string, any>[];
 };
 
 export const ProfileInOuting = ({
@@ -15,12 +16,14 @@ export const ProfileInOuting = ({
   sendFriendRequest,
   attendanceStatus,
   currentUser,
+  sentRequests,
+  recievedRequests,
 }: ProfileInOutingProps) => {
-  const { sentFriendRequests, receivedFriendRequests, setShouldQuery } =
-    useNotificationContext();
+  // const { sentFriendRequests, receivedFriendRequests, setShouldQuery } =
+  //   useNotificationContext();
 
   // NOTE for testing purposes, this will be removed
-  useEffect(() => setShouldQuery(true), []);
+  // useEffect(() => setShouldQuery(true), []);
 
   const [
     getFriendshipStatus,
@@ -53,18 +56,18 @@ export const ProfileInOuting = ({
   }, [profile, currentUser]);
 
   const alreadyRequested = useMemo(() => {
-    if (!sentFriendRequests) return false;
-    return sentFriendRequests.some((request) => {
+    if (!sentRequests) return false;
+    return sentRequests.some((request) => {
       return request.addressee_profile_id === Number(profile.id);
     });
-  }, [profile.id, sentFriendRequests]);
+  }, [profile.id, sentRequests]);
 
   const hasRecievedRequest = useMemo(() => {
-    if (!receivedFriendRequests) return false;
-    return receivedFriendRequests.some((request) => {
+    if (!recievedRequests) return false;
+    return recievedRequests.some((request) => {
       return request.sender_profile_id === Number(profile.id);
     });
-  }, [profile.id, receivedFriendRequests]);
+  }, [profile.id, recievedRequests]);
 
   const alreadyFriends = useMemo(() => {
     if (!statusData || statusData.getFriendshipStatus === null) return false;

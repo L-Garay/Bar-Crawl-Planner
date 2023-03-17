@@ -1,9 +1,14 @@
 import type { LinksFunction } from '@remix-run/node';
-import { OutingNotification } from '~/components/notifications/notificationCard';
+import { NotificationCard } from '~/components/notifications/notificationCard';
 import notificationStyles from '~/generatedStyles/notifications.css';
 import { useMemo, useState } from 'react';
-import { useNotificationContext } from '~/contexts/notificationContext';
 import { NotificationDetails } from '~/components/notifications/notificationDetails';
+import {
+  GENERATE_NOTIFICATION_STATUS,
+  GET_NEW_NOTIFICATIONS_COUNT,
+  GET_NOTIFICATIONS,
+} from '~/constants/graphqlConstants';
+import { useMutation, useQuery } from '@apollo/client';
 
 export const links: LinksFunction = () => {
   return [
@@ -16,8 +21,29 @@ export const links: LinksFunction = () => {
 };
 
 export default function Notifications() {
-  const { notifications } = useNotificationContext();
   const [notificationIndex, setnotificationIndex] = useState<number>();
+
+  const {
+    data: notificationsData,
+    loading: notificationsLoading,
+    error: notificationsError,
+  } = useQuery(GET_NOTIFICATIONS);
+
+  const [generateNotificationStatus, { error: statusError }] = useMutation(
+    GENERATE_NOTIFICATION_STATUS,
+    {
+      refetchQueries: [
+        { query: GET_NOTIFICATIONS },
+        { query: GET_NEW_NOTIFICATIONS_COUNT },
+      ],
+      awaitRefetchQueries: true,
+    }
+  );
+
+  const notifications = useMemo(() => {
+    if (!notificationsData || !notificationsData.getAllNotifications) return [];
+    return notificationsData.getAllNotifications;
+  }, [notificationsData]);
 
   const notification = useMemo(() => {
     if (notifications && notificationIndex !== undefined) {
@@ -40,12 +66,13 @@ export default function Notifications() {
               <>
                 {notifications.map((notification: any, index: number) => {
                   return (
-                    <OutingNotification
+                    <NotificationCard
                       key={notification.created_at}
                       {...notification}
                       setnotificationIndex={setnotificationIndex}
                       index={index}
                       selectedNotification={notifications[notificationIndex!]}
+                      generateNotificationStatus={generateNotificationStatus}
                     />
                   );
                 })}
@@ -54,7 +81,12 @@ export default function Notifications() {
               <p>Nothing yet</p>
             )}
           </div>
-          {notification ? <NotificationDetails {...notification} /> : null}
+          {notification ? (
+            <NotificationDetails
+              {...notification}
+              generateNotificationStatus={generateNotificationStatus}
+            />
+          ) : null}
         </div>
 
         <p>

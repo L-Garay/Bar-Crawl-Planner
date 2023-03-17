@@ -6,6 +6,9 @@ import { BasicHeader } from '~/components/organisms/Headers';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 import footerStyles from '~/generatedStyles/footer.css';
 import headerStyles from '~/generatedStyles/header.css';
+import { GET_NEW_NOTIFICATIONS_COUNT } from '~/constants/graphqlConstants';
+import { useQuery } from '@apollo/client';
+import { useMemo } from 'react';
 
 export const links: LinksFunction = () => {
   return [
@@ -26,17 +29,28 @@ export const links: LinksFunction = () => {
 export const loader: LoaderFunction = async ({ request }) => {
   const { valid, user, session } = await validateUserAndSession(request);
 
-  if (valid) {
-    return { session, user, valid };
-  } else {
+  if (!valid) {
     return logout(request, true);
   }
+
+  return { session, user, valid };
 };
 
 export default function AuthLayout() {
+  const {
+    data: countData,
+    loading: countLoading,
+    error: countError,
+  } = useQuery(GET_NEW_NOTIFICATIONS_COUNT);
+
+  const count = useMemo(() => {
+    if (!countData || !countData.getNewNotificationCount) return 0;
+    return countData.getNewNotificationCount;
+  }, [countData]);
+
   return (
     <>
-      <BasicHeader />
+      <BasicHeader count={count} />
       <Outlet />
       <BasicFooter />
     </>

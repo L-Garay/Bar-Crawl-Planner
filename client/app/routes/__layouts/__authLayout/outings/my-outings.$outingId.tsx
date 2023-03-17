@@ -8,6 +8,7 @@ import {
   DELETE_OUTING,
   GENERATE_FRIEND_REQUEST,
   GET_ACCOUNT_WITH_PROFILE_DATA,
+  GET_FRIEND_REQUESTS,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   GET_SENT_FRIEND_REQUESTS,
@@ -18,7 +19,7 @@ import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
 import EditIcon from '~/components/svgs/editIcon';
 import moment from 'moment';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -126,7 +127,11 @@ export const loader: LoaderFunction = async ({ request, params }) => {
     logApolloError(error);
     throw new Response(JSON.stringify(error), { status: 500 });
   }
-  return { outing, profiles, currentUserProfile };
+  return {
+    outing,
+    profiles,
+    currentUserProfile,
+  };
 };
 
 export default function OutingDetails() {
@@ -142,6 +147,21 @@ export default function OutingDetails() {
   const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST, {
     refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
   });
+  const { error: sentRequestError, data: sentRequestData } = useQuery(
+    GET_SENT_FRIEND_REQUESTS
+  );
+  const { error: friendRequestError, data: friendRequestData } =
+    useQuery(GET_FRIEND_REQUESTS);
+
+  const sentRequests = useMemo(() => {
+    if (!sentRequestData || !sentRequestData.getSentFriendRequests) return [];
+    return sentRequestData.getSentFriendRequests;
+  }, [sentRequestData]);
+
+  const recievedRequests = useMemo(() => {
+    if (!friendRequestData || !friendRequestData.getFriendRequests) return [];
+    return friendRequestData.getFriendRequests;
+  }, [friendRequestData]);
 
   const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;
@@ -301,6 +321,8 @@ export default function OutingDetails() {
                     sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Accepted"
                     currentUser={getAccountWithProfileData.profile.id}
+                    sentRequests={sentRequests}
+                    recievedRequests={recievedRequests}
                   />
                 );
               })}
@@ -316,6 +338,8 @@ export default function OutingDetails() {
                     sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Pending"
                     currentUser={getAccountWithProfileData.profile.id}
+                    sentRequests={sentRequests}
+                    recievedRequests={recievedRequests}
                   />
                 );
               })}
@@ -331,6 +355,8 @@ export default function OutingDetails() {
                     sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Declined"
                     currentUser={getAccountWithProfileData.profile.id}
+                    sentRequests={sentRequests}
+                    recievedRequests={recievedRequests}
                   />
                 );
               })}

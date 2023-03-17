@@ -6,12 +6,11 @@ import {
   GENERATE_FRIEND_NOTIFICATION,
   GET_OUTING,
 } from '~/constants/graphqlConstants';
-import { useNotificationContext } from '~/contexts/notificationContext';
 import logApolloError from '~/utils/getApolloError';
-import type { OutingNotificationProps } from './notificationCard';
+import type { NotificationCardProps } from './notificationCard';
 
 export type NotificationDetailsProps = Omit<
-  OutingNotificationProps,
+  NotificationCardProps,
   'setnotificationIndex' | 'index' | 'selectedNotification'
 >;
 
@@ -24,8 +23,8 @@ export const NotificationDetails = ({
   notification_sender_relation,
   notification_relation,
   outing_id,
+  generateNotificationStatus,
 }: NotificationDetailsProps) => {
-  const { generateNotificationStatus } = useNotificationContext();
   const [getOuting, { error: outingError, data: outingData }] =
     useLazyQuery(GET_OUTING);
 
@@ -97,6 +96,7 @@ export const NotificationDetails = ({
   };
 
   const handleDecline = async () => {
+    // TODO add mutation to generate friend status update to 'D' for declined
     try {
       await generateNotificationStatus({
         variables: {
