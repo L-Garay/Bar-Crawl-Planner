@@ -1,11 +1,12 @@
-import type { LinksFunction, LoaderFunction } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
-import { getNewClient } from '~/apollo/getClient';
-import { FriendListItem } from '~/components/friends/friendListItem';
-import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
-import { useNotificationContext } from '~/contexts/notificationContext';
-import logApolloError from '~/utils/getApolloError';
+import type { LinksFunction } from '@remix-run/node';
+import {
+  GET_ALL_FRIENDSHIPS,
+  GET_FRIEND_REQUESTS,
+  GET_SENT_FRIEND_REQUESTS,
+} from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
+import { useQuery } from '@apollo/client';
+import { useMemo } from 'react';
 
 export const links: LinksFunction = () => {
   return [
@@ -17,29 +18,39 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const client = await getNewClient(request);
-  let friendships: any;
-  try {
-    friendships = await client.query({
-      query: GET_ALL_FRIENDSHIPS,
-    });
-  } catch (error) {
-    logApolloError(error);
-    throw new Response(JSON.stringify(error), { status: 500 });
-  }
-
-  return { friendships };
-};
-
 export default function FriendsIndex() {
-  const { friendships } = useLoaderData();
-  const { sentFriendRequests, receivedFriendRequests } =
-    useNotificationContext();
-  const { getAllFriendships } = friendships.data;
-  console.log('all friends', getAllFriendships); // these are friendships, not users
-  console.log('sent requests', sentFriendRequests); // these are notifications, not friendships or users
-  console.log('recieved requests', receivedFriendRequests); // these are notifications, not friendships or users
+  const { data: friendsData, error: friendsError } =
+    useQuery(GET_ALL_FRIENDSHIPS);
+  const { data: sentData, error: sentError } = useQuery(
+    GET_SENT_FRIEND_REQUESTS
+  );
+
+  const { data: recievedData, error: recievedError } =
+    useQuery(GET_FRIEND_REQUESTS);
+
+  const friends = useMemo(() => {
+    // NOTE these are friendships, not profiles or notifications
+    if (!friendsData || !friendsData.getAllFriendships) return [];
+    return friendsData.getAllFriendships;
+  }, [friendsData]);
+
+  const sentRequests = useMemo(() => {
+    // NOTE these are notifications, not friendships
+    if (!sentData || !sentData.getSentFriendRequests) return [];
+    return sentData.getSentFriendRequests;
+  }, [sentData]);
+
+  const recievedRequests = useMemo(() => {
+    // NOTE these are notifications, not friendships
+    if (!recievedData || !recievedData.getFriendRequests) return [];
+    return recievedData.getFriendRequests;
+  }, [recievedData]);
+
+  console.log('all friends', friends); // these are friendships, not users
+  console.log('sent requests', sentRequests); // these are notifications, not friendships or users
+  console.log('recieved requests', recievedRequests); // these are notifications, not friendships or users
+
+  // TODO
 
   // TODO I'm not sure how much detail and what kind I want to display in these lists
   // but if we need profile information, we can easily get it from the friendship relations
@@ -60,6 +71,14 @@ export default function FriendsIndex() {
             <div>
               <ul>
                 {/* we need to get the friend's profile data to display here */}
+                {recievedRequests.map((request: any) => {
+                  return (
+                    <li key={request.id}>
+                      From: {request.sender_profile_id} created at:{' '}
+                      {request.created_at}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           </div>
@@ -68,6 +87,23 @@ export default function FriendsIndex() {
             <div>
               <ul>
                 {/* we need to get the friend's profile data to display here */}
+                {friends.length ? (
+                  <>
+                    {friends.map((friend: any) => {
+                      return (
+                        <li key={friend.id}>
+                          Friend: {friend.id} created at:{' '}
+                          {
+                            friend.frienshipStatus_friendship_relation[0]
+                              .created_at
+                          }{' '}
+                        </li>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <li>No friends</li>
+                )}
               </ul>
             </div>
           </div>
@@ -76,6 +112,20 @@ export default function FriendsIndex() {
             <div>
               <ul>
                 {/* we need to get the friend's profile data to display here */}
+                {sentRequests.length ? (
+                  <>
+                    {sentRequests.map((request: any) => {
+                      return (
+                        <li key={request.id}>
+                          To: {request.addressee_profile_id} created at:{' '}
+                          {request.created_at}
+                        </li>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <li>No pending requests</li>
+                )}
               </ul>
             </div>
           </div>

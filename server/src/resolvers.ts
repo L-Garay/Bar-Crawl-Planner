@@ -357,6 +357,8 @@ const resolvers: Resolvers = {
           },
         });
       } else {
+        console.log(requests.data, 'notifications for user:', id);
+
         return requests.data;
       }
     },

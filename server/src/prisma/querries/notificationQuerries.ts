@@ -49,8 +49,19 @@ export async function GetSentFriendRequests(
   try {
     const notifications = await prismaClient.notification.findMany({
       where: {
-        sender_profile_id: user_id,
-        type_code: 'FR',
+        AND: [
+          {
+            sender_profile_id: user_id,
+            type_code: 'FR',
+          },
+          {
+            notification_relation: {
+              none: {
+                status_code: 'A',
+              },
+            },
+          },
+        ],
       },
       include: {
         notification_relation: {
@@ -76,7 +87,7 @@ export async function GetSentFriendRequests(
         },
       },
     });
-    console.log('notifications: ', notifications);
+    console.log('notifications for user: ', user_id, notifications);
 
     return { status: 'Success', data: notifications, error: null };
   } catch (error) {
@@ -88,8 +99,12 @@ export async function GetFriendRequests(user_id: number): Promise<PrismaData> {
   try {
     const notifications = await prismaClient.notification.findMany({
       where: {
-        addressee_profile_id: user_id,
-        type_code: 'FR',
+        AND: [
+          {
+            addressee_profile_id: user_id,
+            type_code: 'FR',
+          },
+        ],
       },
       include: {
         notification_relation: {
@@ -115,7 +130,6 @@ export async function GetFriendRequests(user_id: number): Promise<PrismaData> {
         },
       },
     });
-    console.log('notifications: ', notifications);
 
     return { status: 'Success', data: notifications, error: null };
   } catch (error) {
