@@ -17,6 +17,7 @@ import {
 import { testGoogleJob } from './scheduledJobs/testGoogleMaps';
 import { GetProfileByAccountId } from './prisma/querries/profileQuerries';
 import { DisconnectUserWithOuting } from './prisma/mutations/outingMutations';
+import useAuth from './auth/authMiddleware';
 
 const prismaClient = new PrismaClient({
   log: ['warn', 'error'],
@@ -61,8 +62,31 @@ async function StartServer() {
     res.status(200).send('Healthy!');
   });
 
+  app.post(
+    '/disconnect-user',
+    bodyParser.text(),
+    // TODO testing config
+    cors({ origin: 'http://localhost:3000', credentials: false }), // not sure how I feel about this, will likely need to change this after looking into cors more
+    // but for right now in testing, this works
+    async (req, res) => {
+      const keyValArray = req.body.split('&');
+      const valArray = keyValArray.map(
+        (keyVal: string) => keyVal.split('=')[1]
+      );
+
+      const response = await DisconnectUserWithOuting(
+        Number(valArray[0]),
+        Number(valArray[1])
+      );
+      if (response.error) {
+        return res.status(500).send(response.error);
+      }
+      return res.status(200).send(response.data);
+    }
+  );
+
   // this route is used as a 'background' check so to speak
-  app.get('/validate', async (req, res) => {
+  app.get('/validate', async (req, res, next) => {
     const decodedToken = await runTokenValidation(req);
 
     // Even though these are errors, we don't want to treat them like actual errors here
@@ -100,26 +124,23 @@ async function StartServer() {
     return res.status(200).send('Success');
   });
 
-  app.post(
-    '/disconnect-user',
-    bodyParser.text(),
-    // TODO testing config
-    cors({ origin: 'http://localhost:3000', credentials: false }), // not sure how I feel about this, will likely need to change this after looking into cors more
-    // but for right now in testing, this works
+  app.get(
+    '/notification-machine',
+    cors(corsOptions),
+    bodyParser.json(),
     async (req, res) => {
-      const keyValArray = req.body.split('&');
-      const valArray = keyValArray.map(
-        (keyVal: string) => keyVal.split('=')[1]
-      );
-
-      const response = await DisconnectUserWithOuting(
-        Number(valArray[0]),
-        Number(valArray[1])
-      );
-      if (response.error) {
-        return res.status(500).send(response.error);
+      const decodedToken = await runTokenValidation(req);
+      const badToken =
+        decodedToken.error ||
+        typeof decodedToken.decoded === 'string' ||
+        typeof decodedToken.decoded === 'undefined';
+      if (badToken) {
+        return res.status(500).send('no auth');
       }
-      return res.status(200).send(response.data);
+      console.log(
+        'this means we passed auth on the notification machine route'
+      );
+      return res.status(200).send('Success');
     }
   );
 
