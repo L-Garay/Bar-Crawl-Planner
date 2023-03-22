@@ -1,6 +1,12 @@
 import prismaClient from '../..';
 import { PrismaData, PrismaError } from '../../types/sharedTypes';
 import dotenv from 'dotenv';
+import { NotificationMachine } from '../../stateMachines/index';
+import { interpret } from 'xstate';
+import {
+  Notification,
+  NotificationStatus,
+} from '../../types/generated/graphqlTypes';
 
 dotenv.config();
 
@@ -136,6 +142,27 @@ export async function GenerateNotificationStatus(
       },
     });
     return { status: 'Success', data: status, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function TestMachine(
+  notification_id: number,
+  notificationStatus_id: number
+): Promise<PrismaData> {
+  try {
+    const context = {
+      notification_id,
+      notificationStatus_id,
+    };
+    const dynmaicMachine = NotificationMachine.withContext(context);
+    const notificationService = interpret(dynmaicMachine).start('opened');
+    console.log('BEFORE TRANSITION', notificationService.getSnapshot().value);
+    notificationService.onTransition((state) => console.log(state.value));
+    notificationService.send('ACCEPT');
+    console.log('AFTER TRANSITION', notificationService.getSnapshot().value);
+    return { status: 'Success', data: 'Success', error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }

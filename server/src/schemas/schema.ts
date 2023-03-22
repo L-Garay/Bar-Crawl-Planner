@@ -126,6 +126,7 @@ const typeDefs = `#graphql
   }
 
   type NotificationStatus {
+    id: Int
     notification_id: Int
     modifier_profile_id: Int
     notification_created_at: String
@@ -154,6 +155,29 @@ const typeDefs = `#graphql
     getSentFriendRequests: [Notification]
     getNewNotificationCount: Int
     getFriendshipStatus(target_id: Int!): FriendshipStatus
+  }
+
+  input NofiticationInput {
+    id: Int
+    sender_profile_id: Int
+    addressee_profile_id: Int
+    created_at: String
+    type_code: String
+    outing_id: Int
+  }
+
+  input NotificationStatusInput {
+    notification_id: Int
+    modifier_profile_id: Int
+    notification_created_at: String
+    modified_at: String
+    status_code: String
+    type_code: String
+  }
+
+  input NotificationMachineInput {
+    notification: NofiticationInput
+    notificationStatus: NotificationStatusInput
   }
 
   type Mutation {
@@ -189,6 +213,7 @@ const typeDefs = `#graphql
       created_at: String!
       id: Int!
     ): NotificationStatus
+    testMachine(notification_id: Int!, notificationStatus_id: Int!): String
   }
 `;
 

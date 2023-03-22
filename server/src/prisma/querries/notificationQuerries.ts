@@ -12,6 +12,8 @@ export async function GetAllNotifications(
       include: {
         notification_relation: {
           select: {
+            id: true,
+            notification_created_at: true,
             status_code: true,
             modified_at: true,
             modifier_profile_id: true,

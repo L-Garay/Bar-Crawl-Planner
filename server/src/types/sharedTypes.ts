@@ -111,3 +111,62 @@ export type OutingInviteEmail = {
     outro: string;
   };
 };
+
+export type Outing = {
+  id: number;
+  name: string;
+  accepted_profiles: Profile[];
+  pending_profiles: Profile[];
+  declined_profiles: Profile[];
+  creator_profile_id: string;
+  created_at: string;
+  start_date_and_time: string;
+  place_ids: string[];
+};
+
+export type Account = {
+  id: number;
+  email: string;
+  email_verified: boolean;
+  created_at: string;
+  profile: Profile;
+  deactivated: boolean;
+  deactivated_at: string;
+  phone_number: string;
+};
+
+export type Profile = {
+  id: number;
+  name: string;
+  profile_img: string;
+  updated_at: string;
+  account: Account;
+  account_id: number;
+  accepted_outings: Outing[];
+  pending_outings: Outing[];
+  declined_outings: Outing[];
+  social_pin: string;
+  friends: Profile[];
+  friendsRelation: Profile[];
+};
+
+export type Notification = {
+  id: number;
+  sender_profile_id: number;
+  addressee_profile_id: number;
+  created_at: string;
+  type_code: string;
+  notification_relation: NotificationStatus[];
+  notification_addressee_relation: Profile;
+  notification_sender_relation: Profile;
+  outing_id: number;
+};
+
+export type NotificationStatus = {
+  notification_id: number;
+  modifier_profile_id: number;
+  notification_created_at: string;
+  modified_at: string;
+  status_code: string;
+  type_code: string;
+};

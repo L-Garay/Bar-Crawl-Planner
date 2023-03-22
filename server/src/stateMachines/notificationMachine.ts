@@ -1,4 +1,8 @@
-import { createMachine } from 'xstate';
+import { createMachine, interpret } from 'xstate';
+import {
+  Notification,
+  NotificationStatus,
+} from '../types/generated/graphqlTypes';
 
 // can start the machine when the user hits the /authenticate route (if they are properly authenticated)
 // at that point we know we they are a registered user who can start using the machine
@@ -11,44 +15,19 @@ import { createMachine } from 'xstate';
 // then at that point, we will be able to access the notitication and status in the functions used for the guarded transitions
 // the guards will be used to determine the current state of the notification and then determine what the next state should be
 
-// which means that the intitial state of the machine should be something like 'unkown' or 'undefined' or 'uninitialized' or something that means that 'there isn't a notification selected yet'
-// then within that state, we will have a transition for each possible state that the already created notification could be in
-// FOR EXAMPLE: if userA sends userB a friend request, assume it was already moved from 'unkown' to 'created' to 'sent'
-// now suppose 5 days have passed since then, and userB is just now opening the app and seeing the notification
-// userB's state machine will be started once they log in
-// once they navigate to the notifications page and select the Friend request notification to see the detials and respond, AT THIS POINT we need to set that notification and it's corresponding status in the machine context
-// AT THIS POINT, since we know that the notification is in the 'sent' state and not opened, we can transition to the 'opened' state
-// which means that from the 'unkown' state, we will have a transition to the 'sent' state
-// from there once the user accepts, declines or deletes the notification, we will transition to the 'accepted', 'declined' or 'deleted' state
+// However, I just saw that you can start the machine in a specific state by passing in the state to the interpretor's .start() method
+// this will allow us to pick up a notification that may already be in an intermediate state, lilke opened or accepted, without having to have an extra 'unkown' state with logic to determine what state the notification is in and where to go next
 
 const notificationMachine = createMachine(
   {
     id: 'notifications',
-    initial: 'unkown',
+    initial: 'created',
+    predictableActionArguments: true,
     context: {
-      notification: {},
-      notificationStatus: {},
+      notification_id: 0,
+      notificationStatus_id: 0,
     },
     states: {
-      unkown: {
-        on: {
-          IS_SENT: {
-            target: 'sent',
-          },
-          IS_OPENED: {
-            target: 'opened',
-          },
-          IS_ACCEPTED: {
-            target: 'accepted',
-          },
-          IS_DECLINED: {
-            target: 'declined',
-          },
-          IS_DELETED: {
-            target: 'deleted',
-          },
-        },
-      },
       created: {
         on: {
           SEND: {
@@ -117,13 +96,18 @@ const notificationMachine = createMachine(
     actions: {
       generateNotification: (context, event) => {
         // use context and event to generate either outingNotification or friendNotification and respective status
+        console.log('GENERATE NOTIFICATION', context, event);
       },
       deleteNotification: (context, event) => {
         // use context and event to update notification status to deleted
+        console.log('DELETE NOFITICATION', context, event);
       },
       generateNotificationStatus: (context, event) => {
         // use context and event to update notification status
+        console.log('GENERATE NOTIFICATION STATUS', context, event);
       },
     },
   }
 );
+
+export default notificationMachine;

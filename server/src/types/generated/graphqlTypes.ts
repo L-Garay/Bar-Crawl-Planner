@@ -96,6 +96,7 @@ export type Mutation = {
   generateNotificationStatus?: Maybe<NotificationStatus>;
   generateOutingNotification?: Maybe<Array<Maybe<Notification>>>;
   sendOutingInvites?: Maybe<Scalars['String']>;
+  testMachine?: Maybe<Scalars['String']>;
   updateOuting?: Maybe<Outing>;
   updateUserAccount?: Maybe<Account>;
 };
@@ -204,6 +205,12 @@ export type MutationSendOutingInvitesArgs = {
 };
 
 
+export type MutationTestMachineArgs = {
+  notificationStatus_id: Scalars['Int'];
+  notification_id: Scalars['Int'];
+};
+
+
 export type MutationUpdateOutingArgs = {
   id: Scalars['Int'];
   name?: InputMaybe<Scalars['String']>;
@@ -214,6 +221,15 @@ export type MutationUpdateOutingArgs = {
 export type MutationUpdateUserAccountArgs = {
   email?: InputMaybe<Scalars['String']>;
   phone_number?: InputMaybe<Scalars['String']>;
+};
+
+export type NofiticationInput = {
+  addressee_profile_id?: InputMaybe<Scalars['Int']>;
+  created_at?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['Int']>;
+  outing_id?: InputMaybe<Scalars['Int']>;
+  sender_profile_id?: InputMaybe<Scalars['Int']>;
+  type_code?: InputMaybe<Scalars['String']>;
 };
 
 export type Notification = {
@@ -229,14 +245,27 @@ export type Notification = {
   type_code?: Maybe<Scalars['String']>;
 };
 
+export type NotificationMachineInput = {
+  notification?: InputMaybe<NofiticationInput>;
+  notificationStatus?: InputMaybe<NotificationStatusInput>;
+};
+
 export type NotificationStatus = {
   __typename?: 'NotificationStatus';
+  id?: Maybe<Scalars['Int']>;
   modified_at?: Maybe<Scalars['String']>;
   modifier_profile_id?: Maybe<Scalars['Int']>;
   notification_created_at?: Maybe<Scalars['String']>;
   notification_id?: Maybe<Scalars['Int']>;
   status_code?: Maybe<Scalars['String']>;
   type_code?: Maybe<Scalars['String']>;
+};
+
+export type NotificationStatusInput = {
+  modified_at?: InputMaybe<Scalars['String']>;
+  modifier_profile_id?: InputMaybe<Scalars['Int']>;
+  notification_id?: InputMaybe<Scalars['Int']>;
+  status_code?: InputMaybe<Scalars['String']>;
 };
 
 export type Outing = {
@@ -404,8 +433,11 @@ export type ResolversTypes = ResolversObject<{
   Int: ResolverTypeWrapper<Scalars['Int']>;
   LocationDetails: ResolverTypeWrapper<LocationDetails>;
   Mutation: ResolverTypeWrapper<{}>;
+  NofiticationInput: NofiticationInput;
   Notification: ResolverTypeWrapper<Notification>;
+  NotificationMachineInput: NotificationMachineInput;
   NotificationStatus: ResolverTypeWrapper<NotificationStatus>;
+  NotificationStatusInput: NotificationStatusInput;
   Outing: ResolverTypeWrapper<Outing>;
   OutingProfileStates: ResolverTypeWrapper<OutingProfileStates>;
   Profile: ResolverTypeWrapper<Profile>;
@@ -423,8 +455,11 @@ export type ResolversParentTypes = ResolversObject<{
   Int: Scalars['Int'];
   LocationDetails: LocationDetails;
   Mutation: {};
+  NofiticationInput: NofiticationInput;
   Notification: Notification;
+  NotificationMachineInput: NotificationMachineInput;
   NotificationStatus: NotificationStatus;
+  NotificationStatusInput: NotificationStatusInput;
   Outing: Outing;
   OutingProfileStates: OutingProfileStates;
   Profile: Profile;
@@ -513,6 +548,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   generateNotificationStatus?: Resolver<Maybe<ResolversTypes['NotificationStatus']>, ParentType, ContextType, RequireFields<MutationGenerateNotificationStatusArgs, 'created_at' | 'id' | 'status_code' | 'type_code'>>;
   generateOutingNotification?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType, RequireFields<MutationGenerateOutingNotificationArgs, 'outing_id'>>;
   sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
+  testMachine?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationTestMachineArgs, 'notificationStatus_id' | 'notification_id'>>;
   updateOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationUpdateOutingArgs, 'id'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
 }>;
@@ -531,6 +567,7 @@ export type NotificationResolvers<ContextType = any, ParentType extends Resolver
 }>;
 
 export type NotificationStatusResolvers<ContextType = any, ParentType extends ResolversParentTypes['NotificationStatus'] = ResolversParentTypes['NotificationStatus']> = ResolversObject<{
+  id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   modified_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   modifier_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   notification_created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;

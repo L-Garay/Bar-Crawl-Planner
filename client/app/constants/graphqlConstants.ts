@@ -294,9 +294,11 @@ export const GET_NOTIFICATIONS = gql`
       type_code
       outing_id
       notification_relation {
+        id
         status_code
         notification_created_at
         modifier_profile_id
+        modified_at
       }
       notification_addressee_relation {
         id
@@ -425,5 +427,14 @@ export const GENERATE_NOTIFICATION_STATUS = gql`
       notification_created_at
       modified_at
     }
+  }
+`;
+
+export const TEST_MACHINE = gql`
+  mutation testMachine($notification_id: Int!, $notificationStatus_id: Int!) {
+    testMachine(
+      notification_id: $notification_id
+      notificationStatus_id: $notificationStatus_id
+    )
   }
 `;

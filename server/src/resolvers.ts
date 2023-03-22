@@ -47,6 +47,7 @@ import {
   GenerateFriendRequest,
   GenerateNotificationStatus,
   GenerateOutingNotification,
+  TestMachine,
 } from './prisma/mutations/notificationMutations';
 import {
   GetAllNotifications,
@@ -919,6 +920,32 @@ const resolvers: Resolvers = {
         });
       } else {
         return notificationStatus.data;
+      }
+    },
+    testMachine: async (parent, args, context, info) => {
+      const { authError } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { notification_id, notificationStatus_id } = args;
+
+      const notificationResponse = await TestMachine(
+        notification_id,
+        notificationStatus_id
+      );
+      if (notificationResponse.status === 'Failure') {
+        throw new GraphQLError('Cannot generate friend notification', {
+          extensions: {
+            code: notificationResponse.error?.name,
+            message: notificationResponse.error?.message,
+            prismaMeta: notificationResponse.error?.meta,
+            prismaErrorCode: notificationResponse.error?.errorCode,
+          },
+        });
+      } else {
+        return notificationResponse.data;
       }
     },
   },
