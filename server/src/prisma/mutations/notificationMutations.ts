@@ -3,10 +3,6 @@ import { PrismaData, PrismaError } from '../../types/sharedTypes';
 import dotenv from 'dotenv';
 import { NotificationMachine } from '../../stateMachines/index';
 import { interpret } from 'xstate';
-import {
-  Notification,
-  NotificationStatus,
-} from '../../types/generated/graphqlTypes';
 
 dotenv.config();
 
@@ -32,6 +28,7 @@ export async function GenerateOutingNotification(
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
+
   // then create the notification status
   try {
     await prismaClient.notificationStatus.create({
@@ -48,6 +45,26 @@ export async function GenerateOutingNotification(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
   return { status: 'Success', data: notification, error: null };
+}
+
+export async function GenerateOutingNotificationWithMachine(
+  addressee_id: number,
+  sender_profile_id: number,
+  outing_id: number
+): Promise<PrismaData> {
+  try {
+    const eventData = {
+      sender_profile_id,
+      addressee_profile_id: addressee_id,
+      outing_id,
+      type_code: 'OJ',
+    };
+    const notificationService = interpret(NotificationMachine).start();
+    const state = notificationService.send('SEND', eventData);
+    return { status: 'Success', data: state.context.notification, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
 }
 
 export async function GenerateFriendRequest(
@@ -155,6 +172,7 @@ export async function TestMachine(
     const context = {
       notification_id,
       notificationStatus_id,
+      notification: {},
     };
     const dynmaicMachine = NotificationMachine.withContext(context);
     const notificationService = interpret(dynmaicMachine).start('opened');

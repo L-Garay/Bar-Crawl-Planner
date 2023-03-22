@@ -1,8 +1,5 @@
-import { createMachine, interpret } from 'xstate';
-import {
-  Notification,
-  NotificationStatus,
-} from '../types/generated/graphqlTypes';
+import { assign, createMachine, interpret } from 'xstate';
+import prismaClient from '..';
 
 // can start the machine when the user hits the /authenticate route (if they are properly authenticated)
 // at that point we know we they are a registered user who can start using the machine
@@ -26,13 +23,14 @@ const notificationMachine = createMachine(
     context: {
       notification_id: 0,
       notificationStatus_id: 0,
+      notification: {} as any,
     },
     states: {
       created: {
         on: {
           SEND: {
             target: 'sent',
-            actions: 'generateNotificationStatus',
+            actions: 'generateNotification',
           }, // transition to sent state
         },
       },
@@ -54,7 +52,7 @@ const notificationMachine = createMachine(
         on: {
           ACCEPT: {
             target: 'accepted',
-            actions: ['generateNotification', 'generateNotificationStatus'],
+            actions: ['generateNotificationStatus'],
           }, // transition to accepted state
           DECLINE: {
             target: 'declined',
@@ -94,9 +92,38 @@ const notificationMachine = createMachine(
   },
   {
     actions: {
-      generateNotification: (context, event) => {
+      generateNotification: async (context, event) => {
         // use context and event to generate either outingNotification or friendNotification and respective status
         console.log('GENERATE NOTIFICATION', context, event);
+        const created_at = new Date().toISOString();
+        const {
+          sender_profile_id,
+          addressee_profile_id,
+          type_code,
+          outing_id,
+        } = event;
+        const notification = await prismaClient.notification.create({
+          data: {
+            sender_profile_id,
+            addressee_profile_id,
+            type_code,
+            created_at,
+            outing_id,
+            notification_relation: {
+              create: {
+                modifier_profile_id: sender_profile_id,
+                status_code: 'S', // since we KNOW the notificaiton is being transition to the 'Sent' state
+                type_code,
+                notification_created_at: created_at,
+                modified_at: created_at,
+              },
+            },
+          },
+        });
+        assign({
+          notification_id: notification.id,
+          notification: notification,
+        });
       },
       deleteNotification: (context, event) => {
         // use context and event to update notification status to deleted

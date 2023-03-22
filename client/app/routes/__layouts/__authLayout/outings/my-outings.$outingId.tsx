@@ -143,7 +143,7 @@ export default function OutingDetails() {
 
   const transition = useTransition();
 
-  // TODO change this to send a friend request notification
+  // NOTE this is what we'd replace with a mutation to trigger a transition in the notification state machine
   const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST, {
     refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
   });

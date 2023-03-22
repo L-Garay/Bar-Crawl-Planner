@@ -47,6 +47,7 @@ import {
   GenerateFriendRequest,
   GenerateNotificationStatus,
   GenerateOutingNotification,
+  GenerateOutingNotificationWithMachine,
   TestMachine,
 } from './prisma/mutations/notificationMutations';
 import {
@@ -822,7 +823,7 @@ const resolvers: Resolvers = {
           console.log(profile.id, sender_profile.data.id);
 
           if (profile.id !== sender_profile.data.id) {
-            return await GenerateOutingNotification(
+            return await GenerateOutingNotificationWithMachine(
               profile.id, // recipient_profile_id
               sender_profile.data.id,
               outing_id
