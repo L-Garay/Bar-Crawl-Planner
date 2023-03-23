@@ -24,12 +24,6 @@ export const links: LinksFunction = () => {
 export default function Notifications() {
   const [notificationIndex, setnotificationIndex] = useState<number>();
 
-  const {
-    data: notificationsData,
-    loading: notificationsLoading,
-    error: notificationsError,
-  } = useQuery(GET_NOTIFICATIONS);
-
   const [openNotification, { error: statusError }] = useMutation(
     OPEN_NOTIFICATION,
     {
@@ -40,6 +34,12 @@ export default function Notifications() {
       awaitRefetchQueries: true,
     }
   );
+
+  const {
+    data: notificationsData,
+    loading: notificationsLoading,
+    error: notificationsError,
+  } = useQuery(GET_NOTIFICATIONS);
 
   const notifications = useMemo(() => {
     if (!notificationsData || !notificationsData.getAllNotifications) return [];
@@ -82,12 +82,7 @@ export default function Notifications() {
               <p>Nothing yet</p>
             )}
           </div>
-          {notification ? (
-            <NotificationDetails
-              {...notification}
-              // generateNotificationStatus={generateNotificationStatus}
-            />
-          ) : null}
+          {notification ? <NotificationDetails {...notification} /> : null}
         </div>
 
         <p>

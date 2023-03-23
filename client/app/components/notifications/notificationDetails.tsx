@@ -3,7 +3,10 @@ import moment from 'moment';
 import { useEffect, useMemo } from 'react';
 import {
   ADD_FRIEND,
+  DECLINE_FRIEND_REQUEST,
   GENERATE_FRIEND_NOTIFICATION,
+  GET_NEW_NOTIFICATIONS_COUNT,
+  GET_NOTIFICATIONS,
   GET_OUTING,
 } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
@@ -32,6 +35,17 @@ NotificationDetailsProps) => {
   const [generateFriendNotification, { error: notificationError }] =
     useMutation(GENERATE_FRIEND_NOTIFICATION);
 
+  const [declineFriendRequest, { error: declineError }] = useMutation(
+    DECLINE_FRIEND_REQUEST,
+    {
+      refetchQueries: [
+        { query: GET_NOTIFICATIONS },
+        { query: GET_NEW_NOTIFICATIONS_COUNT },
+      ],
+      awaitRefetchQueries: true,
+    }
+  );
+
   useEffect(() => {
     if (outing_id) {
       getOuting({
@@ -55,7 +69,7 @@ NotificationDetailsProps) => {
 
   const { name } = notification_sender_relation;
   const { id: addressee_id } = notification_addressee_relation;
-  const { status_code, created_at: notification_created_at } =
+  const { status_code, notification_created_at } =
     notification_relation[notification_relation.length - 1];
   const title = useMemo(() => {
     if (name && outingData) {
@@ -96,16 +110,13 @@ NotificationDetailsProps) => {
   };
 
   const handleDecline = async () => {
-    // TODO add mutation to generate friend status update to 'D' for declined
     try {
-      // await generateNotificationStatus({
-      //   variables: {
-      //     id: Number(id),
-      //     status_code: 'D',
-      //     type_code: 'FR',
-      //     created_at: new Date().toISOString(),
-      //   },
-      // });
+      await declineFriendRequest({
+        variables: {
+          notification_id: Number(id),
+          notification_created_at,
+        },
+      });
     } catch (error) {
       logApolloError(error);
     }

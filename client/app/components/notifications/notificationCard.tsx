@@ -1,13 +1,19 @@
-import type {
+import {
   ApolloCache,
   DefaultContext,
   MutationFunctionOptions,
   OperationVariables,
+  useMutation,
 } from '@apollo/client';
 import { useLazyQuery } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
-import { GET_OUTING } from '~/constants/graphqlConstants';
+import {
+  GET_NEW_NOTIFICATIONS_COUNT,
+  GET_NOTIFICATIONS,
+  GET_OUTING,
+  OPEN_NOTIFICATION,
+} from '~/constants/graphqlConstants';
 import { ClosedEnvelope, OpenEnvelope } from '../svgs/envelopes';
 
 export type NotificationCardProps = {
@@ -26,7 +32,7 @@ export type NotificationCardProps = {
   notification_relation: [
     {
       status_code: string;
-      created_at: string;
+      notification_created_at: string;
       id: number;
     }
   ];
@@ -35,16 +41,16 @@ export type NotificationCardProps = {
   setnotificationIndex: (index: number) => void;
   index: number;
   selectedNotification: any;
-  openNotification: (
-    options?:
-      | MutationFunctionOptions<
-          any,
-          OperationVariables,
-          DefaultContext,
-          ApolloCache<any>
-        >
-      | undefined
-  ) => Promise<any>;
+  // openNotification: (
+  //   options?:
+  //     | MutationFunctionOptions<
+  //         any,
+  //         OperationVariables,
+  //         DefaultContext,
+  //         ApolloCache<any>
+  //       >
+  //     | undefined
+  // ) => Promise<any>;
 };
 
 export const NotificationCard = ({
@@ -59,10 +65,20 @@ export const NotificationCard = ({
   index,
   selectedNotification,
   outing_id,
-  openNotification,
 }: NotificationCardProps) => {
   const [getOuting, { error: outingError, data: outingData }] =
     useLazyQuery(GET_OUTING);
+
+  const [openNotification, { error: statusError }] = useMutation(
+    OPEN_NOTIFICATION,
+    {
+      refetchQueries: [
+        { query: GET_NOTIFICATIONS },
+        { query: GET_NEW_NOTIFICATIONS_COUNT },
+      ],
+      awaitRefetchQueries: true,
+    }
+  );
 
   useEffect(() => {
     if (outing_id) {
@@ -138,7 +154,7 @@ export const NotificationCard = ({
           openNotification({
             variables: {
               type_code,
-              created_at,
+              notification_created_at: created_at,
               id: Number(id),
             },
           });

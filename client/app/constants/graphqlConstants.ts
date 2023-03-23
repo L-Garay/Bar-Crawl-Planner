@@ -433,10 +433,14 @@ export const GENERATE_NOTIFICATION_STATUS = gql`
 export const OPEN_NOTIFICATION = gql`
   mutation openNotification(
     $type_code: String!
-    $created_at: String!
+    $notification_created_at: String!
     $id: Int!
   ) {
-    openNotification(type_code: $type_code, created_at: $created_at, id: $id) {
+    openNotification(
+      type_code: $type_code
+      notification_created_at: $notification_created_at
+      id: $id
+    ) {
       modifier_profile_id
       status_code
       type_code
@@ -446,11 +450,20 @@ export const OPEN_NOTIFICATION = gql`
   }
 `;
 
-export const TEST_MACHINE = gql`
-  mutation testMachine($notification_id: Int!, $notificationStatus_id: Int!) {
-    testMachine(
+export const DECLINE_FRIEND_REQUEST = gql`
+  mutation declineFriendRequest(
+    $notification_id: Int!
+    $notification_created_at: String!
+  ) {
+    declineFriendRequest(
       notification_id: $notification_id
-      notificationStatus_id: $notificationStatus_id
-    )
+      notification_created_at: $notification_created_at
+    ) {
+      modifier_profile_id
+      status_code
+      type_code
+      notification_created_at
+      modified_at
+    }
   }
 `;
