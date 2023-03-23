@@ -4,11 +4,10 @@ import type {
   MutationFunctionOptions,
   OperationVariables,
 } from '@apollo/client';
-import { useMutation } from '@apollo/client';
 import { useLazyQuery } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
-import { GET_OUTING, TEST_MACHINE } from '~/constants/graphqlConstants';
+import { GET_OUTING } from '~/constants/graphqlConstants';
 import { ClosedEnvelope, OpenEnvelope } from '../svgs/envelopes';
 
 export type NotificationCardProps = {
@@ -36,7 +35,7 @@ export type NotificationCardProps = {
   setnotificationIndex: (index: number) => void;
   index: number;
   selectedNotification: any;
-  generateNotificationStatus: (
+  openNotification: (
     options?:
       | MutationFunctionOptions<
           any,
@@ -60,11 +59,10 @@ export const NotificationCard = ({
   index,
   selectedNotification,
   outing_id,
-  generateNotificationStatus,
+  openNotification,
 }: NotificationCardProps) => {
   const [getOuting, { error: outingError, data: outingData }] =
     useLazyQuery(GET_OUTING);
-  const [testMachine, { error: testMachineError }] = useMutation(TEST_MACHINE);
 
   useEffect(() => {
     if (outing_id) {
@@ -136,20 +134,10 @@ export const NotificationCard = ({
       className="notification-card-container"
       onClick={() => {
         setnotificationIndex(index);
-        testMachine({
-          // NOTE we'll likely want to add more contextual data to the gql mutations
-          // that way the server will have enough information to properly move the notification through the nofitication state machine
-          // i.e. we'll likely want to
-          variables: {
-            notification_id: id,
-            notificationStatus_id: status_id,
-          },
-        });
         if (status_code === 'S') {
-          generateNotificationStatus({
+          openNotification({
             variables: {
               type_code,
-              status_code: 'O',
               created_at,
               id: Number(id),
             },

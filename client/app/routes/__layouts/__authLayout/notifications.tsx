@@ -7,6 +7,7 @@ import {
   GENERATE_NOTIFICATION_STATUS,
   GET_NEW_NOTIFICATIONS_COUNT,
   GET_NOTIFICATIONS,
+  OPEN_NOTIFICATION,
 } from '~/constants/graphqlConstants';
 import { useMutation, useQuery } from '@apollo/client';
 
@@ -29,8 +30,8 @@ export default function Notifications() {
     error: notificationsError,
   } = useQuery(GET_NOTIFICATIONS);
 
-  const [generateNotificationStatus, { error: statusError }] = useMutation(
-    GENERATE_NOTIFICATION_STATUS,
+  const [openNotification, { error: statusError }] = useMutation(
+    OPEN_NOTIFICATION,
     {
       refetchQueries: [
         { query: GET_NOTIFICATIONS },
@@ -72,7 +73,7 @@ export default function Notifications() {
                       setnotificationIndex={setnotificationIndex}
                       index={index}
                       selectedNotification={notifications[notificationIndex!]}
-                      generateNotificationStatus={generateNotificationStatus}
+                      openNotification={openNotification}
                     />
                   );
                 })}
@@ -84,7 +85,7 @@ export default function Notifications() {
           {notification ? (
             <NotificationDetails
               {...notification}
-              generateNotificationStatus={generateNotificationStatus}
+              // generateNotificationStatus={generateNotificationStatus}
             />
           ) : null}
         </div>

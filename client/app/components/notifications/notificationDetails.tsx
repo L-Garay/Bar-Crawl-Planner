@@ -23,8 +23,8 @@ export const NotificationDetails = ({
   notification_sender_relation,
   notification_relation,
   outing_id,
-  generateNotificationStatus,
-}: NotificationDetailsProps) => {
+}: // generateNotificationStatus,
+NotificationDetailsProps) => {
   const [getOuting, { error: outingError, data: outingData }] =
     useLazyQuery(GET_OUTING);
 
@@ -75,14 +75,14 @@ export const NotificationDetails = ({
           addressee_profile_id: Number(addressee_id),
         },
       });
-      await generateNotificationStatus({
-        variables: {
-          id: Number(id),
-          status_code: 'A',
-          type_code: 'FR',
-          created_at: new Date().toISOString(),
-        },
-      });
+      // await generateNotificationStatus({
+      //   variables: {
+      //     id: Number(id),
+      //     status_code: 'A',
+      //     type_code: 'FR',
+      //     created_at: new Date().toISOString(),
+      //   },
+      // });
       await generateFriendNotification({
         variables: {
           sender_profile_id: Number(sender_profile_id),
@@ -98,14 +98,14 @@ export const NotificationDetails = ({
   const handleDecline = async () => {
     // TODO add mutation to generate friend status update to 'D' for declined
     try {
-      await generateNotificationStatus({
-        variables: {
-          id: Number(id),
-          status_code: 'D',
-          type_code: 'FR',
-          created_at: new Date().toISOString(),
-        },
-      });
+      // await generateNotificationStatus({
+      //   variables: {
+      //     id: Number(id),
+      //     status_code: 'D',
+      //     type_code: 'FR',
+      //     created_at: new Date().toISOString(),
+      //   },
+      // });
     } catch (error) {
       logApolloError(error);
     }

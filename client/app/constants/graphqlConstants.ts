@@ -430,6 +430,22 @@ export const GENERATE_NOTIFICATION_STATUS = gql`
   }
 `;
 
+export const OPEN_NOTIFICATION = gql`
+  mutation openNotification(
+    $type_code: String!
+    $created_at: String!
+    $id: Int!
+  ) {
+    openNotification(type_code: $type_code, created_at: $created_at, id: $id) {
+      modifier_profile_id
+      status_code
+      type_code
+      notification_created_at
+      modified_at
+    }
+  }
+`;
+
 export const TEST_MACHINE = gql`
   mutation testMachine($notification_id: Int!, $notificationStatus_id: Int!) {
     testMachine(
