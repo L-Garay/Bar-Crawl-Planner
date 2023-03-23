@@ -218,6 +218,12 @@ const typeDefs = `#graphql
       notification_created_at: String!
       id: Int!
     ): NotificationStatus
+    acceptFriendRequest(
+      sender_profile_id: Int!
+      addressee_profile_id: Int!
+      notification_created_at: String!
+      notification_id: Int!
+    ): NotificationStatus
     declineFriendRequest(
       notification_id: Int!
       notification_created_at: String!

@@ -43,6 +43,7 @@ import {
   GetFriendshipStatus,
 } from './prisma/querries/friendsQuerries';
 import {
+  AcceptFriendRequest,
   DeclineFriendRequest,
   GenerateFriendNotification,
   GenerateFriendRequestWithMachine,
@@ -943,6 +944,44 @@ const resolvers: Resolvers = {
 
       if (notificationResponse.status === 'Failure') {
         throw new GraphQLError('Cannot open notification', {
+          extensions: {
+            code: notificationResponse.error?.name,
+            message: notificationResponse.error?.message,
+            prismaMeta: notificationResponse.error?.meta,
+            prismaErrorCode: notificationResponse.error?.errorCode,
+          },
+        });
+      } else {
+        return notificationResponse.data;
+      }
+    },
+    acceptFriendRequest: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const {
+        notification_created_at,
+        notification_id,
+        sender_profile_id,
+        addressee_profile_id,
+      } = args;
+
+      const { id: modifier_profile_id } = profile.data;
+
+      const notificationResponse = await AcceptFriendRequest(
+        sender_profile_id,
+        addressee_profile_id,
+        notification_created_at,
+        notification_id,
+        modifier_profile_id
+      );
+
+      if (notificationResponse.status === 'Failure') {
+        throw new GraphQLError('Cannot accept friend request', {
           extensions: {
             code: notificationResponse.error?.name,
             message: notificationResponse.error?.message,

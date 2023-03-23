@@ -84,6 +84,7 @@ export type Mutation = {
   CreateAccountAndProfile?: Maybe<Scalars['String']>;
   DisconnectUserWithOuting?: Maybe<Outing>;
   UpdateAccountBySocialPin?: Maybe<Account>;
+  acceptFriendRequest?: Maybe<NotificationStatus>;
   addFriend?: Maybe<FriendshipStatus>;
   createAccount?: Maybe<Account>;
   createOuting?: Maybe<Outing>;
@@ -127,6 +128,14 @@ export type MutationUpdateAccountBySocialPinArgs = {
   email: Scalars['String'];
   profile_id: Scalars['Int'];
   social_pin: Scalars['String'];
+};
+
+
+export type MutationAcceptFriendRequestArgs = {
+  addressee_profile_id: Scalars['Int'];
+  notification_created_at: Scalars['String'];
+  notification_id: Scalars['Int'];
+  sender_profile_id: Scalars['Int'];
 };
 
 
@@ -544,6 +553,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   CreateAccountAndProfile?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationCreateAccountAndProfileArgs, 'email' | 'name' | 'picture' | 'verified'>>;
   DisconnectUserWithOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationDisconnectUserWithOutingArgs, 'outing_id' | 'profile_id'>>;
   UpdateAccountBySocialPin?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationUpdateAccountBySocialPinArgs, 'email' | 'profile_id' | 'social_pin'>>;
+  acceptFriendRequest?: Resolver<Maybe<ResolversTypes['NotificationStatus']>, ParentType, ContextType, RequireFields<MutationAcceptFriendRequestArgs, 'addressee_profile_id' | 'notification_created_at' | 'notification_id' | 'sender_profile_id'>>;
   addFriend?: Resolver<Maybe<ResolversTypes['FriendshipStatus']>, ParentType, ContextType, RequireFields<MutationAddFriendArgs, 'addressee_profile_id' | 'requestor_profile_id'>>;
   createAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationCreateAccountArgs>>;
   createOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, Partial<MutationCreateOutingArgs>>;

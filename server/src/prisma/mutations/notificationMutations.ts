@@ -216,6 +216,37 @@ export async function OpenNotification(
   }
 }
 
+export async function AcceptFriendRequest(
+  sender_profile_id: number,
+  addressee_profile_id: number,
+  notification_created_at: string,
+  notification_id: number,
+  modifier_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const eventData = {
+      modifier_profile_id,
+      sender_profile_id,
+      addressee_profile_id,
+      notification_created_at,
+      notification_id,
+      status_code: 'A', // used to update the notification status
+      type_code: 'FR', // used to update the notification status
+      // the creation of the FRR notification is handled by the machine and so needs no extra specific data
+    };
+    const notificationService = interpret(NotificationMachine).start('opened');
+    const state = notificationService.send('ACCEPT_FRIEND', eventData);
+    notificationService.stop();
+    return {
+      status: 'Success',
+      data: state.context.notificationStatus,
+      error: null,
+    };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
 export async function DeclineFriendRequest(
   modifier_profile_id: number,
   notification_id: number,
@@ -231,9 +262,13 @@ export async function DeclineFriendRequest(
       modified_at: new Date().toISOString(),
     };
     const notificationService = interpret(NotificationMachine).start('opened');
-    const state = notificationService.send('DECLINE', eventData);
+    const state = notificationService.send('DECLINE_FRIEND', eventData);
     notificationService.stop();
-    return { status: 'Success', data: state.context.notification, error: null };
+    return {
+      status: 'Success',
+      data: state.context.notificationStatus,
+      error: null,
+    };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
