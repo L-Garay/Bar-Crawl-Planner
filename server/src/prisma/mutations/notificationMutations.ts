@@ -61,6 +61,10 @@ export async function GenerateOutingNotificationWithMachine(
     };
     const notificationService = interpret(NotificationMachine).start();
     const state = notificationService.send('SEND', eventData);
+    // NOTE do we .stop() the service here? and restart as needed?
+    notificationService.stop();
+    // TODO look into the state.context.notification and see if it's the same as the notification returned from the prisma call
+    // based on return from friend request notification, it's not being set properly
     return { status: 'Success', data: state.context.notification, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
@@ -101,6 +105,29 @@ export async function GenerateFriendRequest(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
   return { status: 'Success', data: notification, error: null };
+}
+
+export async function GenerateFriendRequestWithMachine(
+  addressee_profile_id: number,
+  sender_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const created_at = new Date().toISOString();
+    const eventData = {
+      sender_profile_id,
+      addressee_profile_id,
+      type_code: 'FR',
+      created_at,
+    };
+    const notificationService = interpret(NotificationMachine).start();
+    const state = notificationService.send('SEND', eventData);
+    notificationService.stop();
+    // TODO look into the state.context.notification and see if it's the same as the notification returned from the prisma call
+    // based on return from friend request notification, it's not being set properly
+    return { status: 'Success', data: state.context.notification, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
 }
 
 export async function GenerateFriendNotification(

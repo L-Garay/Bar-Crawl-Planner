@@ -45,6 +45,7 @@ import {
 import {
   GenerateFriendNotification,
   GenerateFriendRequest,
+  GenerateFriendRequestWithMachine,
   GenerateNotificationStatus,
   GenerateOutingNotification,
   GenerateOutingNotificationWithMachine,
@@ -733,7 +734,7 @@ const resolvers: Resolvers = {
       }
       const { addressee_profile_id } = args;
 
-      const notificationResponse = await GenerateFriendRequest(
+      const notificationResponse = await GenerateFriendRequestWithMachine(
         addressee_profile_id, // recipient_profile_id
         sender_profile.data.id // sender_profile_id
       );

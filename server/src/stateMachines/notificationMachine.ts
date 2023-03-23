@@ -113,7 +113,7 @@ const notificationMachine = createMachine(
               create: {
                 modifier_profile_id: sender_profile_id,
                 status_code: 'S', // since we KNOW the notificaiton is being transition to the 'Sent' state
-                type_code,
+                type_code, // since the type_code comes from the event, we can just pass it in and whether it's an outing or friend notification, it will be set properly
                 notification_created_at: created_at,
                 modified_at: created_at,
               },
