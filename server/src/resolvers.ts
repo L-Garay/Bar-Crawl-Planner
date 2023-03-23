@@ -43,12 +43,12 @@ import {
   GetFriendshipStatus,
 } from './prisma/querries/friendsQuerries';
 import {
+  DeclineFriendRequest,
   GenerateFriendNotification,
   GenerateFriendRequestWithMachine,
   GenerateNotificationStatus,
   GenerateOutingNotificationWithMachine,
   OpenNotification,
-  TestMachine,
 } from './prisma/mutations/notificationMutations';
 import {
   GetAllNotifications,
@@ -931,13 +931,13 @@ const resolvers: Resolvers = {
         });
       }
 
-      const { created_at, id, type_code } = args;
+      const { notification_created_at, id, type_code } = args;
       const { id: modifier_profile_id } = profile.data;
 
       const notificationResponse = await OpenNotification(
         modifier_profile_id,
         type_code,
-        created_at,
+        notification_created_at,
         id
       );
 
@@ -954,21 +954,25 @@ const resolvers: Resolvers = {
         return notificationResponse.data;
       }
     },
-    testMachine: async (parent, args, context, info) => {
-      const { authError } = context;
+    declineFriendRequest: async (parent, args, context, info) => {
+      const { authError, profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
           extensions: { code: authError.code },
         });
       }
-      const { notification_id, notificationStatus_id } = args;
 
-      const notificationResponse = await TestMachine(
+      const { notification_created_at, notification_id } = args;
+      const { id: modifier_profile_id } = profile.data;
+
+      const notificationResponse = await DeclineFriendRequest(
+        modifier_profile_id,
         notification_id,
-        notificationStatus_id
+        notification_created_at
       );
+
       if (notificationResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot generate friend notification', {
+        throw new GraphQLError('Cannot decline friend request', {
           extensions: {
             code: notificationResponse.error?.name,
             message: notificationResponse.error?.message,

@@ -215,10 +215,13 @@ const typeDefs = `#graphql
     ): NotificationStatus
     openNotification(
       type_code: String!
-      created_at: String!
+      notification_created_at: String!
       id: Int!
     ): NotificationStatus
-    testMachine(notification_id: Int!, notificationStatus_id: Int!): String
+    declineFriendRequest(
+      notification_id: Int!
+      notification_created_at: String!
+  ): NotificationStatus
   }
 `;
 

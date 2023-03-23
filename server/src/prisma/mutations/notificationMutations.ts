@@ -194,7 +194,7 @@ export async function GenerateNotificationStatus(
 export async function OpenNotification(
   modifier_profile_id: number,
   type_code: string,
-  created_at: string,
+  notification_created_at: string,
   notification_id: number
 ): Promise<PrismaData> {
   try {
@@ -202,7 +202,8 @@ export async function OpenNotification(
       modifier_profile_id,
       status_code: 'O',
       type_code,
-      created_at,
+      notification_created_at,
+      modified_at: new Date().toISOString(),
       notification_id,
     };
 
@@ -215,23 +216,24 @@ export async function OpenNotification(
   }
 }
 
-export async function TestMachine(
+export async function DeclineFriendRequest(
+  modifier_profile_id: number,
   notification_id: number,
-  notificationStatus_id: number
+  notification_created_at: string
 ): Promise<PrismaData> {
   try {
-    const context = {
+    const eventData = {
+      modifier_profile_id,
       notification_id,
-      notificationStatus_id,
-      notification: {},
+      type_code: 'FR',
+      status_code: 'D',
+      notification_created_at,
+      modified_at: new Date().toISOString(),
     };
-    const dynmaicMachine = NotificationMachine.withContext(context);
-    const notificationService = interpret(dynmaicMachine).start('opened');
-    console.log('BEFORE TRANSITION', notificationService.getSnapshot().value);
-    notificationService.onTransition((state) => console.log(state.value));
-    notificationService.send('ACCEPT');
-    console.log('AFTER TRANSITION', notificationService.getSnapshot().value);
-    return { status: 'Success', data: 'Success', error: null };
+    const notificationService = interpret(NotificationMachine).start('opened');
+    const state = notificationService.send('DECLINE', eventData);
+    notificationService.stop();
+    return { status: 'Success', data: state.context.notification, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }

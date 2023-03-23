@@ -24,6 +24,7 @@ const notificationMachine = createMachine(
       notification_id: 0,
       notificationStatus_id: 0,
       notification: {} as any,
+      notificationStatus: {} as any,
     },
     states: {
       created: {
@@ -56,7 +57,7 @@ const notificationMachine = createMachine(
           }, // transition to accepted state
           DECLINE: {
             target: 'declined',
-            // actions: 'generateNotificationStatus',
+            actions: 'generateNotificationStatus',
           }, // transition to declined state
           DELETE: {
             target: 'deleted',
@@ -131,7 +132,7 @@ const notificationMachine = createMachine(
           modifier_profile_id,
           status_code,
           type_code,
-          created_at,
+          notification_created_at,
           notification_id,
         } = event;
         const status = await prismaClient.notificationStatus.create({
@@ -140,13 +141,14 @@ const notificationMachine = createMachine(
             status_code,
             type_code,
             modified_at: new Date().toISOString(),
-            notification_created_at: created_at, // need original notification created_at,
+            notification_created_at, // need original notification created_at,
             notification_id, // need original notification id
           },
         });
         assign({
           notificationStatus_id: status.id,
           notification_id,
+          notificationStatus: status,
         });
         console.log('GENERATE NOTIFICATION STATUS', context, event);
       },
