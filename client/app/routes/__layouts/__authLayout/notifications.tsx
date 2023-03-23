@@ -4,7 +4,6 @@ import notificationStyles from '~/generatedStyles/notifications.css';
 import { useMemo, useState } from 'react';
 import { NotificationDetails } from '~/components/notifications/notificationDetails';
 import {
-  GENERATE_NOTIFICATION_STATUS,
   GET_NEW_NOTIFICATIONS_COUNT,
   GET_NOTIFICATIONS,
   OPEN_NOTIFICATION,
@@ -24,22 +23,15 @@ export const links: LinksFunction = () => {
 export default function Notifications() {
   const [notificationIndex, setnotificationIndex] = useState<number>();
 
-  const [openNotification, { error: statusError }] = useMutation(
-    OPEN_NOTIFICATION,
-    {
-      refetchQueries: [
-        { query: GET_NOTIFICATIONS },
-        { query: GET_NEW_NOTIFICATIONS_COUNT },
-      ],
-      awaitRefetchQueries: true,
-    }
-  );
+  const [openNotification] = useMutation(OPEN_NOTIFICATION, {
+    refetchQueries: [
+      { query: GET_NOTIFICATIONS },
+      { query: GET_NEW_NOTIFICATIONS_COUNT },
+    ],
+    awaitRefetchQueries: true,
+  });
 
-  const {
-    data: notificationsData,
-    loading: notificationsLoading,
-    error: notificationsError,
-  } = useQuery(GET_NOTIFICATIONS);
+  const { data: notificationsData } = useQuery(GET_NOTIFICATIONS);
 
   const notifications = useMemo(() => {
     if (!notificationsData || !notificationsData.getAllNotifications) return [];

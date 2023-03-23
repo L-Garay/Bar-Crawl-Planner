@@ -3,9 +3,7 @@ import moment from 'moment';
 import { useEffect, useMemo } from 'react';
 import {
   ACCEPT_FRIEND_REQUEST,
-  ADD_FRIEND,
   DECLINE_FRIEND_REQUEST,
-  GENERATE_FRIEND_NOTIFICATION,
   GET_NEW_NOTIFICATIONS_COUNT,
   GET_NOTIFICATIONS,
   GET_OUTING,
@@ -29,33 +27,22 @@ export const NotificationDetails = ({
   outing_id,
 }: // generateNotificationStatus,
 NotificationDetailsProps) => {
-  const [getOuting, { error: outingError, data: outingData }] =
-    useLazyQuery(GET_OUTING);
+  const [getOuting, { data: outingData }] = useLazyQuery(GET_OUTING);
 
-  const [addFriend, { error: addFriendError }] = useMutation(ADD_FRIEND);
-  const [generateFriendNotification, { error: notificationError }] =
-    useMutation(GENERATE_FRIEND_NOTIFICATION);
-
-  const [declineFriendRequest, { error: declineError }] = useMutation(
-    DECLINE_FRIEND_REQUEST,
-    {
-      refetchQueries: [
-        { query: GET_NOTIFICATIONS },
-        { query: GET_NEW_NOTIFICATIONS_COUNT },
-      ],
-      awaitRefetchQueries: true,
-    }
-  );
-  const [acceptFriendRequest, { error: acceptError }] = useMutation(
-    ACCEPT_FRIEND_REQUEST,
-    {
-      refetchQueries: [
-        { query: GET_NOTIFICATIONS },
-        { query: GET_NEW_NOTIFICATIONS_COUNT },
-      ],
-      awaitRefetchQueries: true,
-    }
-  );
+  const [declineFriendRequest] = useMutation(DECLINE_FRIEND_REQUEST, {
+    refetchQueries: [
+      { query: GET_NOTIFICATIONS },
+      { query: GET_NEW_NOTIFICATIONS_COUNT },
+    ],
+    awaitRefetchQueries: true,
+  });
+  const [acceptFriendRequest] = useMutation(ACCEPT_FRIEND_REQUEST, {
+    refetchQueries: [
+      { query: GET_NOTIFICATIONS },
+      { query: GET_NEW_NOTIFICATIONS_COUNT },
+    ],
+    awaitRefetchQueries: true,
+  });
 
   useEffect(() => {
     if (outing_id) {
@@ -94,27 +81,6 @@ NotificationDetailsProps) => {
 
   const handleAccept = async () => {
     try {
-      // await addFriend({
-      //   variables: {
-      //     requestor_profile_id: Number(sender_profile_id),
-      //     addressee_profile_id: Number(addressee_id),
-      //   },
-      // });
-      // await generateNotificationStatus({
-      //   variables: {
-      //     id: Number(id),
-      //     status_code: 'A',
-      //     type_code: 'FR',
-      //     created_at: new Date().toISOString(),
-      //   },
-      // });
-      // await generateFriendNotification({
-      //   variables: {
-      //     sender_profile_id: Number(sender_profile_id),
-      //     addressee_profile_id: Number(addressee_id),
-      //     type_code: 'FRR',
-      //   },
-      // });
       await acceptFriendRequest({
         variables: {
           sender_profile_id: Number(sender_profile_id),

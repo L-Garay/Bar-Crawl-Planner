@@ -1,10 +1,4 @@
-import {
-  ApolloCache,
-  DefaultContext,
-  MutationFunctionOptions,
-  OperationVariables,
-  useMutation,
-} from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { useLazyQuery } from '@apollo/client';
 import moment from 'moment';
 import { useEffect, useMemo } from 'react';
@@ -66,19 +60,15 @@ export const NotificationCard = ({
   selectedNotification,
   outing_id,
 }: NotificationCardProps) => {
-  const [getOuting, { error: outingError, data: outingData }] =
-    useLazyQuery(GET_OUTING);
+  const [getOuting, { data: outingData }] = useLazyQuery(GET_OUTING);
 
-  const [openNotification, { error: statusError }] = useMutation(
-    OPEN_NOTIFICATION,
-    {
-      refetchQueries: [
-        { query: GET_NOTIFICATIONS },
-        { query: GET_NEW_NOTIFICATIONS_COUNT },
-      ],
-      awaitRefetchQueries: true,
-    }
-  );
+  const [openNotification] = useMutation(OPEN_NOTIFICATION, {
+    refetchQueries: [
+      { query: GET_NOTIFICATIONS },
+      { query: GET_NEW_NOTIFICATIONS_COUNT },
+    ],
+    awaitRefetchQueries: true,
+  });
 
   useEffect(() => {
     if (outing_id) {
@@ -96,7 +86,7 @@ export const NotificationCard = ({
   );
 
   const { name } = notification_sender_relation;
-  const { status_code, id: status_id } =
+  const { status_code } =
     notification_relation[notification_relation.length - 1];
 
   const title = useMemo(() => {

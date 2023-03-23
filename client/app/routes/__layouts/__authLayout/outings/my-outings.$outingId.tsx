@@ -15,7 +15,7 @@ import {
   SEND_OUTING_EMAIL,
   UPDATE_OUTING,
 } from '~/constants/graphqlConstants';
-import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
+// import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
 import EditIcon from '~/components/svgs/editIcon';
 import moment from 'moment';
@@ -147,11 +147,8 @@ export default function OutingDetails() {
   const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST, {
     refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
   });
-  const { error: sentRequestError, data: sentRequestData } = useQuery(
-    GET_SENT_FRIEND_REQUESTS
-  );
-  const { error: friendRequestError, data: friendRequestData } =
-    useQuery(GET_FRIEND_REQUESTS);
+  const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
+  const { data: friendRequestData } = useQuery(GET_FRIEND_REQUESTS);
 
   const sentRequests = useMemo(() => {
     if (!sentRequestData || !sentRequestData.getSentFriendRequests) return [];

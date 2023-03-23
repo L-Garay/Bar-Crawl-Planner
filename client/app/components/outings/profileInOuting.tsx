@@ -19,16 +19,9 @@ export const ProfileInOuting = ({
   sentRequests,
   recievedRequests,
 }: ProfileInOutingProps) => {
-  // const { sentFriendRequests, receivedFriendRequests, setShouldQuery } =
-  //   useNotificationContext();
-
-  // NOTE for testing purposes, this will be removed
-  // useEffect(() => setShouldQuery(true), []);
-
-  const [
-    getFriendshipStatus,
-    { data: statusData, error: friendshipStatusError },
-  ] = useLazyQuery(GET_FRIENDSHIP_STATUS);
+  const [getFriendshipStatus, { data: statusData }] = useLazyQuery(
+    GET_FRIENDSHIP_STATUS
+  );
 
   useEffect(() => {
     if (profile) {
