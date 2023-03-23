@@ -198,7 +198,6 @@ const typeDefs = `#graphql
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
-    addFriend(requestor_profile_id: Int!, addressee_profile_id: Int!): FriendshipStatus
     generateOutingNotification(outing_id: Int!): [Notification]
     generateFriendRequest(addressee_profile_id: Int!): Notification
     openNotification(

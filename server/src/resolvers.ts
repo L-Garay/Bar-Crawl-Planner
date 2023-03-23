@@ -692,34 +692,6 @@ const resolvers: Resolvers = {
 
       return `Account ${account.data.id} and Profile ${profile.data.id} created`;
     },
-    addFriend: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const { addressee_profile_id, requestor_profile_id } = args;
-
-      const addedFriend = await AddFriend(
-        requestor_profile_id,
-        addressee_profile_id
-      );
-
-      if (addedFriend.status === 'Failure') {
-        throw new GraphQLError('Cannot add friend', {
-          extensions: {
-            code: addedFriend.error?.name,
-            message: addedFriend.error?.message,
-            prismaMeta: addedFriend.error?.meta,
-            prismaErrorCode: addedFriend.error?.errorCode,
-          },
-        });
-      } else {
-        return addedFriend.data;
-      }
-    },
     generateFriendRequest: async (parent, args, context, info) => {
       const { authError, profile: sender_profile } = context;
       if (authError) {

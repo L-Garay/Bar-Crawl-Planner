@@ -100,19 +100,6 @@ export const GET_PROFILES_IN_OUTING = gql`
   }
 `;
 
-export const ADD_FRIEND = gql`
-  mutation addFriend($requestor_profile_id: Int!, $addressee_profile_id: Int!) {
-    addFriend(
-      requestor_profile_id: $requestor_profile_id
-      addressee_profile_id: $addressee_profile_id
-    ) {
-      requestor_profile_id
-      addressee_profile_id
-      created_at
-    }
-  }
-`;
-
 export const GET_ALL_FRIENDSHIPS = gql`
   query getAllFriendships {
     getAllFriendships {
