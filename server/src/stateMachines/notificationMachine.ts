@@ -1,4 +1,4 @@
-import { assign, createMachine, interpret } from 'xstate';
+import { assign, createMachine } from 'xstate';
 import prismaClient from '..';
 import { AddFriend } from '../prisma/mutations/friendsMutations';
 
@@ -8,10 +8,6 @@ import { AddFriend } from '../prisma/mutations/friendsMutations';
 // at that point we can stop the machine, since we'll know they are no longer a registered user
 
 // each time a user selects a nofitication, we need to make sure to put it into context so we can derive what stae it's in
-
-// when a user takes any action with regards to a notification, we will need to set that notification and it's corresponding most relevant status, into the machine context using .withContext() and passing in the data
-// then at that point, we will be able to access the notitication and status in the functions used for the guarded transitions
-// the guards will be used to determine the current state of the notification and then determine what the next state should be
 
 // However, I just saw that you can start the machine in a specific state by passing in the state to the interpretor's .start() method
 // this will allow us to pick up a notification that may already be in an intermediate state, lilke opened or accepted, without having to have an extra 'unkown' state with logic to determine what state the notification is in and where to go next
@@ -33,7 +29,7 @@ const notificationMachine = createMachine(
           SEND: {
             target: 'sent',
             actions: 'generateNotification',
-          }, // transition to sent state
+          },
         },
       },
       sent: {
@@ -42,11 +38,11 @@ const notificationMachine = createMachine(
           OPEN: {
             target: 'opened',
             actions: 'generateNotificationStatus',
-          }, // transition to opened state
+          },
           DELETE: {
             target: 'deleted',
             // actions: 'generateNotificationStatus',
-          }, // transition to deleted state
+          },
         },
       },
       opened: {
@@ -59,15 +55,15 @@ const notificationMachine = createMachine(
               'generateNotificationStatus', // update original friend request notitication status to 'A'
               'generateFriendRequestResponseNotification', // create new friend request response notification to be sent to the friend request initiator
             ],
-          }, // transition to accepted state
+          },
           DECLINE_FRIEND: {
             target: 'declined',
             actions: 'generateNotificationStatus',
-          }, // transition to declined state
+          },
           DELETE: {
             target: 'deleted',
             // actions: 'generateNotificationStatus',
-          }, // transition to deleted state
+          },
         },
       },
       accepted: {
@@ -76,7 +72,7 @@ const notificationMachine = createMachine(
           DELETE: {
             target: 'deleted',
             // actions: 'generateNotificationStatus',
-          }, // transition to deleted state
+          },
         },
       },
       declined: {
@@ -85,7 +81,7 @@ const notificationMachine = createMachine(
           DELETE: {
             target: 'deleted',
             // actions: 'generateNotificationStatus',
-          }, // transition to deleted state
+          },
         },
       },
       deleted: {
@@ -99,7 +95,6 @@ const notificationMachine = createMachine(
   {
     actions: {
       generateNotification: async (context, event) => {
-        // use context and event to generate either outingNotification or friendNotification and respective status
         console.log('GENERATE NOTIFICATION', context, event);
         const created_at = new Date().toISOString();
         const {
@@ -145,7 +140,7 @@ const notificationMachine = createMachine(
               create: {
                 modifier_profile_id: addressee_profile_id,
                 status_code: 'S', // since we KNOW the notificaiton is being transition to the 'Sent' state
-                type_code: 'FRR', // since the type_code comes from the event, we can just pass it in and whether it's an outing or friend notification, it will be set properly
+                type_code: 'FRR',
                 notification_created_at: created_at,
                 modified_at: created_at,
               },
@@ -158,7 +153,6 @@ const notificationMachine = createMachine(
         });
       },
       generateNotificationStatus: async (context, event) => {
-        // use context and event to create a new notification status for a given notification
         const {
           modifier_profile_id,
           status_code,
@@ -184,7 +178,6 @@ const notificationMachine = createMachine(
         console.log('GENERATE NOTIFICATION STATUS', context, event);
       },
       addFriend: async (context, event) => {
-        // needs requestor_profile_id, addressee_profile_id
         const { sender_profile_id, addressee_profile_id } = event;
         await AddFriend(sender_profile_id, addressee_profile_id);
       },

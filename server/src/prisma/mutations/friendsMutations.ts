@@ -9,28 +9,21 @@ export async function AddFriend(
   console.log('addressee_profile_id: ', addressee_profile_id);
 
   try {
-    await prismaClient.friendship.create({
+    const friend = await prismaClient.friendship.create({
       data: {
         created_at: new Date().toISOString(),
         requestor_profile_id,
         addressee_profile_id,
+        frienshipStatus_friendship_relation: {
+          create: {
+            status_code: 'A',
+            created_at: new Date().toISOString(),
+            modifier_profile_id: addressee_profile_id, // because the addressee is the one who accepted the request, they are the modifier
+          },
+        },
       },
     });
-  } catch (error) {
-    return { status: 'Failure', data: null, error: error as PrismaError };
-  }
-
-  try {
-    const friendStatus = await prismaClient.friendshipStatus.create({
-      data: {
-        status_code: 'A',
-        created_at: new Date().toISOString(),
-        requestor_profile_id,
-        modifier_profile_id: addressee_profile_id, // because the addressee is the one who accepted the request, they are the modifier
-        addressee_profile_id,
-      },
-    });
-    return { status: 'Success', data: friendStatus, error: null };
+    return { status: 'Success', data: friend, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
