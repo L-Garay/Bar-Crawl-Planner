@@ -467,3 +467,25 @@ export const DECLINE_FRIEND_REQUEST = gql`
     }
   }
 `;
+
+export const ACCEPT_FRIEND_REQUEST = gql`
+  mutation acceptFriendRequest(
+    $sender_profile_id: Int!
+    $addressee_profile_id: Int!
+    $notification_created_at: String!
+    $notification_id: Int!
+  ) {
+    acceptFriendRequest(
+      sender_profile_id: $sender_profile_id
+      addressee_profile_id: $addressee_profile_id
+      notification_created_at: $notification_created_at
+      notification_id: $notification_id
+    ) {
+      modifier_profile_id
+      status_code
+      type_code
+      notification_created_at
+      modified_at
+    }
+  }
+`;
