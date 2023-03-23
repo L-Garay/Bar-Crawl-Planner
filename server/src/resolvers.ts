@@ -34,10 +34,7 @@ import {
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
-import {
-  AddFriend,
-  GenerateFriendStatus,
-} from './prisma/mutations/friendsMutations';
+import { AddFriend } from './prisma/mutations/friendsMutations';
 import {
   GetAllFriendships,
   GetFriendshipStatus,
@@ -45,9 +42,7 @@ import {
 import {
   AcceptFriendRequest,
   DeclineFriendRequest,
-  GenerateFriendNotification,
   GenerateFriendRequestWithMachine,
-  GenerateNotificationStatus,
   GenerateOutingNotificationWithMachine,
   OpenNotification,
 } from './prisma/mutations/notificationMutations';
@@ -751,60 +746,6 @@ const resolvers: Resolvers = {
         return notificationResponse.data;
       }
     },
-    generateFriendNotification: async (parent, args, context, info) => {
-      const { authError } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { addressee_profile_id, type_code, sender_profile_id } = args;
-
-      const notificationResponse = await GenerateFriendNotification(
-        sender_profile_id,
-        addressee_profile_id,
-        type_code
-      );
-      if (notificationResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot generate friend notification', {
-          extensions: {
-            code: notificationResponse.error?.name,
-            message: notificationResponse.error?.message,
-            prismaMeta: notificationResponse.error?.meta,
-            prismaErrorCode: notificationResponse.error?.errorCode,
-          },
-        });
-      } else {
-        return notificationResponse.data;
-      }
-    },
-    generateFriendStatus: async (parent, args, context, info) => {
-      const { authError } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { addressee_profile_id, status_code, requestor_profile_id } = args;
-
-      const notificationResponse = await GenerateFriendStatus(
-        requestor_profile_id,
-        addressee_profile_id,
-        status_code
-      );
-      if (notificationResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot generate friend status', {
-          extensions: {
-            code: notificationResponse.error?.name,
-            message: notificationResponse.error?.message,
-            prismaMeta: notificationResponse.error?.meta,
-            prismaErrorCode: notificationResponse.error?.errorCode,
-          },
-        });
-      } else {
-        return notificationResponse.data;
-      }
-    },
     generateOutingNotification: async (parent, args, context, info) => {
       const { authError, profile: sender_profile } = context;
       if (authError) {
@@ -890,38 +831,6 @@ const resolvers: Resolvers = {
             prismaErrorCode: failedResponses[0].error?.errorCode,
           },
         });
-      }
-    },
-    generateNotificationStatus: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const { type_code, status_code, created_at, id: notification_id } = args;
-      const { id: modifier_profile_id } = profile.data;
-
-      const notificationStatus = await GenerateNotificationStatus(
-        modifier_profile_id,
-        type_code,
-        status_code,
-        created_at,
-        notification_id
-      );
-
-      if (notificationStatus.status === 'Failure') {
-        throw new GraphQLError('Cannot generate notification status', {
-          extensions: {
-            code: notificationStatus.error?.name,
-            message: notificationStatus.error?.message,
-            prismaMeta: notificationStatus.error?.meta,
-            prismaErrorCode: notificationStatus.error?.errorCode,
-          },
-        });
-      } else {
-        return notificationStatus.data;
       }
     },
     openNotification: async (parent, args, context, info) => {

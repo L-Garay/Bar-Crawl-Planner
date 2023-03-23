@@ -3,12 +3,8 @@ import { NotificationCard } from '~/components/notifications/notificationCard';
 import notificationStyles from '~/generatedStyles/notifications.css';
 import { useMemo, useState } from 'react';
 import { NotificationDetails } from '~/components/notifications/notificationDetails';
-import {
-  GET_NEW_NOTIFICATIONS_COUNT,
-  GET_NOTIFICATIONS,
-  OPEN_NOTIFICATION,
-} from '~/constants/graphqlConstants';
-import { useMutation, useQuery } from '@apollo/client';
+import { GET_NOTIFICATIONS } from '~/constants/graphqlConstants';
+import { useQuery } from '@apollo/client';
 
 export const links: LinksFunction = () => {
   return [
@@ -22,14 +18,6 @@ export const links: LinksFunction = () => {
 
 export default function Notifications() {
   const [notificationIndex, setnotificationIndex] = useState<number>();
-
-  const [openNotification] = useMutation(OPEN_NOTIFICATION, {
-    refetchQueries: [
-      { query: GET_NOTIFICATIONS },
-      { query: GET_NEW_NOTIFICATIONS_COUNT },
-    ],
-    awaitRefetchQueries: true,
-  });
 
   const { data: notificationsData } = useQuery(GET_NOTIFICATIONS);
 
@@ -65,7 +53,6 @@ export default function Notifications() {
                       setnotificationIndex={setnotificationIndex}
                       index={index}
                       selectedNotification={notifications[notificationIndex!]}
-                      openNotification={openNotification}
                     />
                   );
                 })}

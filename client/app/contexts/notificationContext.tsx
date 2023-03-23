@@ -1,14 +1,6 @@
-import type {
-  ApolloCache,
-  DefaultContext,
-  MutationFunctionOptions,
-  OperationVariables,
-} from '@apollo/client';
 import { useLazyQuery } from '@apollo/client';
-import { useMutation } from '@apollo/client';
 import { createContext, useContext, useMemo, useState } from 'react';
 import {
-  GENERATE_NOTIFICATION_STATUS,
   GET_FRIEND_REQUESTS,
   GET_NEW_NOTIFICATIONS_COUNT,
   GET_NOTIFICATIONS,
@@ -21,16 +13,6 @@ interface NotificationController {
   notifications: any[];
   sentFriendRequests: any[];
   receivedFriendRequests: any[];
-  generateNotificationStatus: (
-    options?:
-      | MutationFunctionOptions<
-          any,
-          OperationVariables,
-          DefaultContext,
-          ApolloCache<any>
-        >
-      | undefined
-  ) => Promise<any>;
   setShouldQuery: (shouldQuery: boolean) => void;
 }
 
@@ -60,16 +42,6 @@ export const NotificationProvider = (props: { children: React.ReactNode }) => {
       loading: notificationsLoading,
     },
   ] = useLazyQuery(GET_NOTIFICATIONS);
-  const [generateNotificationStatus, { error: statusError }] = useMutation(
-    GENERATE_NOTIFICATION_STATUS,
-    {
-      refetchQueries: [
-        { query: GET_NOTIFICATIONS },
-        { query: GET_NEW_NOTIFICATIONS_COUNT },
-      ],
-      awaitRefetchQueries: true,
-    }
-  );
 
   if (shouldQuery) {
     getNewNotificationCount();
@@ -91,7 +63,6 @@ export const NotificationProvider = (props: { children: React.ReactNode }) => {
   // TODO I've suprressed the UI error boundary by properly catching the network error, but this is still a problem that needs to be addressed
   if (countError) logApolloError(countError);
   if (notificationsError) logApolloError(notificationsError);
-  if (statusError) logApolloError(statusError);
 
   const count = useMemo(() => {
     if (countData) {
@@ -121,7 +92,6 @@ export const NotificationProvider = (props: { children: React.ReactNode }) => {
         notifications,
         sentFriendRequests,
         receivedFriendRequests,
-        generateNotificationStatus,
         setShouldQuery,
       }}
     >

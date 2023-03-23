@@ -274,16 +274,6 @@ export const GET_OUTINGS = gql`
 
 // ------------------- Notifications -------------------
 
-export const GENERATE_OUTING_NOTIFICATIONS = gql`
-  mutation generateOutingNotification($outing_id: Int!) {
-    generateOutingNotification(outing_id: $outing_id) {
-      addressee_profile_id
-      created_at
-      type_code
-    }
-  }
-`;
-
 export const GET_NOTIFICATIONS = gql`
   query getAllNotifications {
     getAllNotifications {
@@ -350,6 +340,16 @@ export const GET_FRIEND_REQUESTS = gql`
   }
 `;
 
+export const GENERATE_OUTING_NOTIFICATIONS = gql`
+  mutation generateOutingNotification($outing_id: Int!) {
+    generateOutingNotification(outing_id: $outing_id) {
+      addressee_profile_id
+      created_at
+      type_code
+    }
+  }
+`;
+
 export const GENERATE_FRIEND_REQUEST = gql`
   mutation generateFriendRequest($addressee_profile_id: Int!) {
     generateFriendRequest(addressee_profile_id: $addressee_profile_id) {
@@ -362,70 +362,6 @@ export const GENERATE_FRIEND_REQUEST = gql`
         name
         profile_img
       }
-    }
-  }
-`;
-
-export const GENERATE_FRIEND_STATUS = gql`
-  mutation generateFriendStatus(
-    $requestor_profile_id: Int!
-    $addressee_profile_id: Int!
-    $status_code: String!
-  ) {
-    generateFriendStatus(
-      requestor_profile_id: $requestor_profile_id
-      addressee_profile_id: $addressee_profile_id
-      status_code: $status_code
-    ) {
-      requestor_profile_id
-      addressee_profile_id
-      status_code
-      created_at
-    }
-  }
-`;
-
-export const GENERATE_FRIEND_NOTIFICATION = gql`
-  mutation generateFriendNotification(
-    $sender_profile_id: Int!
-    $addressee_profile_id: Int!
-    $type_code: String!
-  ) {
-    generateFriendNotification(
-      sender_profile_id: $sender_profile_id
-      addressee_profile_id: $addressee_profile_id
-      type_code: $type_code
-    ) {
-      id
-      addressee_profile_id
-      type_code
-      created_at
-      notification_addressee_relation {
-        id
-        name
-      }
-    }
-  }
-`;
-
-export const GENERATE_NOTIFICATION_STATUS = gql`
-  mutation generateNotificationStatus(
-    $type_code: String!
-    $status_code: String!
-    $created_at: String!
-    $id: Int!
-  ) {
-    generateNotificationStatus(
-      type_code: $type_code
-      status_code: $status_code
-      created_at: $created_at
-      id: $id
-    ) {
-      modifier_profile_id
-      status_code
-      type_code
-      notification_created_at
-      modified_at
     }
   }
 `;
