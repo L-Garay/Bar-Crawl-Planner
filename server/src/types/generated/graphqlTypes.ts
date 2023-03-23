@@ -95,6 +95,7 @@ export type Mutation = {
   generateFriendStatus?: Maybe<FriendshipStatus>;
   generateNotificationStatus?: Maybe<NotificationStatus>;
   generateOutingNotification?: Maybe<Array<Maybe<Notification>>>;
+  openNotification?: Maybe<NotificationStatus>;
   sendOutingInvites?: Maybe<Scalars['String']>;
   testMachine?: Maybe<Scalars['String']>;
   updateOuting?: Maybe<Outing>;
@@ -195,6 +196,13 @@ export type MutationGenerateNotificationStatusArgs = {
 
 export type MutationGenerateOutingNotificationArgs = {
   outing_id: Scalars['Int'];
+};
+
+
+export type MutationOpenNotificationArgs = {
+  created_at: Scalars['String'];
+  id: Scalars['Int'];
+  type_code: Scalars['String'];
 };
 
 
@@ -547,6 +555,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   generateFriendStatus?: Resolver<Maybe<ResolversTypes['FriendshipStatus']>, ParentType, ContextType, RequireFields<MutationGenerateFriendStatusArgs, 'addressee_profile_id' | 'requestor_profile_id' | 'status_code'>>;
   generateNotificationStatus?: Resolver<Maybe<ResolversTypes['NotificationStatus']>, ParentType, ContextType, RequireFields<MutationGenerateNotificationStatusArgs, 'created_at' | 'id' | 'status_code' | 'type_code'>>;
   generateOutingNotification?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType, RequireFields<MutationGenerateOutingNotificationArgs, 'outing_id'>>;
+  openNotification?: Resolver<Maybe<ResolversTypes['NotificationStatus']>, ParentType, ContextType, RequireFields<MutationOpenNotificationArgs, 'created_at' | 'id' | 'type_code'>>;
   sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
   testMachine?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationTestMachineArgs, 'notificationStatus_id' | 'notification_id'>>;
   updateOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationUpdateOutingArgs, 'id'>>;

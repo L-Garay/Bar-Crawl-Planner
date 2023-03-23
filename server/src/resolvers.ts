@@ -44,11 +44,10 @@ import {
 } from './prisma/querries/friendsQuerries';
 import {
   GenerateFriendNotification,
-  GenerateFriendRequest,
   GenerateFriendRequestWithMachine,
   GenerateNotificationStatus,
-  GenerateOutingNotification,
   GenerateOutingNotificationWithMachine,
+  OpenNotification,
   TestMachine,
 } from './prisma/mutations/notificationMutations';
 import {
@@ -922,6 +921,37 @@ const resolvers: Resolvers = {
         });
       } else {
         return notificationStatus.data;
+      }
+    },
+    openNotification: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { created_at, id, type_code } = args;
+      const { id: modifier_profile_id } = profile.data;
+
+      const notificationResponse = await OpenNotification(
+        modifier_profile_id,
+        type_code,
+        created_at,
+        id
+      );
+
+      if (notificationResponse.status === 'Failure') {
+        throw new GraphQLError('Cannot open notification', {
+          extensions: {
+            code: notificationResponse.error?.name,
+            message: notificationResponse.error?.message,
+            prismaMeta: notificationResponse.error?.meta,
+            prismaErrorCode: notificationResponse.error?.errorCode,
+          },
+        });
+      } else {
+        return notificationResponse.data;
       }
     },
     testMachine: async (parent, args, context, info) => {

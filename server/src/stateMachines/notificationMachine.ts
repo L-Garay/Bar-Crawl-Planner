@@ -43,7 +43,7 @@ const notificationMachine = createMachine(
           }, // transition to opened state
           DELETE: {
             target: 'deleted',
-            actions: 'generateNotificationStatus',
+            // actions: 'generateNotificationStatus',
           }, // transition to deleted state
         },
       },
@@ -52,15 +52,15 @@ const notificationMachine = createMachine(
         on: {
           ACCEPT: {
             target: 'accepted',
-            actions: ['generateNotificationStatus'],
+            // actions: ['generateNotificationStatus'],
           }, // transition to accepted state
           DECLINE: {
             target: 'declined',
-            actions: 'generateNotificationStatus',
+            // actions: 'generateNotificationStatus',
           }, // transition to declined state
           DELETE: {
             target: 'deleted',
-            actions: 'generateNotificationStatus',
+            // actions: 'generateNotificationStatus',
           }, // transition to deleted state
         },
       },
@@ -69,7 +69,7 @@ const notificationMachine = createMachine(
         on: {
           DELETE: {
             target: 'deleted',
-            actions: 'generateNotificationStatus',
+            // actions: 'generateNotificationStatus',
           }, // transition to deleted state
         },
       },
@@ -78,7 +78,7 @@ const notificationMachine = createMachine(
         on: {
           DELETE: {
             target: 'deleted',
-            actions: 'generateNotificationStatus',
+            // actions: 'generateNotificationStatus',
           }, // transition to deleted state
         },
       },
@@ -125,13 +125,34 @@ const notificationMachine = createMachine(
           notification: notification,
         });
       },
+      generateNotificationStatus: async (context, event) => {
+        // use context and event to create a new notification status for a given notification
+        const {
+          modifier_profile_id,
+          status_code,
+          type_code,
+          created_at,
+          notification_id,
+        } = event;
+        const status = await prismaClient.notificationStatus.create({
+          data: {
+            modifier_profile_id,
+            status_code,
+            type_code,
+            modified_at: new Date().toISOString(),
+            notification_created_at: created_at, // need original notification created_at,
+            notification_id, // need original notification id
+          },
+        });
+        assign({
+          notificationStatus_id: status.id,
+          notification_id,
+        });
+        console.log('GENERATE NOTIFICATION STATUS', context, event);
+      },
       deleteNotification: (context, event) => {
         // use context and event to update notification status to deleted
         console.log('DELETE NOFITICATION', context, event);
-      },
-      generateNotificationStatus: (context, event) => {
-        // use context and event to update notification status
-        console.log('GENERATE NOTIFICATION STATUS', context, event);
       },
     },
   }

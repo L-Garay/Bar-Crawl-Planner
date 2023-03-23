@@ -213,6 +213,11 @@ const typeDefs = `#graphql
       created_at: String!
       id: Int!
     ): NotificationStatus
+    openNotification(
+      type_code: String!
+      created_at: String!
+      id: Int!
+    ): NotificationStatus
     testMachine(notification_id: Int!, notificationStatus_id: Int!): String
   }
 `;
