@@ -1,4 +1,4 @@
-import type { LoaderFunction } from '@remix-run/node';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { useLoaderData, useNavigate } from '@remix-run/react';
 import { useState, useEffect } from 'react';
@@ -11,6 +11,17 @@ import {
   CONNECT_PROFILE,
   GENERATE_OUTING_NOTIFICATIONS,
 } from '~/constants/graphqlConstants';
+import spinnerStyles from '~/generatedStyles/spinners.css';
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: spinnerStyles,
+      as: 'style',
+    },
+  ];
+};
 
 export const loader: LoaderFunction = async ({ request, context }) => {
   return await authenticator.isAuthenticated(request);

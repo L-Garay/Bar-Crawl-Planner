@@ -329,11 +329,7 @@ export const GET_FRIEND_REQUESTS = gql`
 
 export const GENERATE_OUTING_NOTIFICATIONS = gql`
   mutation generateOutingNotification($outing_id: Int!) {
-    generateOutingNotification(outing_id: $outing_id) {
-      addressee_profile_id
-      created_at
-      type_code
-    }
+    generateOutingNotification(outing_id: $outing_id)
   }
 `;
 
