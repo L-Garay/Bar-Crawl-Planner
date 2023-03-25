@@ -90,13 +90,21 @@ export type OutingInviteProfiles = {
 };
 
 export type GenerateOutingInviteEmailParams = {
+  outing_name: string;
   outing_id: number;
   start_date_and_time: string;
   profiles: OutingInviteProfiles[];
   senderName: string;
 };
 
-export type OutingInviteEmail = {
+export type GenerateOutingJoinedEmailInput = Omit<
+  GenerateOutingInviteEmailParams,
+  'profiles'
+> & {
+  names: string[];
+};
+
+export type Email = {
   body: {
     name: string;
     intro: string;

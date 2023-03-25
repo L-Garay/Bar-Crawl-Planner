@@ -184,7 +184,7 @@ type Mutation {
     email: String!
     verified: Boolean!
   ): String
-  generateOutingNotification(outing_id: Int!): [Notification]
+  generateOutingNotification(outing_id: Int!): String
   generateFriendRequest(addressee_profile_id: Int!): Notification
   openNotification(
     type_code: String!
