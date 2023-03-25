@@ -1,5 +1,5 @@
 import { GenerateOutingInviteEmailParams } from '../../types/sharedTypes';
-import { GenerateOutingInviteEmail } from './';
+import { GenerateOutingInviteEmail } from '.';
 
 const mockFormat = jest.fn(() => 'Wednesday, January 1st, 12:00:00 pm');
 const mockMomentObject = {
@@ -11,6 +11,7 @@ jest.mock('moment', () => ({
 }));
 
 const singleProfile: GenerateOutingInviteEmailParams = {
+  outing_name: 'Outing 1',
   outing_id: 1,
   start_date_and_time: '2021-01-01 12:00:00',
   profiles: [{ id: 1, name: 'Profile 1', social_pin: 'abcd' }],

@@ -1,1 +1,2 @@
-export { default as GenerateOutingInviteEmail } from './generateEmails';
+export { default as GenerateOutingInviteEmail } from './generateOutingInvite';
+export { default as GenerateOutingJoinedEmail } from './generateOutingJoined';
