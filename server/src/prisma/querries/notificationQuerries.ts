@@ -1,6 +1,34 @@
 import prismaClient from '../..';
 import { PrismaData, PrismaError } from '../../types/sharedTypes';
 
+export async function GetNotification(
+  notification_id: number
+): Promise<PrismaData> {
+  try {
+    const notification = await prismaClient.notification.findUnique({
+      where: {
+        id: notification_id,
+      },
+      include: {
+        notification_relation: {
+          select: {
+            status_code: true,
+            modified_at: true,
+            modifier_profile_id: true,
+          },
+        },
+      },
+    });
+    console.log('notification from mutation function: ', notification);
+
+    return new Promise((resolve) =>
+      resolve({ status: 'Success', data: notification, error: null })
+    );
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
 export async function GetAllNotifications(
   user_id: number
 ): Promise<PrismaData> {
@@ -89,7 +117,6 @@ export async function GetSentFriendRequests(
         },
       },
     });
-    console.log('notifications for user: ', user_id, notifications);
 
     return { status: 'Success', data: notifications, error: null };
   } catch (error) {

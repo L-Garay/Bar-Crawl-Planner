@@ -53,43 +53,6 @@ export async function GenerateFriendRequestWithMachine(
   }
 }
 
-export async function GenerateFriendNotification(
-  addressee_profile_id: number,
-  sender_profile_id: number,
-  type_code: string
-): Promise<PrismaData> {
-  const created_at = new Date().toISOString();
-  let notification: any;
-  try {
-    notification = await prismaClient.notification.create({
-      data: {
-        sender_profile_id,
-        addressee_profile_id,
-        type_code,
-        created_at,
-      },
-    });
-  } catch (error) {
-    return { status: 'Failure', data: null, error: error as PrismaError };
-  }
-
-  try {
-    await prismaClient.notificationStatus.create({
-      data: {
-        notification_id: notification.id,
-        modifier_profile_id: sender_profile_id,
-        status_code: 'S',
-        type_code,
-        notification_created_at: created_at,
-        modified_at: created_at,
-      },
-    });
-  } catch (error) {
-    return { status: 'Failure', data: null, error: error as PrismaError };
-  }
-  return { status: 'Success', data: notification, error: null };
-}
-
 export async function OpenNotification(
   modifier_profile_id: number,
   type_code: string,
@@ -106,7 +69,17 @@ export async function OpenNotification(
       notification_id,
     };
 
-    const notificationService = interpret(NotificationMachine).start('sent'); // since we know this method should only be called when a notification is sent and not opened
+    const dynamicContext = {
+      notification_id,
+      notificationStatus_id: 0,
+      notification: {} as any,
+      notificationStatus: {} as any,
+      error: undefined,
+    };
+
+    const dynamicMachine = NotificationMachine.withContext(dynamicContext);
+
+    const notificationService = interpret(dynamicMachine).start('sent'); // since we know this method should only be called when a notification is sent and not opened
     const state = notificationService.send('OPEN', eventData);
     notificationService.stop();
     return { status: 'Success', data: state.context.notification, error: null };

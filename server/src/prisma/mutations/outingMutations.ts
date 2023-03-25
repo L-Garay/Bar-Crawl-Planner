@@ -6,15 +6,21 @@ import {
   PrismaError,
   PrismaData,
   SendingOutingsInvitesInput,
-  OutingUpdateInput,
+  Email,
 } from '../../types/sharedTypes';
 
 import Mailgen from 'mailgen';
 import nodemailer from 'nodemailer';
 import { Account, Profile } from '@prisma/client';
-import { GenerateOutingInviteEmail } from '../../utilities/generateEmails/';
 import dotenv from 'dotenv';
 import short from 'short-uuid';
+import { GetOutingByOutingId } from '../querries/outingsQuerries';
+import { GetAccountByAccountId } from '../querries/accountQuerries';
+import { GetAcceptedProfilesInOuting } from '../querries/profileQuerries';
+import {
+  GenerateOutingJoinedEmail,
+  GenerateOutingInviteEmail,
+} from '../../utilities/generateEmails';
 
 dotenv.config();
 
@@ -78,6 +84,57 @@ export async function DeleteOuting(outingId: number) {
       error: null,
     };
   } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function ConnectUserWithOuting(
+  outingId: number,
+  profileId: number
+): Promise<PrismaData> {
+  try {
+    const outing = await prismaClient.outing.update({
+      where: { id: outingId },
+      data: {
+        pending_profiles: {
+          disconnect: { id: profileId },
+        },
+        accepted_profiles: {
+          connect: {
+            id: profileId,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: outing, error: null };
+  } catch (error) {
+    console.log(error);
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function DisconnectUserWithOuting(
+  profileId: number,
+  outingId: number
+): Promise<PrismaData> {
+  try {
+    const user = await prismaClient.outing.update({
+      where: { id: outingId },
+      data: {
+        accepted_profiles: {
+          disconnect: { id: profileId },
+        },
+        pending_profiles: {
+          disconnect: { id: profileId },
+        },
+        declined_profiles: {
+          connect: { id: profileId },
+        },
+      },
+    });
+    return { status: 'Success', data: user, error: null };
+  } catch (error) {
+    console.log(error);
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
@@ -214,8 +271,14 @@ export async function SendOutingInvites({
     });
   });
 
+  const outing = await GetOutingByOutingId(outing_id);
+  if (outing.status === 'Failure') {
+    return { status: 'Failure', data: null, error: outing.error };
+  }
+
   // generate the email inputs to be used in constructing the email
   const generateEmailInput: GenerateOutingInviteEmailParams = {
+    outing_name: outing.data.name,
     outing_id,
     start_date_and_time,
     profiles: resolvedProfiles,
@@ -224,13 +287,13 @@ export async function SendOutingInvites({
   // generate the email templates
   const generatedEmails = GenerateOutingInviteEmail(generateEmailInput);
   // generate the html emails using mailgen generator
-  const emailsToSend = generatedEmails.map((email) =>
+  const emailsToSend = generatedEmails.map((email: Email) =>
     generator.generate(email)
   );
   // const textEmailsToSend = generatedEmails.map((email) => generator.generatePlaintext(email));
 
   // set the mail options for each email
-  const mailOptions = emailsToSend.map((email, index) => {
+  const mailOptions = emailsToSend.map((email: Email, index: number) => {
     return {
       from: process.env.GMAIL_EMAIL,
       to: emails[index],
@@ -241,18 +304,20 @@ export async function SendOutingInvites({
 
   // use nodemailer transport to send the emails
   const emailResponse = await Promise.allSettled(
-    mailOptions.map((mailOption) => transporter.sendMail(mailOption))
+    mailOptions.map((mailOption: Record<string, any>) =>
+      transporter.sendMail(mailOption)
+    )
   );
 
   // log failed emails
-  emailResponse.forEach((response, index, array) => {
+  emailResponse.forEach((response: any, index: number) => {
     if (response.status === 'rejected') {
       // TODO log to some loggin service
       console.log(`Error sending some emails\n` + response.reason);
     }
   });
   const successfulEmails = emailResponse.filter(
-    (response) => response.status === 'fulfilled'
+    (response: any) => response.status === 'fulfilled'
   );
   const successString = successfulEmails.length > 1 ? 's' : '';
   return {
@@ -262,53 +327,125 @@ export async function SendOutingInvites({
   };
 }
 
-export async function ConnectUserWithOuting(
-  outingId: number,
-  profileId: number
-): Promise<PrismaData> {
-  try {
-    const outing = await prismaClient.outing.update({
-      where: { id: outingId },
-      data: {
-        pending_profiles: {
-          disconnect: { id: profileId },
-        },
-        accepted_profiles: {
-          connect: {
-            id: profileId,
-          },
-        },
-      },
-    });
-    return { status: 'Success', data: outing, error: null };
-  } catch (error) {
-    console.log(error);
-    return { status: 'Failure', data: null, error: error as PrismaError };
-  }
-}
+export async function SendOutingJoinedNotification(
+  outing_id: number,
+  sender_profile: PrismaData
+) {
+  // instantiate mailgen generator to create emails
+  const generator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'Bar Crawl Planner',
+      link: 'http://localhost:3000/homepage',
+    },
+  });
+  // create nodemailer gmail transporter to send emails
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_EMAIL,
+      pass: process.env.GMAIL_PASSWORD,
+    },
+  });
 
-export async function DisconnectUserWithOuting(
-  profileId: number,
-  outingId: number
-): Promise<PrismaData> {
-  try {
-    const user = await prismaClient.outing.update({
-      where: { id: outingId },
-      data: {
-        accepted_profiles: {
-          disconnect: { id: profileId },
-        },
-        pending_profiles: {
-          disconnect: { id: profileId },
-        },
-        declined_profiles: {
-          connect: { id: profileId },
-        },
+  if (!generator || !transporter) {
+    return {
+      status: 'Failure',
+      data: null,
+      error: {
+        name: 'Email composition error', // not sure what to call this
+        message: 'Unable to create email generator or transporter',
       },
-    });
-    return { status: 'Success', data: user, error: null };
-  } catch (error) {
-    console.log(error);
-    return { status: 'Failure', data: null, error: error as PrismaError };
+    };
   }
+
+  const outing = await GetOutingByOutingId(outing_id);
+  if (outing.status === 'Failure') {
+    return { status: 'Failure', data: null, error: outing.error };
+  }
+
+  const profilesInOuting = await GetAcceptedProfilesInOuting(outing_id);
+  if (profilesInOuting.status === 'Failure') {
+    return { status: 'Failure', data: null, error: profilesInOuting.error };
+  }
+  console.log('profiles in outing', profilesInOuting.data);
+
+  const removedSelfProfiles = profilesInOuting.data.filter(
+    (profile: Profile) => {
+      if (profile.id !== sender_profile.data.id) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  );
+
+  console.log(
+    'removed self profiles',
+    removedSelfProfiles,
+    removedSelfProfiles.length
+  );
+
+  const names = removedSelfProfiles.map((profile: Profile) => profile.name);
+  const accountsOfProfiles = removedSelfProfiles.map(
+    async (profile: Profile) => await GetAccountByAccountId(profile.account_Id)
+  );
+  if (
+    accountsOfProfiles.some((data: PrismaData) => data.status === 'Failure')
+  ) {
+    return {
+      status: 'Failure',
+      data: null,
+      error: accountsOfProfiles.find(
+        (data: PrismaData) => data.status === 'Failure'
+      )?.error,
+    };
+  }
+  const resolvedAccounts = await Promise.all(accountsOfProfiles);
+  console.log('resolved accounts', resolvedAccounts, resolvedAccounts[0]);
+
+  const accountEmails = resolvedAccounts.map(
+    (account: PrismaData) => account.data.email
+  );
+  console.log('account emails', accountEmails);
+
+  const notificationData = {
+    outing_id,
+    outing_name: outing.data.name,
+    start_date_and_time: outing.data.start_date_and_time,
+    senderName: sender_profile.data.name,
+    names,
+  };
+
+  const generatedEmail = GenerateOutingJoinedEmail(notificationData);
+  const emailsToSend = generatedEmail.map((email) => generator.generate(email));
+  console.log('emails to send', emailsToSend.length);
+
+  const mailOptions = emailsToSend.map((email: Email, index: number) => {
+    return {
+      from: process.env.GMAIL_EMAIL,
+      to: accountEmails[index],
+      subject: 'Bar Crawl Invite',
+      html: email,
+    };
+  });
+  const emailResponse = await Promise.allSettled(
+    mailOptions.map((mailOption: Record<string, any>) =>
+      transporter.sendMail(mailOption)
+    )
+  );
+  emailResponse.forEach((response: any, index: number) => {
+    if (response.status === 'rejected') {
+      console.log(`Error sending some emails\n` + response.reason);
+    }
+  });
+  const successfulEmails = emailResponse.filter(
+    (response: any) => response.status === 'fulfilled'
+  );
+  const successString = successfulEmails.length > 1 ? 's' : '';
+  return {
+    status: 'Success',
+    data: `Sucessfully sent ${successfulEmails.length} email${successString}!`,
+    error: null,
+  };
 }

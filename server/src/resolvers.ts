@@ -31,9 +31,10 @@ import {
   DeleteOuting,
   DisconnectUserWithOuting,
   SendOutingInvites,
+  SendOutingJoinedNotification,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
-import { Profile } from '@prisma/client';
+import { Account, Profile } from '@prisma/client';
 import { AddFriend } from './prisma/mutations/friendsMutations';
 import {
   GetAllFriendships,
@@ -355,8 +356,6 @@ const resolvers: Resolvers = {
           },
         });
       } else {
-        console.log(requests.data, 'notifications for user:', id);
-
         return requests.data;
       }
     },
@@ -568,19 +567,19 @@ const resolvers: Resolvers = {
         senderName: profile.data.name,
       };
 
-      const outing = await SendOutingInvites(inviteArgs);
+      const status = await SendOutingInvites(inviteArgs);
 
-      if (outing.status === 'Failure') {
+      if (status.status === 'Failure') {
         throw new GraphQLError('Cannot send outing invites', {
           extensions: {
-            code: outing.error?.name,
-            message: outing.error?.message,
-            prismaMeta: outing.error?.meta,
-            prismaErrorCode: outing.error?.errorCode,
+            code: status.error?.name,
+            message: status.error?.message,
+            prismaMeta: status.error?.meta,
+            prismaErrorCode: status.error?.errorCode,
           },
         });
       } else {
-        return outing.data;
+        return status.data;
       }
     },
     ConnectUserWithOuting: async (parent, args, context, info) => {
@@ -726,84 +725,24 @@ const resolvers: Resolvers = {
         });
       }
       const { outing_id } = args;
-      console.log('notification resolver is called');
 
-      const profilesInOuting = await GetAcceptedProfilesInOuting(outing_id);
-      // TODO add error handling
-      console.log('Total profiles in outing', profilesInOuting.data.length);
-
-      const notificationResponses = profilesInOuting.data.map(
-        async (profile: Profile) => {
-          console.log(profile.id, sender_profile.data.id);
-
-          if (profile.id !== sender_profile.data.id) {
-            return await GenerateOutingNotificationWithMachine(
-              profile.id, // recipient_profile_id
-              sender_profile.data.id,
-              outing_id
-            );
-          } else {
-            return null;
-          }
-        }
+      const status = await SendOutingJoinedNotification(
+        outing_id,
+        sender_profile
       );
-      // notificationResponses is an array of objects each with a status, data and error property
-      // we need to loop  through all the responses and check if any of them have a status of Failure
-      // log that error
-      // if however at least one notifaction succeeds, we return a successful response
-      // if none of them succeed then we return a failure response
-      console.log(notificationResponses);
 
-      const resolvedNotificationResponses = await Promise.all(
-        notificationResponses
-      );
-      const noNullResponses = resolvedNotificationResponses.filter(
-        (response) => {
-          if (response) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-      );
-      console.log('no null length', noNullResponses.length);
-
-      const successfulResponses = noNullResponses.filter((response: any) => {
-        console.log(response);
-        if (response.status === 'Success') {
-          return true;
-        } else {
-          return false;
-        }
-      });
-      const failedResponses = noNullResponses.filter((response: any) => {
-        if (response.status === 'Failure') {
-          return true;
-        } else {
-          return false;
-        }
-      });
-
-      if (failedResponses.length) {
-        failedResponses.forEach((response: any) => console.log(response.error));
-      }
-
-      console.log(successfulResponses.length, failedResponses.length);
-
-      if (successfulResponses.length) {
-        return successfulResponses;
-      } else {
-        // NOTE what kind data do we throw here?
-        // do we attach the data from the first failed response?
-        throw new GraphQLError('Cannot generate outing notifications', {
+      if (status.status === 'Failure') {
+        throw new GraphQLError('Cannot generate outing joined notifications', {
           extensions: {
-            code: failedResponses[0].error?.name,
-            message: failedResponses[0].error?.message,
-            prismaMeta: failedResponses[0].error?.meta,
-            prismaErrorCode: failedResponses[0].error?.errorCode,
+            code: status.error?.name,
+            message: status.error?.message,
+            prismaMeta: status.error?.meta,
+            prismaErrorCode: status.error?.errorCode,
           },
         });
       }
+
+      return status.data;
     },
     openNotification: async (parent, args, context, info) => {
       const { authError, profile } = context;
