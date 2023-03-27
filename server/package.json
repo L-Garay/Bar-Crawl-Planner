@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.ts",
+  "main": "./src/index.js",
   "dependencies": {
     "@apollo/server": "^4.0.1",
     "@googlemaps/google-maps-services-js": "^3.3.26",
