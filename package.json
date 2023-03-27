@@ -10,5 +10,11 @@
   "dependencies": {
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.40"
+  },
+  "scripts": {
+    "serverUnitTests": "cd server && npm run unitTests"
+  },
+  "engines": {
+    "node": "^16.18.0"
   }
 }

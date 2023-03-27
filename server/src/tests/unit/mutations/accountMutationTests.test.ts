@@ -5,9 +5,9 @@ import { prismaMock } from '../../../utilities/prismaClientSingleton';
 // which then fails because that file has a bunch of dependencies that are not mocked
 // however, this should just be testing the prisma client and methods, shouldn't need the resolver or graphql at all
 // NOTE not sure if this test actually passes or not yet
-describe.skip('accountMutations', () => {
-  describe.skip('CreateAccount', () => {
-    it.skip('should create an account', async () => {
+describe('accountMutations', () => {
+  describe('CreateAccount', () => {
+    it('should create an account', async () => {
       const account = {
         id: 1,
         email: 'test@mail.com',
