@@ -27,7 +27,8 @@
     "xstate": "^4.37.0"
   },
   "scripts": {
-    "start": "node ./src/index.ts",
+    "build": "npm run generateAndCompile",
+    "start": "node index.js",
     "compile": "rimraf ./dist && npm run codegen && tsc",
     "generateAndCompile": "npx prisma generate && npm run compile",
     "compileAndStart": "npm run generateAndCompile && npm run startCompiled",
