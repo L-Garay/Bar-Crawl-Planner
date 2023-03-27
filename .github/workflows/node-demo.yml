@@ -24,3 +24,5 @@ jobs:
       - name: List files in /server directory
         run: | 
           ls ${{github.workspace}}/server
+      - name: Run unit tests
+        run: npm run serverUnitTests
