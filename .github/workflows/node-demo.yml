@@ -25,4 +25,5 @@ jobs:
         run: | 
           ls ${{github.workspace}}/server
       - name: Run unit tests
-        run: npm run serverUnitTests
+        run: npm ci
+      - run: npm run serverUnitTests
