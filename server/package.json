@@ -29,7 +29,7 @@
   "scripts": {
     "build": "npm run generateAndCompile",
     "start": "node index.js",
-    "compile": "rimraf ./dist && npm run codegen && tsc",
+    "compile": "npm run codegen && tsc",
     "generateAndCompile": "npx prisma generate && npm run compile",
     "compileAndStart": "npm run generateAndCompile && npm run startCompiled",
     "startCompiled": "node ./dist/index.js",
