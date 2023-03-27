@@ -13,5 +13,8 @@
   },
   "scripts": {
     "serverUnitTests": "cd server && npm run unitTests"
+  },
+  "engines": {
+    "node": "^16.18.0"
   }
 }
