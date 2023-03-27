@@ -11,15 +11,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use Node.js ${{env.NODE_VERSION }}
+      - name: Use Node.js ${{vars.NODE_VERSION }}
         uses: actions/setup-node@v3
         with:
-          node-version: ${{env.NODE_VERSION}}
+          node-version: ${{vars.NODE_VERSION}}
       - name: List files in /server directory
         run: | 
           ls ${{github.workspace}}/server
       - name: List current NODE_VERSION
-        run: echo "The current version is ${{env.NODE_VERSION}}"
+        run: echo "The current version is ${{vars.NODE_VERSION}}"
       - name: Run unit tests
         run: npm ci
       - run: npm run serverUnitTests
