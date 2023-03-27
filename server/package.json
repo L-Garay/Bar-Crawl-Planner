@@ -2,7 +2,6 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.js",
   "dependencies": {
     "@apollo/server": "^4.0.1",
     "@googlemaps/google-maps-services-js": "^3.3.26",
@@ -28,6 +27,7 @@
     "xstate": "^4.37.0"
   },
   "scripts": {
+    "start": "node ./src/index.ts",
     "compile": "rimraf ./dist && npm run codegen && tsc",
     "generateAndCompile": "npx prisma generate && npm run compile",
     "compileAndStart": "npm run generateAndCompile && npm run startCompiled",
