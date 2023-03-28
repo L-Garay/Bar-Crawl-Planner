@@ -20,6 +20,6 @@
     "start": "concurrently \"npm run startClient\" \"npm run startServer\""
   },
   "engines": {
-    "node": "^16.18.0"
+    "node": "^16.19.1"
   }
 }
