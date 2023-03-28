@@ -28,6 +28,8 @@ const getConfig = () => {
     process.env.GOOGLE_MAPS_API_KEY,
     'GOOGLE_MAPS_API_KEY is undefined'
   );
+  invariant(process.env.GMAIL_EMAIL, 'GMAIL_EMAIL is undefined');
+  invariant(process.env.GMAIL_PASSWORD, 'GMAIL_PASSWORD is undefined');
 
   const SERVER_ADDRESS = process.env.SERVER_ADDRESS!;
   const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID!;
@@ -42,6 +44,8 @@ const getConfig = () => {
   const AUTH0_CALLBACK_URL = process.env.AUTH0_CALLBACK_URL!;
   const LOGIN_PAGE = process.env.LOGIN_PAGE!;
   const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY!;
+  const GMAIL_EMAIL = process.env.GMAIL_EMAIL!;
+  const GMAIL_PASSWORD = process.env.GMAIL_PASSWORD!;
 
   const config = {
     AUTH0: {
@@ -62,6 +66,8 @@ const getConfig = () => {
     },
     GOOGLE: {
       API_KEY: GOOGLE_MAPS_API_KEY,
+      GMAIL_EMAIL,
+      GMAIL_PASSWORD,
     },
   } as const;
 
