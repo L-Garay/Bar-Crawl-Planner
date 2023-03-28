@@ -12,7 +12,11 @@
     "moment-timezone": "^0.5.40"
   },
   "scripts": {
-    "serverUnitTests": "cd server && npm run unitTests"
+    "serverUnitTests": "cd server && npm run unitTests",
+    "buildClient": "cd client && npm run build",
+    "buildServer": "cd server && npm run generateAndCompile",
+    "startClient": "cd client && npm run start",
+    "startServer": "cd server && npm run startCompiled"
   },
   "engines": {
     "node": "^16.18.0"
