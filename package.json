@@ -16,7 +16,8 @@
     "buildClient": "cd client && npm run build",
     "buildServer": "cd server && npm run generateAndCompile",
     "startClient": "cd client && npm run start",
-    "startServer": "cd server && npm run startCompiled"
+    "startServer": "cd server && npm run startCompiled",
+    "start": "concurrently \"npm run startClient\" \"npm run startServer\""
   },
   "engines": {
     "node": "^16.18.0"
