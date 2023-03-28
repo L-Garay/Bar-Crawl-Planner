@@ -11,7 +11,26 @@
 //
 //
 // -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
+Cypress.Commands.add('login', (username: string, password: string) => {
+  const log = Cypress.log({
+    name: 'loginViaAuth0',
+  });
+  log.snapshot('before');
+  cy.origin(
+    'https://dev-3e11guxw7tjwfmjk.us.auth0.com',
+    { args: { username, password } },
+    ({ username, password }) => {
+      cy.contains('h1', 'Welcome');
+      cy.get('input[id="username"]').type(username);
+      cy.get('input[id="password"]').type(password);
+      cy.get('button[name="action"]').click();
+    }
+  );
+  log.snapshot('after');
+  log.end();
+
+  cy.url().should('include', 'localhost:3000/homepage');
+});
 //
 //
 // -- This is a child command --
