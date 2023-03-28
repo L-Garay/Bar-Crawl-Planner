@@ -9,7 +9,7 @@ on:
 jobs:
   Login-With-Auth0:
     runs-on: ubuntu-latest
-    # container: cypress/included:12.9.0
+    container: cypress/included:12.0.0
     steps:
       - name: List current NODE_VERSION
         run: echo "The current version is ${{vars.NODE_VERSION}}"
