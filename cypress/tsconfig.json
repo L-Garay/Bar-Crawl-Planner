@@ -1,0 +1,21 @@
+{
+   "include": ["**/**.ts"],
+   "compilerOptions": {
+    "rootDir": "cypress",
+     "outDir": "cypress/dist",
+     "lib": ["ES2018", "dom"],
+     "isolatedModules": true,
+     "esModuleInterop": true,
+     "resolveJsonModule": true,
+     "target": "ES2018",
+     "module": "CommonJS",
+     "moduleResolution": "Node",
+     "types": ["cypress", "@testing-library/cypress", "node"],
+     "strict": true,
+     "allowJs": true,
+     "useUnknownInCatchVariables": false,
+     "noImplicitReturns": true,
+     "forceConsistentCasingInFileNames": true,
+   },
+   "compileOnSave":false
+ }
