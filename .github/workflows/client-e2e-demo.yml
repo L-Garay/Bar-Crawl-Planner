@@ -13,14 +13,10 @@ jobs:
     steps:
       - name: List current NODE_VERSION
         run: echo "The current version is ${{vars.NODE_VERSION}}"
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{vars.NODE_VERSION }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{vars.NODE_VERSION}}
+      - name: Checkout code
+        uses: actions/checkout@v3
       - name: Cypress run
         uses: cypress-io/github-action@v5.5.1
         with:
           browser: firefox
-          build: npm run buildClient && npm run buildServer
-          start: npm run startClient && npm run startServer
+          start: npm run startServer && npm run startClient
