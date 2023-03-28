@@ -9,6 +9,7 @@ on:
 jobs:
   Login-With-Auth0:
     runs-on: ubuntu-latest
+    container: cypress/browsers:node12.18.3-chrome87-ff82
     steps:
       - name: List current NODE_VERSION
         run: echo "The current version is ${{vars.NODE_VERSION}}"
