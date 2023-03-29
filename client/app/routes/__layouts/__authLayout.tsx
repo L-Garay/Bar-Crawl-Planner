@@ -6,8 +6,6 @@ import { BasicHeader } from '~/components/organisms/Headers';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 import footerStyles from '~/generatedStyles/footer.css';
 import headerStyles from '~/generatedStyles/header.css';
-import { useQuery } from '@apollo/client';
-import { useMemo } from 'react';
 
 export const links: LinksFunction = () => {
   return [
