@@ -6,7 +6,6 @@ import { BasicHeader } from '~/components/organisms/Headers';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 import footerStyles from '~/generatedStyles/footer.css';
 import headerStyles from '~/generatedStyles/header.css';
-import { GET_NEW_NOTIFICATIONS_COUNT } from '~/constants/graphqlConstants';
 import { useQuery } from '@apollo/client';
 import { useMemo } from 'react';
 
@@ -37,20 +36,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function AuthLayout() {
-  const {
-    data: countData,
-    loading: countLoading,
-    error: countError,
-  } = useQuery(GET_NEW_NOTIFICATIONS_COUNT);
-
-  const count = useMemo(() => {
-    if (!countData || !countData.getNewNotificationCount) return 0;
-    return countData.getNewNotificationCount;
-  }, [countData]);
-
   return (
     <>
-      <BasicHeader count={count} />
+      <BasicHeader />
       <Outlet />
       <BasicFooter />
     </>

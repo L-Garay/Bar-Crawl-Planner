@@ -327,7 +327,7 @@ export async function SendOutingInvites({
   };
 }
 
-export async function SendOutingJoinedNotification(
+export async function SendOutingJoinedEmails(
   outing_id: number,
   sender_profile: PrismaData
 ) {

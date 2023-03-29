@@ -149,12 +149,6 @@ const typeDefs = `#graphql
     getAllOutings: [Outing]
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
-    getAllFriendships: [Friendship]
-    getAllNotifications: [Notification]
-    getFriendRequests: [Notification]
-    getSentFriendRequests: [Notification]
-    getNewNotificationCount: Int
-    getFriendshipStatus(target_id: Int!): FriendshipStatus
   }
 
   input NofiticationInput {
@@ -198,23 +192,7 @@ const typeDefs = `#graphql
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
-    generateOutingNotification(outing_id: Int!): String
-    generateFriendRequest(addressee_profile_id: Int!): Notification
-    openNotification(
-      type_code: String!
-      notification_created_at: String!
-      id: Int!
-    ): NotificationStatus
-    acceptFriendRequest(
-      sender_profile_id: Int!
-      addressee_profile_id: Int!
-      notification_created_at: String!
-      notification_id: Int!
-    ): NotificationStatus
-    declineFriendRequest(
-      notification_id: Int!
-      notification_created_at: String!
-  ): NotificationStatus
+    sendOutingJoinedEmails(outing_id: Int!): String
   }
 `;
 

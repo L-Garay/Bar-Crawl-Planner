@@ -6,12 +6,9 @@ import { getNewClient } from '~/apollo/getClient';
 import { authenticator } from '~/auth/authenticator';
 import {
   DELETE_OUTING,
-  GENERATE_FRIEND_REQUEST,
   GET_ACCOUNT_WITH_PROFILE_DATA,
-  GET_FRIEND_REQUESTS,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
-  GET_SENT_FRIEND_REQUESTS,
   SEND_OUTING_EMAIL,
   UPDATE_OUTING,
 } from '~/constants/graphqlConstants';
@@ -19,7 +16,6 @@ import {
 import logApolloError from '~/utils/getApolloError';
 import EditIcon from '~/components/svgs/editIcon';
 import moment from 'moment';
-import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
 
 export const action: ActionFunction = async ({ request, params }) => {
@@ -142,23 +138,6 @@ export default function OutingDetails() {
   const [showEditDate, setShowEditDate] = useState(false);
 
   const transition = useTransition();
-
-  // NOTE this is what we'd replace with a mutation to trigger a transition in the notification state machine
-  const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST, {
-    refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
-  });
-  const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
-  const { data: friendRequestData } = useQuery(GET_FRIEND_REQUESTS);
-
-  const sentRequests = useMemo(() => {
-    if (!sentRequestData || !sentRequestData.getSentFriendRequests) return [];
-    return sentRequestData.getSentFriendRequests;
-  }, [sentRequestData]);
-
-  const recievedRequests = useMemo(() => {
-    if (!friendRequestData || !friendRequestData.getFriendRequests) return [];
-    return friendRequestData.getFriendRequests;
-  }, [friendRequestData]);
 
   const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;
@@ -315,11 +294,7 @@ export default function OutingDetails() {
                   <ProfileInOuting
                     key={profile.id}
                     profile={profile}
-                    sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Accepted"
-                    currentUser={getAccountWithProfileData.profile.id}
-                    sentRequests={sentRequests}
-                    recievedRequests={recievedRequests}
                   />
                 );
               })}
@@ -332,11 +307,7 @@ export default function OutingDetails() {
                   <ProfileInOuting
                     key={profile.id}
                     profile={profile}
-                    sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Pending"
-                    currentUser={getAccountWithProfileData.profile.id}
-                    sentRequests={sentRequests}
-                    recievedRequests={recievedRequests}
                   />
                 );
               })}
@@ -349,11 +320,7 @@ export default function OutingDetails() {
                   <ProfileInOuting
                     key={profile.id}
                     profile={profile}
-                    sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Declined"
-                    currentUser={getAccountWithProfileData.profile.id}
-                    sentRequests={sentRequests}
-                    recievedRequests={recievedRequests}
                   />
                 );
               })}
