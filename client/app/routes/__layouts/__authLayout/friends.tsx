@@ -1,7 +1,7 @@
 import type { LinksFunction } from '@remix-run/node';
 import {
   GET_ALL_FRIENDSHIPS,
-  GET_FRIEND_REQUESTS,
+  GET_RECIEVED_FRIEND_REQUESTS,
   GET_SENT_FRIEND_REQUESTS,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
@@ -25,8 +25,9 @@ export default function FriendsIndex() {
     GET_SENT_FRIEND_REQUESTS
   );
 
-  const { data: recievedData, error: recievedError } =
-    useQuery(GET_FRIEND_REQUESTS);
+  const { data: recievedData, error: recievedError } = useQuery(
+    GET_RECIEVED_FRIEND_REQUESTS
+  );
 
   const friends = useMemo(() => {
     // NOTE these are friendships, not profiles or notifications
@@ -42,8 +43,10 @@ export default function FriendsIndex() {
 
   const recievedRequests = useMemo(() => {
     // NOTE these are notifications, not friendships
-    if (!recievedData || !recievedData.getFriendRequests) return [];
-    return recievedData.getFriendRequests;
+    console.log('recievedData', recievedData);
+
+    if (!recievedData || !recievedData.getRecievedFriendRequests) return [];
+    return recievedData.getRecievedFriendRequests;
   }, [recievedData]);
 
   console.log('all friends', friends); // these are friendships, not users
@@ -67,15 +70,19 @@ export default function FriendsIndex() {
         <h1>This will be the friends page</h1>
         <div className="friends-lists">
           <div className="friend-requests list">
-            <h5>Your friend requests</h5>
+            <h5>Your recieved friend requests</h5>
             <div>
               <ul>
                 {/* we need to get the friend's profile data to display here */}
                 {recievedRequests.map((request: any) => {
                   return (
                     <li key={request.id}>
-                      From: {request.sender_profile_id} created at:{' '}
-                      {request.created_at}
+                      From: {request.requestor_profile_id} created at:{' '}
+                      {request.created_at}{' '}
+                      <span style={{ display: 'block' }}>
+                        <button>Accept</button>
+                        <button>Decline</button>
+                      </span>
                     </li>
                   );
                 })}
@@ -108,7 +115,7 @@ export default function FriendsIndex() {
             </div>
           </div>
           <div className="sent-requests list">
-            <h5>Pending Requests</h5>
+            <h5>Pending sent requests</h5>
             <div>
               <ul>
                 {/* we need to get the friend's profile data to display here */}

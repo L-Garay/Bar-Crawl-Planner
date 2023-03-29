@@ -106,11 +106,7 @@ export const GET_ALL_FRIENDSHIPS = gql`
       id
       requestor_profile_id
       addressee_profile_id
-      frienshipStatus_friendship_relation {
-        status_code
-        modifier_profile_id
-        created_at
-      }
+      status_code
     }
   }
 `;
@@ -302,26 +298,18 @@ export const GET_SENT_FRIEND_REQUESTS = gql`
     getSentFriendRequests {
       id
       addressee_profile_id
-      sender_profile_id
+      requestor_profile_id
       created_at
     }
   }
 `;
 
-export const GET_FRIENDSHIP_STATUS = gql`
-  query getFriendshipStatus($target_id: Int!) {
-    getFriendshipStatus(target_id: $target_id) {
-      status_code
-    }
-  }
-`;
-
-export const GET_FRIEND_REQUESTS = gql`
-  query getFriendRequests {
-    getFriendRequests {
+export const GET_RECIEVED_FRIEND_REQUESTS = gql`
+  query getRecievedFriendRequests {
+    getRecievedFriendRequests {
       id
       addressee_profile_id
-      sender_profile_id
+      requestor_profile_id
       created_at
     }
   }
