@@ -1,6 +1,6 @@
 import { assign, createMachine } from 'xstate';
 import prismaClient from '..';
-import { AddFriend } from '../prisma/mutations/friendsMutations';
+// import { AddFriend } from '../prisma/mutations/friendsMutations';
 
 // can start the machine when the user hits the /authenticate route (if they are properly authenticated)
 // at that point we know we they are a registered user who can start using the machine
@@ -179,7 +179,7 @@ const notificationMachine = createMachine(
       },
       addFriend: async (context, event) => {
         const { sender_profile_id, addressee_profile_id } = event;
-        await AddFriend(sender_profile_id, addressee_profile_id);
+        // await AddFriend(sender_profile_id, addressee_profile_id);
       },
       deleteNotification: (context, event) => {
         // use context and event to update notification status to deleted
