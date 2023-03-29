@@ -34,17 +34,12 @@ import {
   SendOutingJoinedNotification,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
-import { Account, Profile } from '@prisma/client';
-import { AddFriend } from './prisma/mutations/friendsMutations';
-import {
-  GetAllFriendships,
-  GetFriendshipStatus,
-} from './prisma/querries/friendsQuerries';
+import { Profile } from '@prisma/client';
+import { GenerateFriendRequestAndEmail } from './prisma/mutations/friendsMutations';
+import { GetAllFriendships } from './prisma/querries/friendsQuerries';
 import {
   AcceptFriendRequest,
   DeclineFriendRequest,
-  GenerateFriendRequestWithMachine,
-  GenerateOutingNotificationWithMachine,
   OpenNotification,
 } from './prisma/mutations/notificationMutations';
 import {
@@ -381,29 +376,6 @@ const resolvers: Resolvers = {
         return requests.data;
       }
     },
-    getFriendshipStatus: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { id: user_id } = profile.data;
-      const { target_id } = args;
-      const status = await GetFriendshipStatus(user_id, target_id);
-      if (status.status === 'Failure') {
-        throw new GraphQLError('Cannot get friendship status', {
-          extensions: {
-            code: status.error?.name,
-            message: status.error?.message,
-            prismaMeta: status.error?.meta,
-            prismaErrorCode: status.error?.errorCode,
-          },
-        });
-      } else {
-        return status.data;
-      }
-    },
   },
   Mutation: {
     updateUserAccount: async (parent, args, context, info) => {
@@ -700,9 +672,9 @@ const resolvers: Resolvers = {
       }
       const { addressee_profile_id } = args;
 
-      const notificationResponse = await GenerateFriendRequestWithMachine(
-        addressee_profile_id, // recipient_profile_id
-        sender_profile.data.id // sender_profile_id
+      const notificationResponse = await GenerateFriendRequestAndEmail(
+        addressee_profile_id,
+        sender_profile.data.id
       );
       if (notificationResponse.status === 'Failure') {
         throw new GraphQLError('Cannot generate friend request', {

@@ -101,16 +101,9 @@ const typeDefs = `#graphql
     requestor_profile_id: Int
     addressee_profile_id: Int
     created_at: String
-    frienshipStatus_friendship_relation: [FriendshipStatus]
-    notification_addressee_relation: Profile
-  }
-
-  type FriendshipStatus {
-    requestor_profile_id: Int
-    addressee_profile_id: Int
-    modifier_profile_id: Int
-    created_at: String
     status_code: String
+    last_modified_by: Int
+    modified_at: String
   }
 
   type Notification {
@@ -154,7 +147,6 @@ const typeDefs = `#graphql
     getFriendRequests: [Notification]
     getSentFriendRequests: [Notification]
     getNewNotificationCount: Int
-    getFriendshipStatus(target_id: Int!): FriendshipStatus
   }
 
   input NofiticationInput {
