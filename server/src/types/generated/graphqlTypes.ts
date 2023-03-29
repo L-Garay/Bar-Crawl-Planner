@@ -289,11 +289,11 @@ export type Query = {
   getAllFriendships?: Maybe<Array<Maybe<Friendship>>>;
   getAllNotifications?: Maybe<Array<Maybe<Notification>>>;
   getAllOutings?: Maybe<Array<Maybe<Outing>>>;
-  getFriendRequests?: Maybe<Array<Maybe<Notification>>>;
   getNewNotificationCount?: Maybe<Scalars['Int']>;
   getOuting?: Maybe<Outing>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
-  getSentFriendRequests?: Maybe<Array<Maybe<Notification>>>;
+  getRecievedFriendRequests?: Maybe<Array<Maybe<Friendship>>>;
+  getSentFriendRequests?: Maybe<Array<Maybe<Friendship>>>;
   getUserAccount?: Maybe<Account>;
   profile?: Maybe<Profile>;
   profiles?: Maybe<Array<Maybe<Profile>>>;
@@ -579,11 +579,11 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getAllFriendships?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getAllNotifications?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>;
   getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
-  getFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>;
   getNewNotificationCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
-  getSentFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>;
+  getRecievedFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
+  getSentFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;

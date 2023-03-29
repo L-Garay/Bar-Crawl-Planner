@@ -36,7 +36,11 @@ import {
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
 import { GenerateFriendRequestAndEmail } from './prisma/mutations/friendsMutations';
-import { GetAllFriendships } from './prisma/querries/friendsQuerries';
+import {
+  GetAllFriendships,
+  GetRecievedFriendRequests,
+  GetSentFriendRequests,
+} from './prisma/querries/friendsQuerries';
 import {
   AcceptFriendRequest,
   DeclineFriendRequest,
@@ -44,9 +48,7 @@ import {
 } from './prisma/mutations/notificationMutations';
 import {
   GetAllNotifications,
-  GetFriendRequests,
   GetNewNotificationCount,
-  GetSentFriendRequests,
 } from './prisma/querries/notificationQuerries';
 
 const resolvers: Resolvers = {
@@ -354,7 +356,7 @@ const resolvers: Resolvers = {
         return requests.data;
       }
     },
-    getFriendRequests: async (parent, args, context, info) => {
+    getRecievedFriendRequests: async (parent, args, context, info) => {
       const { authError, profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -362,7 +364,8 @@ const resolvers: Resolvers = {
         });
       }
       const { id } = profile.data;
-      const requests = await GetFriendRequests(id);
+      const requests = await GetRecievedFriendRequests(id);
+
       if (requests.status === 'Failure') {
         throw new GraphQLError('Cannot get friend requests', {
           extensions: {

@@ -144,8 +144,8 @@ const typeDefs = `#graphql
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]
     getAllNotifications: [Notification]
-    getFriendRequests: [Notification]
-    getSentFriendRequests: [Notification]
+    getRecievedFriendRequests: [Friendship]
+    getSentFriendRequests: [Friendship]
     getNewNotificationCount: Int
   }
 
