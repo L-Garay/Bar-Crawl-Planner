@@ -22,22 +22,19 @@ model Account {
 }
 
 model Profile {
-  id                              Int                  @id @unique @default(autoincrement())
-  name                            String               @default("") @db.VarChar(255)
-  profile_img                     String               @default("") @db.VarChar(255)
-  updated_at                      String               @default("") @db.VarChar(255)
-  account                         Account              @relation(fields: [account_Id], references: [id])
-  account_Id                      Int                  @unique
-  accepted_outings                Outing[]             @relation(name: "Accepted_Profiles")
-  pending_outings                 Outing[]             @relation(name: "Pending_Profiles")
-  declined_outings                Outing[]             @relation(name: "Declined_Profiles")
-  social_pin                      String               @unique @default("") @db.VarChar(255)
-  requestor_profile_relation      Friendship[]         @relation("Requestor_Profile")
-  addressee_profile_relation      Friendship[]         @relation("Addressee_Profile")
-  modifier_profile_relation       FriendshipStatus[]   @relation("Modifier_Profile")
-  notification_sender_relation    Notification[]       @relation("Notification_Sender")
-  notification_addressee_relation Notification[]       @relation("Notification_Addressee")
-  notification_modifier_relation  NotificationStatus[] @relation("Notification_Modifier")
+  id                         Int                @id @unique @default(autoincrement())
+  name                       String             @default("") @db.VarChar(255)
+  profile_img                String             @default("") @db.VarChar(255)
+  updated_at                 String             @default("") @db.VarChar(255)
+  account                    Account            @relation(fields: [account_Id], references: [id])
+  account_Id                 Int                @unique
+  accepted_outings           Outing[]           @relation(name: "Accepted_Profiles")
+  pending_outings            Outing[]           @relation(name: "Pending_Profiles")
+  declined_outings           Outing[]           @relation(name: "Declined_Profiles")
+  social_pin                 String             @unique @default("") @db.VarChar(255)
+  requestor_profile_relation Friendship[]       @relation("Requestor_Profile")
+  addressee_profile_relation Friendship[]       @relation("Addressee_Profile")
+  modifier_profile_relation  FriendshipStatus[] @relation("Modifier_Profile")
 }
 
 model Friendship {
@@ -69,50 +66,6 @@ model FriendshipStatus {
   friendshipStatus_friendshipStates_relation FriendshipStates @relation(fields: [status_code], references: [status_code])
 
   @@id([requestor_profile_id, addressee_profile_id, created_at])
-}
-
-// TODO give each notification a simple int id instead of the composite ids
-// see if that makes relationships easier to handle between notifications and statuses
-model Notification {
-  id                              Int                  @id @default(autoincrement())
-  sender_profile_id               Int
-  notification_sender_relation    Profile              @relation("Notification_Sender", fields: [sender_profile_id], references: [id])
-  addressee_profile_id            Int
-  notification_addressee_relation Profile              @relation("Notification_Addressee", fields: [addressee_profile_id], references: [id])
-  created_at                      String               @db.VarChar(255)
-  type_code                       String               @db.VarChar(5)
-  notification_type_relation      NotificationType     @relation(fields: [type_code], references: [type_code])
-  notification_relation           NotificationStatus[]
-  outing_id                       Int?
-
-  @@unique([sender_profile_id, addressee_profile_id, created_at])
-}
-
-model NotificationType {
-  type_code                         String               @id @db.VarChar(5)
-  type_name                         String               @db.VarChar(255)
-  notification_type_relation        Notification[]
-  notification_type_status_relation NotificationStatus[]
-}
-
-model NotificationStates {
-  status_code                  String               @id @db.VarChar(5)
-  status_name                  String               @db.VarChar(255)
-  notification_status_relation NotificationStatus[]
-}
-
-model NotificationStatus {
-  id                                Int                @id @default(autoincrement())
-  notification_id                   Int
-  notification_relation             Notification       @relation(fields: [notification_id], references: [id])
-  modifier_profile_id               Int
-  notification_modifier_relation    Profile            @relation("Notification_Modifier", fields: [modifier_profile_id], references: [id])
-  notification_created_at           String             @db.VarChar(255)
-  modified_at                       String             @db.VarChar(255)
-  status_code                       String             @db.VarChar(5)
-  notification_status_relation      NotificationStates @relation(fields: [status_code], references: [status_code])
-  type_code                         String             @db.VarChar(5)
-  notification_type_status_relation NotificationType   @relation(fields: [type_code], references: [type_code])
 }
 
 model Outing {
