@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "npm run generateAndCompile",
-    "start": "node index.js",
+    "start": "node ./dist/index.js",
     "compile": "npm run codegen && tsc",
     "generateAndCompile": "npx prisma generate && npm run compile",
     "compileAndStart": "npm run generateAndCompile && npm run startCompiled",
@@ -66,6 +66,6 @@
     "schema": "./src/prisma/schema.prisma"
   },
   "engines": {
-    "node": "^16.18.0"
+    "node": "^16.19.1"
   }
 }
