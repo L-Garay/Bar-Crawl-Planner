@@ -14,9 +14,6 @@ export async function AddFriend(
         created_at: new Date().toISOString(),
         requestor_profile_id,
         addressee_profile_id,
-        status_code: 'p',
-        modified_at: new Date().toISOString(),
-        last_modified_by: requestor_profile_id,
       },
     });
     return { status: 'Success', data: friend, error: null };
