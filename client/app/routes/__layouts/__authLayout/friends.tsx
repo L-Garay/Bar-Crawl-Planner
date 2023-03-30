@@ -1,11 +1,12 @@
 import type { LinksFunction } from '@remix-run/node';
 import {
+  UPDATE_FRIEND,
   GET_ALL_FRIENDSHIPS,
   GET_RECIEVED_FRIEND_REQUESTS,
   GET_SENT_FRIEND_REQUESTS,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useMemo } from 'react';
 
 export const links: LinksFunction = () => {
@@ -29,22 +30,28 @@ export default function FriendsIndex() {
     GET_RECIEVED_FRIEND_REQUESTS
   );
 
+  const [updateFriend, { data: updateData, error: updateError }] = useMutation(
+    UPDATE_FRIEND,
+    {
+      refetchQueries: [
+        GET_ALL_FRIENDSHIPS,
+        GET_RECIEVED_FRIEND_REQUESTS,
+        GET_SENT_FRIEND_REQUESTS,
+      ],
+    }
+  );
+
   const friends = useMemo(() => {
-    // NOTE these are friendships, not profiles or notifications
     if (!friendsData || !friendsData.getAllFriendships) return [];
     return friendsData.getAllFriendships;
   }, [friendsData]);
 
   const sentRequests = useMemo(() => {
-    // NOTE these are notifications, not friendships
     if (!sentData || !sentData.getSentFriendRequests) return [];
     return sentData.getSentFriendRequests;
   }, [sentData]);
 
   const recievedRequests = useMemo(() => {
-    // NOTE these are notifications, not friendships
-    console.log('recievedData', recievedData);
-
     if (!recievedData || !recievedData.getRecievedFriendRequests) return [];
     return recievedData.getRecievedFriendRequests;
   }, [recievedData]);
@@ -52,12 +59,6 @@ export default function FriendsIndex() {
   console.log('all friends', friends); // these are friendships, not users
   console.log('sent requests', sentRequests); // these are notifications, not friendships or users
   console.log('recieved requests', recievedRequests); // these are notifications, not friendships or users
-
-  // TODO
-
-  // TODO I'm not sure how much detail and what kind I want to display in these lists
-  // but if we need profile information, we can easily get it from the friendship relations
-  // however, if we need to get profile information from the notifications, we will need to make a separate query using the profile_ids stored on the notifications
 
   return (
     <>
@@ -80,8 +81,42 @@ export default function FriendsIndex() {
                       From: {request.requestor_profile_id} created at:{' '}
                       {request.created_at}{' '}
                       <span style={{ display: 'block' }}>
-                        <button>Accept</button>
-                        <button>Decline</button>
+                        <button
+                          onClick={() =>
+                            updateFriend({
+                              variables: {
+                                friendship_id: request.id,
+                                status_code: 'A',
+                              },
+                            })
+                          }
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() =>
+                            updateFriend({
+                              variables: {
+                                friendship_id: request.id,
+                                status_code: 'D',
+                              },
+                            })
+                          }
+                        >
+                          Decline
+                        </button>
+                        <button
+                          onClick={() =>
+                            updateFriend({
+                              variables: {
+                                friendship_id: request.id,
+                                status_code: 'B',
+                              },
+                            })
+                          }
+                        >
+                          Block
+                        </button>
                       </span>
                     </li>
                   );
@@ -99,11 +134,21 @@ export default function FriendsIndex() {
                     {friends.map((friend: any) => {
                       return (
                         <li key={friend.id}>
-                          Friend: {friend.id} created at:{' '}
-                          {
-                            friend.frienshipStatus_friendship_relation[0]
-                              .created_at
-                          }{' '}
+                          Friend: {friend.id} created at: {friend.created_at}{' '}
+                          <span style={{ display: 'block' }}>
+                            <button
+                              onClick={() =>
+                                updateFriend({
+                                  variables: {
+                                    friendship_id: friend.id,
+                                    status_code: 'B',
+                                  },
+                                })
+                              }
+                            >
+                              Block
+                            </button>
+                          </span>
                         </li>
                       );
                     })}

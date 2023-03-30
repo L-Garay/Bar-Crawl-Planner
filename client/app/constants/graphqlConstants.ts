@@ -107,6 +107,7 @@ export const GET_ALL_FRIENDSHIPS = gql`
       requestor_profile_id
       addressee_profile_id
       status_code
+      created_at
     }
   }
 `;
@@ -333,6 +334,20 @@ export const GENERATE_FRIEND_REQUEST = gql`
         name
         profile_img
       }
+    }
+  }
+`;
+
+export const UPDATE_FRIEND = gql`
+  mutation updateFriend($friendship_id: Int!, $status_code: String!) {
+    updateFriend(friendship_id: $friendship_id, status_code: $status_code) {
+      id
+      requestor_profile_id
+      addressee_profile_id
+      created_at
+      status_code
+      last_modified_by
+      modified_at
     }
   }
 `;
