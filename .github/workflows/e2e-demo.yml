@@ -36,7 +36,8 @@ jobs:
         run: |
           npm run start:server &
           npm run start:client &
-          sleep 30
+          sleep 30 &&
+          curl http://localhost:3000
       - name: Run Cypress tests
         run: npm run cypress:run
       - name: Archive Cypress videos
@@ -44,4 +45,4 @@ jobs:
         if: failure()
         with:
           name: cypress-videos
-          path: /client/cypress/videos
+          path: /home/runner/work/Bar-Crawl-Planner/Bar-Crawl-Planner/client/cypress/videos
