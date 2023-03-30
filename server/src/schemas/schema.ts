@@ -192,9 +192,7 @@ const typeDefs = `#graphql
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
     generateOutingNotification(outing_id: Int!): String
     generateFriendRequest(addressee_profile_id: Int!): Notification
-    acceptFriend(friendship_id: Int!, addressee_profile_id: Int!): Friendship
-    declineFriend(friendship_id: Int!, addressee_profile_id: Int!): Friendship
-    blockFriend(friendship_id: Int!, addressee_profile_id: Int!): Friendship
+    updateFriend(friendship_id: Int!, status_code: String!): Friendship
     openNotification(
       type_code: String!
       notification_created_at: String!

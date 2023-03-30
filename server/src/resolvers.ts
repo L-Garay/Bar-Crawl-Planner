@@ -36,9 +36,7 @@ import {
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
 import {
-  AcceptFriend,
-  BlockFriend,
-  DeclineFriend,
+  UpdateFriend,
   GenerateFriendRequestAndEmail,
 } from './prisma/mutations/friendsMutations';
 import {
@@ -697,64 +695,22 @@ const resolvers: Resolvers = {
         return notificationResponse.data;
       }
     },
-    acceptFriend: async (parent, args, context, info) => {
+    updateFriend: async (parent, args, context, info) => {
       const { authError, profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
           extensions: { code: authError.code },
         });
       }
-      const { friendship_id } = args;
+      const { friendship_id, status_code } = args;
 
-      const status = await AcceptFriend(friendship_id, profile.data.id);
+      const status = await UpdateFriend(
+        friendship_id,
+        profile.data.id,
+        status_code
+      );
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot accept friend request', {
-          extensions: {
-            code: status.error?.name,
-            message: status.error?.message,
-            prismaMeta: status.error?.meta,
-            prismaErrorCode: status.error?.errorCode,
-          },
-        });
-      } else {
-        return status.data;
-      }
-    },
-    declineFriend: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { friendship_id } = args;
-
-      const status = await DeclineFriend(friendship_id, profile.data.id);
-      if (status.status === 'Failure') {
-        throw new GraphQLError('Cannot decline friend request', {
-          extensions: {
-            code: status.error?.name,
-            message: status.error?.message,
-            prismaMeta: status.error?.meta,
-            prismaErrorCode: status.error?.errorCode,
-          },
-        });
-      } else {
-        return status.data;
-      }
-    },
-    blockFriend: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { friendship_id } = args;
-
-      const status = await BlockFriend(friendship_id, profile.data.id);
-      if (status.status === 'Failure') {
-        throw new GraphQLError('Cannot block friend', {
           extensions: {
             code: status.error?.name,
             message: status.error?.message,

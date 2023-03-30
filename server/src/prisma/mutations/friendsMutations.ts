@@ -30,9 +30,10 @@ export async function AddFriend(
   }
 }
 
-export async function AcceptFriend(
+export async function UpdateFriend(
   friendship_id: number,
-  addressee_profile_id: number
+  addressee_profile_id: number,
+  status_code: string
 ): Promise<PrismaData> {
   try {
     const updatedFriend = await prismaClient.friendship.update({
@@ -42,49 +43,7 @@ export async function AcceptFriend(
       data: {
         modified_at: new Date().toISOString(),
         last_modified_by: addressee_profile_id,
-        status_code: 'A',
-      },
-    });
-    return { status: 'Success', data: updatedFriend, error: null };
-  } catch (error) {
-    return { status: 'Failure', data: null, error: error as PrismaError };
-  }
-}
-
-export async function DeclineFriend(
-  friendship_id: number,
-  addressee_profile_id: number
-): Promise<PrismaData> {
-  try {
-    const updatedFriend = await prismaClient.friendship.update({
-      where: {
-        id: friendship_id,
-      },
-      data: {
-        modified_at: new Date().toISOString(),
-        last_modified_by: addressee_profile_id,
-        status_code: 'D',
-      },
-    });
-    return { status: 'Success', data: updatedFriend, error: null };
-  } catch (error) {
-    return { status: 'Failure', data: null, error: error as PrismaError };
-  }
-}
-
-export async function BlockFriend(
-  friendship_id: number,
-  addressee_profile_id: number
-): Promise<PrismaData> {
-  try {
-    const updatedFriend = await prismaClient.friendship.update({
-      where: {
-        id: friendship_id,
-      },
-      data: {
-        modified_at: new Date().toISOString(),
-        last_modified_by: addressee_profile_id,
-        status_code: 'B',
+        status_code,
       },
     });
     return { status: 'Success', data: updatedFriend, error: null };
