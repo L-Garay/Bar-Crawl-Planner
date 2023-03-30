@@ -14,7 +14,7 @@
   "scripts": {
     "serverUnitTests": "cd server && npm run unitTests",
     "start": "concurrently \"npm run start:server\" \"npm run start:client\"",
-    "start:server": "cd server && npm run generateAndCompile && npm run start & sleep 10 && curl http://localhost:4000/healthcheck",
+    "start:server": "cd server && npm run generateAndCompile && npm run start & sleep 10 && curl http://localhost:3000",
     "start:client": "cd client && npm run build && npm run start & sleep 10 && curl http://localhost:3000",
     "cypress:run": "cd client && npm run cypress:run",
     "install:client": "cd client && npm install"
