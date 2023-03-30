@@ -25,6 +25,8 @@ jobs:
         run: echo "The current version is ${{vars.NODE_VERSION}}"
       - name: Install dependencies
         run: npm ci
+      - name: Install client dependencies
+        run: npm run install:client
       - name: Build and start client
         run: npm run start:client
       - name: Run Cypress tests

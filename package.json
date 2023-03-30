@@ -15,7 +15,8 @@
     "serverUnitTests": "cd server && npm run unitTests",
     "start:server": "cd server && npm run generateAndCompile && npm run start",
     "start:client": "cd client && npm run build && npm run start",
-    "cypress:run": "cd client && npm run cypress:run"
+    "cypress:run": "cd client && npm run cypress:run",
+    "install:client": "cd client && npm install"
   },
   "engines": {
     "node": "^16.19.1"
