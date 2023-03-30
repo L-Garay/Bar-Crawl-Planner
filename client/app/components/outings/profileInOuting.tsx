@@ -1,5 +1,6 @@
 import { useLazyQuery } from '@apollo/client';
 import { useEffect, useMemo } from 'react';
+import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
@@ -18,19 +19,18 @@ export const ProfileInOuting = ({
   sentRequests,
   recievedRequests,
 }: ProfileInOutingProps) => {
-  // const [getFriendshipStatus, { data: statusData }] = useLazyQuery(
-  //   GET_FRIENDSHIP_STATUS
-  // );
+  const [getAllFriendships, { data: friendsData }] =
+    useLazyQuery(GET_ALL_FRIENDSHIPS);
 
-  // useEffect(() => {
-  //   if (profile) {
-  //     getFriendshipStatus({
-  //       variables: {
-  //         target_id: Number(profile.id),
-  //       },
-  //     });
-  //   }
-  // }, [getFriendshipStatus, profile]);
+  useEffect(() => {
+    if (profile) {
+      getAllFriendships({
+        variables: {
+          target_id: Number(profile.id),
+        },
+      });
+    }
+  }, [getAllFriendships, profile]);
 
   const color = useMemo(() => {
     if (attendanceStatus === 'Accepted') return 'green';
@@ -61,10 +61,10 @@ export const ProfileInOuting = ({
     });
   }, [profile.id, recievedRequests]);
 
-  // const alreadyFriends = useMemo(() => {
-  //   if (!statusData || statusData.getFriendshipStatus === null) return false;
-  //   return statusData.getFriendshipStatus.status_code === 'A';
-  // }, [statusData]);
+  const alreadyFriends = useMemo(() => {
+    if (!friendsData || friendsData.getAllFriendships === null) return false;
+    return friendsData.getAllFriendships.status_code === 'A';
+  }, [friendsData]);
 
   return (
     <div className="profile-in-outing-container">
@@ -73,7 +73,7 @@ export const ProfileInOuting = ({
           {profile.name} with id {profile.id}
         </p>
         <p>({attendanceStatus})</p>
-        {/* {alreadyFriends ? (
+        {alreadyFriends ? (
           <p>(Friend)</p>
         ) : !sameProfile ? (
           <button
@@ -90,7 +90,7 @@ export const ProfileInOuting = ({
               ? 'Request Pending'
               : 'Send Friend Request'}
           </button>
-        ) : null} */}
+        ) : null}
       </div>
     </div>
   );

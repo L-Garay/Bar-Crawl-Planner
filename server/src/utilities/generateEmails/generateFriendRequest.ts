@@ -13,7 +13,7 @@ const GenerateFriendRequestEmail = (
         button: {
           color: '#ffb6c1',
           text: 'Friends Page',
-          link: `http://localhost:3000/friends`,
+          link: `http://localhost:3000/friends?redirectTo=/friends`,
         },
       },
       outro:
