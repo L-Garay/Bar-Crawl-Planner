@@ -30,6 +30,8 @@ jobs:
       - name: Build and start client and server
         run: |
           npm run start:client &
-          npm run start:server
+          npm run start:server &
+          sleep 10 &&
+          curl http://localhost:3000
       - name: Run Cypress tests
         run: npm run cypress:run
