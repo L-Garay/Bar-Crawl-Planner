@@ -28,6 +28,11 @@ jobs:
       - name: Install client dependencies
         run: npm run install:client
       - name: Build and start client and server
+        # NOTE it only takes about ~1sec for the client to be built apparently, and so it finishes building much much sooner than the server
+        # and so what appears to be happening in the tests is that the client boots up, and you can see the output of the curl command where it is the raw document of the page and shows the error boundary for that page and returns a 500 internal server error
+        # THEN the server finishes building and starts, then the cypress test starts, and the test fails instally because it can't visit localhost:3000 due to that 500 server error
+        # Which means either that the test tries to access the site before the server is ready and the client connects to it properly OR that the client NEVER connects to the server properly when it starts up first
+        # The 500 server error indicates that the issue does pertain to the server, and the client's inability to connect
         run: |
           npm run start:server &
           npm run start:client &
