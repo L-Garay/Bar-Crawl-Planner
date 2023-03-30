@@ -30,6 +30,7 @@ jobs:
       - name: Build and start client and server
         run: |
           npm run start:server &
+          sleep 10 &&
           npm run start:client &
           sleep 10 &&
           curl http://localhost:3000
