@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  build-project:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -27,11 +27,28 @@ jobs:
         run: npm ci
       - name: Install client dependencies
         run: npm run install:client
-      - name: Build and start client and server
+  build-directories:
+    runs-on: ubuntu-latest
+    needs: build-project
+    outputs:
+      client: ${{ steps.build-client.outputs.client }}
+      server: ${{ steps.build-server.outputs.server }}
+    steps:
+      - id: build-server
         run: |
-          npm run start:server &
-          npm run start:client &
-          sleep 30 &&
-          curl http://localhost:3000
-      - name: Run Cypress tests
-        run: npm run cypress:run
+          npm run build:server &
+          sleep 30 && echo "server=ready" >> "$GITHUB_OUTPUT"
+      - id: build-client
+        run: |
+          npm run build:client &
+          sleep 30 && echo "client=ready" >> "$GITHUB_OUTPUT"
+  start-servers:
+    runs-on: ubuntu-latest
+    needs: build-directories
+    steps:
+      - env:
+          CLIENT: ${{ needs.build-directories.outputs.client }}
+          SERVER: ${{ needs.build-directories.outputs.server }}
+        run: |
+          echo "The client directory is $CLIENT and the server directory is $SERVER" &&
+          npm run cypress:run

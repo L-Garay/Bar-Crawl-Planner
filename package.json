@@ -13,8 +13,10 @@
   },
   "scripts": {
     "serverUnitTests": "cd server && npm run unitTests",
-    "start:server": "cd server && npm run generateAndCompile && npm run start",
-    "start:client": "cd client && npm run build && npm run start",
+    "build:server": "cd server && npm run generateAndCompile",
+    "build:client": "cd client && npm run build",
+    "start:server": "cd server && npm run start",
+    "start:client": "cd client && npm run start",
     "cypress:run": "cd client && npm run cypress:run",
     "install:client": "cd client && npm install"
   },
