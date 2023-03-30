@@ -29,7 +29,7 @@ jobs:
         run: npm run install:client
       - name: Build and start client and server
         run: |
-          npm run start:client
+          npm run start:client &
           npm run start:server
       - name: Run Cypress tests
         run: npm run cypress:run
