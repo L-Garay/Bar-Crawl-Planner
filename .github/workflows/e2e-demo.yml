@@ -28,11 +28,6 @@ jobs:
       - name: Install client dependencies
         run: npm run install:client
       - name: Build and start client and server
-        run: |
-          npm run start:server &
-          sleep 10 &&
-          npm run start:client &
-          sleep 10 &&
-          curl http://localhost:3000
+        run: npm run start
       - name: Run Cypress tests
         run: npm run cypress:run

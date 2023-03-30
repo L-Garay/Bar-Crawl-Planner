@@ -13,6 +13,7 @@
   },
   "scripts": {
     "serverUnitTests": "cd server && npm run unitTests",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\" & sleep 10 && curl http://localhost:3000",
     "start:server": "cd server && npm run generateAndCompile && npm run start",
     "start:client": "cd client && npm run build && npm run start",
     "cypress:run": "cd client && npm run cypress:run",
