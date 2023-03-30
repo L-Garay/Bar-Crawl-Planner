@@ -27,13 +27,11 @@ jobs:
         run: npm ci
       - name: Install client dependencies
         run: npm run install:client
-      - name: Build client and server
-        run: |
-          npm run build:server &
-          npm run build:client
-      - name: Start client and server
+      - name: Build and start client and server
         run: |
           npm run start:server &
-          npm run start:client
+          npm run start:client &
+          sleep 30 &&
+          curl http://localhost:3000
       - name: Run Cypress tests
         run: npm run cypress:run
