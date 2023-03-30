@@ -36,10 +36,7 @@ import {
 } from './prisma/mutations/outingMutations';
 import { Account, Profile } from '@prisma/client';
 import { AddFriend } from './prisma/mutations/friendsMutations';
-import {
-  GetAllFriendships,
-  GetFriendshipStatus,
-} from './prisma/querries/friendsQuerries';
+import { GetAllFriendships } from './prisma/querries/friendsQuerries';
 import {
   AcceptFriendRequest,
   DeclineFriendRequest,
@@ -381,29 +378,29 @@ const resolvers: Resolvers = {
         return requests.data;
       }
     },
-    getFriendshipStatus: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { id: user_id } = profile.data;
-      const { target_id } = args;
-      const status = await GetFriendshipStatus(user_id, target_id);
-      if (status.status === 'Failure') {
-        throw new GraphQLError('Cannot get friendship status', {
-          extensions: {
-            code: status.error?.name,
-            message: status.error?.message,
-            prismaMeta: status.error?.meta,
-            prismaErrorCode: status.error?.errorCode,
-          },
-        });
-      } else {
-        return status.data;
-      }
-    },
+    // getFriendshipStatus: async (parent, args, context, info) => {
+    //   const { authError, profile } = context;
+    //   if (authError) {
+    //     throw new GraphQLError(authError.message, {
+    //       extensions: { code: authError.code },
+    //     });
+    //   }
+    //   const { id: user_id } = profile.data;
+    //   const { target_id } = args;
+    //   const status = await GetFriendshipStatus(user_id, target_id);
+    //   if (status.status === 'Failure') {
+    //     throw new GraphQLError('Cannot get friendship status', {
+    //       extensions: {
+    //         code: status.error?.name,
+    //         message: status.error?.message,
+    //         prismaMeta: status.error?.meta,
+    //         prismaErrorCode: status.error?.errorCode,
+    //       },
+    //     });
+    //   } else {
+    //     return status.data;
+    //   }
+    // },
   },
   Mutation: {
     updateUserAccount: async (parent, args, context, info) => {

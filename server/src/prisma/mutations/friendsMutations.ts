@@ -14,13 +14,6 @@ export async function AddFriend(
         created_at: new Date().toISOString(),
         requestor_profile_id,
         addressee_profile_id,
-        frienshipStatus_friendship_relation: {
-          create: {
-            status_code: 'A',
-            created_at: new Date().toISOString(),
-            modifier_profile_id: addressee_profile_id, // because the addressee is the one who accepted the request, they are the modifier
-          },
-        },
       },
     });
     return { status: 'Success', data: friend, error: null };

@@ -1,35 +1,33 @@
-import invariant from 'tiny-invariant';
-
 // TODO look into why invariant cause remix to crash when running built assets
 // works in development, works in built assets if you comment out the invariant functions
 const getConfig = () => {
-  invariant(process.env.SERVER_ADDRESS, 'SERVER_ADDRESS is undefined');
-  invariant(process.env.AUTH0_CLIENT_ID, 'AUTH0_CLIENT_ID is undefined');
-  invariant(process.env.AUTH0_AUDIENCE, 'AUTH0_AUDIENCE is undefined');
-  invariant(
-    process.env.AUTH0_SESSION_SECRET,
-    'AUTH0_SESSION_SECRET is undefined'
-  );
-  invariant(
-    process.env.AUTH0_CLIENT_SECRET,
-    'AUTH0_CLIENT_SECRET is undefined'
-  );
-  invariant(process.env.AUTH0_DOMAIN, 'AUTH0_DOMAIN is undefined');
-  invariant(process.env.AUTH0_LOGOUT_URL, 'AUTH0_LOGOUT_URL is undefined');
-  invariant(process.env.AUTH0_LOGIN_URL, 'AUTH0_LOGIN_URL is undefined');
-  invariant(
-    process.env.AUTH0_RETURN_TO_URL,
-    'AUTH0_RETURN_TO_URL is undefined'
-  );
-  invariant(process.env.COOKIE_SECRET, 'COOKIE_SECRET is undefined');
-  invariant(process.env.AUTH0_CALLBACK_URL, 'AUTH0_CALLBACK_URL is undefined');
-  invariant(process.env.LOGIN_PAGE, 'LOGIN_PAGE is undefined');
-  invariant(
-    process.env.GOOGLE_MAPS_API_KEY,
-    'GOOGLE_MAPS_API_KEY is undefined'
-  );
-  invariant(process.env.GMAIL_EMAIL, 'GMAIL_EMAIL is undefined');
-  invariant(process.env.GMAIL_PASSWORD, 'GMAIL_PASSWORD is undefined');
+  // invariant(process.env.SERVER_ADDRESS, 'SERVER_ADDRESS is undefined');
+  // invariant(process.env.AUTH0_CLIENT_ID, 'AUTH0_CLIENT_ID is undefined');
+  // invariant(process.env.AUTH0_AUDIENCE, 'AUTH0_AUDIENCE is undefined');
+  // invariant(
+  //   process.env.AUTH0_SESSION_SECRET,
+  //   'AUTH0_SESSION_SECRET is undefined'
+  // );
+  // invariant(
+  //   process.env.AUTH0_CLIENT_SECRET,
+  //   'AUTH0_CLIENT_SECRET is undefined'
+  // );
+  // invariant(process.env.AUTH0_DOMAIN, 'AUTH0_DOMAIN is undefined');
+  // invariant(process.env.AUTH0_LOGOUT_URL, 'AUTH0_LOGOUT_URL is undefined');
+  // invariant(process.env.AUTH0_LOGIN_URL, 'AUTH0_LOGIN_URL is undefined');
+  // invariant(
+  //   process.env.AUTH0_RETURN_TO_URL,
+  //   'AUTH0_RETURN_TO_URL is undefined'
+  // );
+  // invariant(process.env.COOKIE_SECRET, 'COOKIE_SECRET is undefined');
+  // invariant(process.env.AUTH0_CALLBACK_URL, 'AUTH0_CALLBACK_URL is undefined');
+  // invariant(process.env.LOGIN_PAGE, 'LOGIN_PAGE is undefined');
+  // invariant(
+  //   process.env.GOOGLE_MAPS_API_KEY,
+  //   'GOOGLE_MAPS_API_KEY is undefined'
+  // );
+  // invariant(process.env.GMAIL_EMAIL, 'GMAIL_EMAIL is undefined');
+  // invariant(process.env.GMAIL_PASSWORD, 'GMAIL_PASSWORD is undefined');
 
   const SERVER_ADDRESS = process.env.SERVER_ADDRESS!;
   const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID!;
