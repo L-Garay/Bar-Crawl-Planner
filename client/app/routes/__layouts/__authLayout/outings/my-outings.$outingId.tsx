@@ -14,6 +14,7 @@ import {
   GET_SENT_FRIEND_REQUESTS,
   SEND_OUTING_EMAIL,
   UPDATE_OUTING,
+  DISCONNECT_PROFILE,
 } from '~/constants/graphqlConstants';
 // import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
@@ -143,9 +144,10 @@ export default function OutingDetails() {
 
   const transition = useTransition();
 
-  const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
-    refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
-  });
+  const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST);
+  const [disconnectUser, { data: disconnectData }] =
+    useMutation(DISCONNECT_PROFILE);
+
   const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
   const { data: friendRequestData } = useQuery(GET_RECIEVED_FRIEND_REQUESTS);
 
@@ -163,6 +165,23 @@ export default function OutingDetails() {
   const { getOuting } = outing.data;
   const { accepted_profiles, pending_profiles, declined_profiles } =
     profiles.data.getProfilesInOuting;
+
+  console.log('disconnectData', disconnectData);
+
+  const currentAcceptedProfiles = useMemo(() => {
+    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
+      return accepted_profiles;
+    if (disconnectData && disconnectData.DisconnectUserWithOuting)
+      return disconnectData.DisconnectUserWithOuting.accepted_profiles;
+  }, [accepted_profiles, disconnectData]);
+
+  const currentPendingProfiles = useMemo(() => {
+    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
+      return pending_profiles;
+    if (disconnectData && disconnectData.DisconnectUserWithOuting)
+      return disconnectData.DisconnectUserWithOuting.pending_profiles;
+  }, [pending_profiles, disconnectData]);
+
   const { getAccountWithProfileData } = currentUserProfile.data;
 
   const isOutingCreator =
@@ -273,43 +292,49 @@ export default function OutingDetails() {
           )}
 
           <br />
-          <div className="add-profiles">
-            <form method="post">
-              {/* TODO: add validation to make sure emails are valid */}
-              <label htmlFor="profile-email">Send invitation email to: </label>
-              <input
-                type="email"
-                name="profile-email"
-                id="profile-email"
-                // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
-                // pattern={`${VALID_EMAIL_REGEX}`}
-                title="figure out what pattern(s) to show here"
-                minLength={EMAIL_MIN_LENGTH} // what should this be?
-                onChange={(e) => {
-                  setShouldDisableSend(
-                    e.target.value.length < EMAIL_MIN_LENGTH
-                  );
-                }}
-              />
-              <input
-                type="hidden"
-                name="start-date-and-time"
-                value={getOuting.start_date_and_time}
-              />
-              <button
-                type="submit"
-                name="intent"
-                value="post"
-                disabled={shouldDisableSend}
-              >
-                Send Invite
-              </button>
-            </form>
-          </div>
+          <>
+            {isOutingCreator ? (
+              <div className="add-profiles">
+                <form method="post">
+                  {/* TODO: add validation to make sure emails are valid */}
+                  <label htmlFor="profile-email">
+                    Send invitation email to:{' '}
+                  </label>
+                  <input
+                    type="email"
+                    name="profile-email"
+                    id="profile-email"
+                    // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
+                    // pattern={`${VALID_EMAIL_REGEX}`}
+                    title="figure out what pattern(s) to show here"
+                    minLength={EMAIL_MIN_LENGTH} // what should this be?
+                    onChange={(e) => {
+                      setShouldDisableSend(
+                        e.target.value.length < EMAIL_MIN_LENGTH
+                      );
+                    }}
+                  />
+                  <input
+                    type="hidden"
+                    name="start-date-and-time"
+                    value={getOuting.start_date_and_time}
+                  />
+                  <button
+                    type="submit"
+                    name="intent"
+                    value="post"
+                    disabled={shouldDisableSend}
+                  >
+                    Send Invite
+                  </button>
+                </form>
+              </div>
+            ) : null}
+          </>
           <h4>Profiles in Outing</h4>
-          {accepted_profiles.length ? (
+          {currentAcceptedProfiles.length ? (
             <>
-              {accepted_profiles.map((profile: any) => {
+              {currentAcceptedProfiles.map((profile: any) => {
                 return (
                   <ProfileInOuting
                     key={profile.id}
@@ -319,14 +344,16 @@ export default function OutingDetails() {
                     currentUser={getAccountWithProfileData.profile.id}
                     sentRequests={sentRequests}
                     recievedRequests={recievedRequests}
+                    disconnectUser={disconnectUser}
+                    outingId={getOuting.id}
                   />
                 );
               })}
             </>
           ) : null}
-          {pending_profiles.length ? (
+          {currentPendingProfiles.length ? (
             <>
-              {pending_profiles.map((profile: any) => {
+              {currentPendingProfiles.map((profile: any) => {
                 return (
                   <ProfileInOuting
                     key={profile.id}
@@ -336,23 +363,8 @@ export default function OutingDetails() {
                     currentUser={getAccountWithProfileData.profile.id}
                     sentRequests={sentRequests}
                     recievedRequests={recievedRequests}
-                  />
-                );
-              })}
-            </>
-          ) : null}
-          {declined_profiles.length ? (
-            <>
-              {declined_profiles.map((profile: any) => {
-                return (
-                  <ProfileInOuting
-                    key={profile.id}
-                    profile={profile}
-                    sendFriendRequest={sendFriendRequest}
-                    attendanceStatus="Declined"
-                    currentUser={getAccountWithProfileData.profile.id}
-                    sentRequests={sentRequests}
-                    recievedRequests={recievedRequests}
+                    disconnectUser={disconnectUser}
+                    outingId={getOuting.id}
                   />
                 );
               })}

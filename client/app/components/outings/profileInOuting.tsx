@@ -1,6 +1,7 @@
 import { useLazyQuery } from '@apollo/client';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
+import { CloseX } from '../svgs/closeX';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
@@ -9,6 +10,8 @@ export type ProfileInOutingProps = {
   currentUser: number;
   sentRequests: Record<string, any>[];
   recievedRequests: Record<string, any>[];
+  disconnectUser: ({ variables }: { variables: any }) => void;
+  outingId: number;
 };
 
 export const ProfileInOuting = ({
@@ -18,7 +21,11 @@ export const ProfileInOuting = ({
   currentUser,
   sentRequests,
   recievedRequests,
+  disconnectUser,
+  outingId,
 }: ProfileInOutingProps) => {
+  const [isHoveringKickIcon, setIsHoveringKickIcon] = useState<boolean>(false);
+
   const [getAllFriendships, { data: friendsData }] =
     useLazyQuery(GET_ALL_FRIENDSHIPS);
 
@@ -68,7 +75,10 @@ export const ProfileInOuting = ({
 
   return (
     <div className="profile-in-outing-container">
-      <div className="profile-in-outing" style={{ display: 'flex' }}>
+      <div
+        className="profile-in-outing"
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
         <p style={{ color, paddingRight: 10 }}>
           {profile.name} with id {profile.id}
         </p>
@@ -91,6 +101,28 @@ export const ProfileInOuting = ({
               : 'Send Friend Request'}
           </button>
         ) : null}
+        {sameProfile ? null : (
+          <div
+            onMouseEnter={() => setIsHoveringKickIcon(true)}
+            onMouseLeave={() => setIsHoveringKickIcon(false)}
+            style={{ marginLeft: 10 }}
+            onClick={() =>
+              disconnectUser({
+                variables: {
+                  profile_id: Number(profile.id),
+                  outing_id: Number(outingId),
+                  original_state: attendanceStatus,
+                },
+              })
+            }
+          >
+            <CloseX
+              pathId={profile.id}
+              size="medium"
+              stroke={isHoveringKickIcon ? 'red' : 'black'}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

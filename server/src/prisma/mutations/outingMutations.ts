@@ -118,7 +118,7 @@ export async function DisconnectUserWithOuting(
   outingId: number
 ): Promise<PrismaData> {
   try {
-    const user = await prismaClient.outing.update({
+    const outing = await prismaClient.outing.update({
       where: { id: outingId },
       data: {
         accepted_profiles: {
@@ -127,12 +127,13 @@ export async function DisconnectUserWithOuting(
         pending_profiles: {
           disconnect: { id: profileId },
         },
-        declined_profiles: {
-          connect: { id: profileId },
-        },
+      },
+      include: {
+        accepted_profiles: true,
+        pending_profiles: true,
       },
     });
-    return { status: 'Success', data: user, error: null };
+    return { status: 'Success', data: outing, error: null };
   } catch (error) {
     console.log(error);
     return { status: 'Failure', data: null, error: error as PrismaError };

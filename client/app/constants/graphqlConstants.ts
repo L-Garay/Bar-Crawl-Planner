@@ -234,6 +234,16 @@ export const DISCONNECT_PROFILE = gql`
     DisconnectUserWithOuting(outing_id: $outing_id, profile_id: $profile_id) {
       id
       name
+      accepted_profiles {
+        id
+        name
+        account_id
+      }
+      pending_profiles {
+        id
+        name
+        account_id
+      }
     }
   }
 `;

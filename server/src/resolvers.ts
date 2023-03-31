@@ -291,8 +291,6 @@ const resolvers: Resolvers = {
           },
         });
       } else {
-        console.log(friends.data);
-
         return friends.data;
       }
     },
@@ -550,21 +548,18 @@ const resolvers: Resolvers = {
         });
       }
       const { outing_id, profile_id } = args;
-      const disconnectedUser = await DisconnectUserWithOuting(
-        outing_id,
-        profile_id
-      );
-      if (disconnectedUser.status === 'Failure') {
+      const outing = await DisconnectUserWithOuting(profile_id, outing_id);
+      if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot disconnect user from outing', {
           extensions: {
-            code: disconnectedUser.error?.name,
-            message: disconnectedUser.error?.message,
-            prismaMeta: disconnectedUser.error?.meta,
-            prismaErrorCode: disconnectedUser.error?.errorCode,
+            code: outing.error?.name,
+            message: outing.error?.message,
+            prismaMeta: outing.error?.meta,
+            prismaErrorCode: outing.error?.errorCode,
           },
         });
       } else {
-        return disconnectedUser.data;
+        return outing.data;
       }
     },
     UpdateAccountBySocialPin: async (parent, args, context, info) => {
