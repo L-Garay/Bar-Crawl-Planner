@@ -9,7 +9,7 @@ import {
   UPDATE_ACCOUNT_BY_SOCIAL_PIN,
   CREATE_ACCOUNT_AND_PROFILE,
   CONNECT_PROFILE,
-  GENERATE_OUTING_NOTIFICATIONS,
+  SEND_OUTING_JOINED_EMAIL,
 } from '~/constants/graphqlConstants';
 import spinnerStyles from '~/generatedStyles/spinners.css';
 
@@ -58,7 +58,7 @@ export default function CheckUser() {
     },
   });
   const [ConnectProfile] = useMutation(CONNECT_PROFILE);
-  const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
+  const [sendOutingJoinedEmail] = useMutation(SEND_OUTING_JOINED_EMAIL);
 
   // Attempt to get inviteData and redirectTo from local storage if there
   useEffect(() => {
@@ -107,8 +107,8 @@ export default function CheckUser() {
             'found and account by email and connected the profile to the outing, now redirecting to outing details page with outingId: ',
             outingId
           );
-          // send notification that user has joined
-          await generateNotifications({
+          // send email that user has joined
+          await sendOutingJoinedEmail({
             variables: {
               outing_id: Number(outingId),
             },
@@ -141,7 +141,7 @@ export default function CheckUser() {
     getAccountByEmail,
     inviteData,
     navigate,
-    generateNotifications,
+    sendOutingJoinedEmail,
     redirectToUrl,
   ]);
 
@@ -199,8 +199,8 @@ export default function CheckUser() {
             'successfully connected profile after updating account by social pin, attempting to redirect to returnTo: ',
             returnTo
           );
-          // send notification that user has joined
-          await generateNotifications({
+          // send email that user has joined
+          await sendOutingJoinedEmail({
             variables: {
               outing_id: Number(outingId),
             },
@@ -218,7 +218,7 @@ export default function CheckUser() {
     updateAccountBySocialPin,
     email,
     ConnectProfile,
-    generateNotifications,
+    sendOutingJoinedEmail,
   ]);
 
   // NOTE this would indicate that there is no account, that the user is not coming from an invite, and that they just signed up with Auth0

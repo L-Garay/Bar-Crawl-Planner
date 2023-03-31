@@ -6,7 +6,7 @@ import { getNewClient } from '~/apollo/getClient';
 import { authenticator } from '~/auth/authenticator';
 import {
   DELETE_OUTING,
-  GENERATE_FRIEND_REQUEST,
+  SEND_FRIEND_REQUEST,
   GET_ACCOUNT_WITH_PROFILE_DATA,
   GET_RECIEVED_FRIEND_REQUESTS,
   GET_OUTING,
@@ -143,8 +143,7 @@ export default function OutingDetails() {
 
   const transition = useTransition();
 
-  // NOTE this is what we'd replace with a mutation to trigger a transition in the notification state machine
-  const [sendFriendRequest] = useMutation(GENERATE_FRIEND_REQUEST, {
+  const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
     refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
   });
   const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);

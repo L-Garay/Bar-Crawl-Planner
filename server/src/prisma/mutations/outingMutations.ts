@@ -327,7 +327,7 @@ export async function SendOutingInvites({
   };
 }
 
-export async function SendOutingJoinedNotification(
+export async function SendOutingJoinedEmail(
   outing_id: number,
   sender_profile: PrismaData
 ) {
@@ -409,7 +409,7 @@ export async function SendOutingJoinedNotification(
   );
   console.log('account emails', accountEmails);
 
-  const notificationData = {
+  const emailData = {
     outing_id,
     outing_name: outing.data.name,
     start_date_and_time: outing.data.start_date_and_time,
@@ -417,7 +417,7 @@ export async function SendOutingJoinedNotification(
     names,
   };
 
-  const generatedEmail = GenerateOutingJoinedEmail(notificationData);
+  const generatedEmail = GenerateOutingJoinedEmail(emailData);
   const emailsToSend = generatedEmail.map((email) => generator.generate(email));
   console.log('emails to send', emailsToSend.length);
 

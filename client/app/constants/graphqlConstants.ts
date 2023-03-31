@@ -278,44 +278,6 @@ export const GET_OUTINGS = gql`
   }
 `;
 
-// ------------------- Notifications -------------------
-
-export const GET_NOTIFICATIONS = gql`
-  query getAllNotifications {
-    getAllNotifications {
-      id
-      sender_profile_id
-      addressee_profile_id
-      created_at
-      type_code
-      outing_id
-      notification_relation {
-        id
-        status_code
-        notification_created_at
-        modifier_profile_id
-        modified_at
-      }
-      notification_addressee_relation {
-        id
-        name
-        profile_img
-      }
-      notification_sender_relation {
-        id
-        name
-        profile_img
-      }
-    }
-  }
-`;
-
-export const GET_NEW_NOTIFICATIONS_COUNT = gql`
-  query getNewNotificationCount {
-    getNewNotificationCount
-  }
-`;
-
 export const GET_SENT_FRIEND_REQUESTS = gql`
   query getSentFriendRequests {
     getSentFriendRequests {
@@ -338,25 +300,15 @@ export const GET_RECIEVED_FRIEND_REQUESTS = gql`
   }
 `;
 
-export const GENERATE_OUTING_NOTIFICATIONS = gql`
-  mutation generateOutingNotification($outing_id: Int!) {
-    generateOutingNotification(outing_id: $outing_id)
+export const SEND_OUTING_JOINED_EMAIL = gql`
+  mutation sendOutingJoinedEmail($outing_id: Int!) {
+    sendOutingJoinedEmail(outing_id: $outing_id)
   }
 `;
 
-export const GENERATE_FRIEND_REQUEST = gql`
-  mutation generateFriendRequest($addressee_profile_id: Int!) {
-    generateFriendRequest(addressee_profile_id: $addressee_profile_id) {
-      id
-      addressee_profile_id
-      created_at
-      type_code
-      notification_addressee_relation {
-        id
-        name
-        profile_img
-      }
-    }
+export const SEND_FRIEND_REQUEST = gql`
+  mutation sendFriendRequestEmail($addressee_profile_id: Int!) {
+    sendFriendRequestEmail(addressee_profile_id: $addressee_profile_id)
   }
 `;
 
@@ -369,66 +321,6 @@ export const UPDATE_FRIEND = gql`
       created_at
       status_code
       last_modified_by
-      modified_at
-    }
-  }
-`;
-
-export const OPEN_NOTIFICATION = gql`
-  mutation openNotification(
-    $type_code: String!
-    $notification_created_at: String!
-    $id: Int!
-  ) {
-    openNotification(
-      type_code: $type_code
-      notification_created_at: $notification_created_at
-      id: $id
-    ) {
-      modifier_profile_id
-      status_code
-      type_code
-      notification_created_at
-      modified_at
-    }
-  }
-`;
-
-export const DECLINE_FRIEND_REQUEST = gql`
-  mutation declineFriendRequest(
-    $notification_id: Int!
-    $notification_created_at: String!
-  ) {
-    declineFriendRequest(
-      notification_id: $notification_id
-      notification_created_at: $notification_created_at
-    ) {
-      modifier_profile_id
-      status_code
-      type_code
-      notification_created_at
-      modified_at
-    }
-  }
-`;
-
-export const ACCEPT_FRIEND_REQUEST = gql`
-  mutation acceptFriendRequest(
-    $sender_profile_id: Int!
-    $addressee_profile_id: Int!
-    $notification_created_at: String!
-    $notification_id: Int!
-  ) {
-    acceptFriendRequest(
-      sender_profile_id: $sender_profile_id
-      addressee_profile_id: $addressee_profile_id
-      notification_created_at: $notification_created_at
-      notification_id: $notification_id
-    ) {
-      modifier_profile_id
-      status_code
-      type_code
-      notification_created_at
       modified_at
     }
   }

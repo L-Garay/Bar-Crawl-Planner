@@ -107,28 +107,6 @@ const typeDefs = `#graphql
     modified_at: String
   }
 
-  type Notification {
-    id: Int
-    sender_profile_id: Int
-    addressee_profile_id: Int
-    created_at: String
-    type_code: String
-    notification_relation: [NotificationStatus]
-    notification_addressee_relation: Profile
-    notification_sender_relation: Profile
-    outing_id: Int
-  }
-
-  type NotificationStatus {
-    id: Int
-    notification_id: Int
-    modifier_profile_id: Int
-    notification_created_at: String
-    modified_at: String
-    status_code: String
-    type_code: String
-  }
-
   # The "Query" type is special: it lists all of the available queries that
   # clients can execute, along with the return type for each. In this
   # case, the "basicUsers" query returns an array of zero or more BasicUsers (defined above).
@@ -144,33 +122,8 @@ const typeDefs = `#graphql
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]
-    getAllNotifications: [Notification]
     getRecievedFriendRequests: [Friendship]
     getSentFriendRequests: [Friendship]
-    getNewNotificationCount: Int
-  }
-
-  input NofiticationInput {
-    id: Int
-    sender_profile_id: Int
-    addressee_profile_id: Int
-    created_at: String
-    type_code: String
-    outing_id: Int
-  }
-
-  input NotificationStatusInput {
-    notification_id: Int
-    modifier_profile_id: Int
-    notification_created_at: String
-    modified_at: String
-    status_code: String
-    type_code: String
-  }
-
-  input NotificationMachineInput {
-    notification: NofiticationInput
-    notificationStatus: NotificationStatusInput
   }
 
   type Mutation {
@@ -191,25 +144,10 @@ const typeDefs = `#graphql
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
-    generateOutingNotification(outing_id: Int!): String
-    generateFriendRequest(addressee_profile_id: Int!): Notification
+    sendOutingJoinedEmail(outing_id: Int!): String
+    sendFriendRequestEmail(addressee_profile_id: Int!): String
     updateFriend(friendship_id: Int!, status_code: String!): Friendship
     blockProfile(blocked_profile_id: Int!): Profile
-    openNotification(
-      type_code: String!
-      notification_created_at: String!
-      id: Int!
-    ): NotificationStatus
-    acceptFriendRequest(
-      sender_profile_id: Int!
-      addressee_profile_id: Int!
-      notification_created_at: String!
-      notification_id: Int!
-    ): NotificationStatus
-    declineFriendRequest(
-      notification_id: Int!
-      notification_created_at: String!
-  ): NotificationStatus
   }
 `;
 
