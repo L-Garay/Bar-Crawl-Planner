@@ -182,15 +182,21 @@ export async function SendOutingInvites({
       },
     };
   }
-  // get the accounts associated with the input emails
-  const accounts: Promise<Account | null>[] = emails.map(async (email) => {
-    const account = await prismaClient.account.findFirst({
-      where: {
-        email: email,
-      },
-    });
-    return account;
+  const filteredEmails = emails.filter((email) => {
+    if (email === null || email === undefined) return false;
+    return true;
   });
+  // get the accounts associated with the input emails
+  const accounts: Promise<Account | null>[] = filteredEmails.map(
+    async (email) => {
+      const account = await prismaClient.account.findFirst({
+        where: {
+          email: email,
+        },
+      });
+      return account;
+    }
+  );
   const resolvedAccounts = await Promise.allSettled(accounts);
 
   // if an account doesn't exist, create one
@@ -204,7 +210,7 @@ export async function SendOutingInvites({
         // otherwise, create a new account
         const newAccount: Account = await prismaClient.account.create({
           data: {
-            email: emails[index],
+            email: filteredEmails[index],
             created_at: new Date().toISOString(),
           },
         });
@@ -297,7 +303,7 @@ export async function SendOutingInvites({
   const mailOptions = emailsToSend.map((email: Email, index: number) => {
     return {
       from: process.env.GMAIL_EMAIL,
-      to: emails[index],
+      to: filteredEmails[index],
       subject: 'Bar Crawl Invite',
       html: email,
     };

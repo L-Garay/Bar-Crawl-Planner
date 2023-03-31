@@ -15,6 +15,7 @@ import {
   GetAccountByEmail,
   GetAccountWithProfileData,
   GetAllAccounts,
+  GetBlockedAccountEmails,
 } from './prisma/querries/accountQuerries';
 import {
   CreateAccount,
@@ -27,7 +28,11 @@ import {
   CreateProfile,
 } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
-import { CitySelectOptions, OutingInput } from './types/sharedTypes';
+import {
+  CitySelectOptions,
+  OutingInput,
+  PrismaData,
+} from './types/sharedTypes';
 import {
   ConnectUserWithOuting,
   CreateOuting,
@@ -472,23 +477,40 @@ const resolvers: Resolvers = {
       }
       const { outing_id, start_date_and_time, emails } = args;
 
+      // check to make sure user isn't trying to invite someone who has blocked them or they have blocked
+      const blockedEmails = await GetBlockedAccountEmails(emails, profile.data);
+      if (blockedEmails.status === 'Failure') {
+        // should we allow this to continue if this fails?
+        console.log(blockedEmails.error);
+      }
+
       // iterate through emails and remove those who are already accepted
       // get the accepted profiles
       const acceptedProfiles = await GetAcceptedProfilesInOuting(outing_id);
       // get the accepted accounts from the accepted profiles
-      const acceptedAccounts = acceptedProfiles.data.map(
-        async (profile: Profile) => {
+      const resolvedAcceptedAccounts = await Promise.all(
+        acceptedProfiles.data.map(async (profile: Profile) => {
           return await GetAccountByAccountId(profile.account_Id);
-        }
+        })
       );
-      const resolvedAcceptedAccounts = await Promise.all(acceptedAccounts);
-      // filter out the emails that are already accepted
-      const emailsToSend = emails.filter((email: string) => {
+
+      // if one of the emails provided is associated with an account that is already attending the outing, return false
+      const nonAcceptedEmails = emails.filter((email: string) => {
         if (
           resolvedAcceptedAccounts.find(
             (account: any) => account.data.email === email
           )
         ) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+
+      // the nonAcceptedEmails will have all emails that are not already accepted, it doesn't filter out blocked emails
+      // so we need to do so here
+      const emailsToSend = nonAcceptedEmails.filter((email) => {
+        if (blockedEmails.data.includes(email)) {
           return false;
         } else {
           return true;

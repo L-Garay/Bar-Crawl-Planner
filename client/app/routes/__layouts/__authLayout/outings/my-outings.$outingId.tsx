@@ -164,8 +164,6 @@ export default function OutingDetails() {
   const { accepted_profiles, pending_profiles, declined_profiles } =
     profiles.data.getProfilesInOuting;
 
-  console.log('disconnectData', disconnectData);
-
   const currentAcceptedProfiles = useMemo(() => {
     if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
       return accepted_profiles;
@@ -179,8 +177,6 @@ export default function OutingDetails() {
     if (disconnectData && disconnectData.DisconnectUserWithOuting)
       return disconnectData.DisconnectUserWithOuting.pending_profiles;
   }, [pending_profiles, disconnectData]);
-
-  console.log(currentUserProfile);
 
   const { getProfile } = currentUserProfile.data;
 

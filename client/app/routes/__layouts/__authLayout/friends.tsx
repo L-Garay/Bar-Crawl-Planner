@@ -78,10 +78,6 @@ export default function FriendsIndex() {
     return recievedData.getRecievedFriendRequests;
   }, [recievedData]);
 
-  console.log('all friends', friends); // these are friendships, not users
-  console.log('sent requests', sentRequests);
-  console.log('recieved requests', recievedRequests);
-
   return (
     <>
       <div
