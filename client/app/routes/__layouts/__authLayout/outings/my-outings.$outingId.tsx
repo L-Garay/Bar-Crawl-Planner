@@ -15,6 +15,7 @@ import {
   SEND_OUTING_EMAIL,
   UPDATE_OUTING,
   DISCONNECT_PROFILE,
+  GET_PROFILE,
 } from '~/constants/graphqlConstants';
 // import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
@@ -119,10 +120,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       },
     });
     currentUserProfile = await client.query({
-      query: GET_ACCOUNT_WITH_PROFILE_DATA,
-      variables: {
-        email,
-      },
+      query: GET_PROFILE,
     });
   } catch (error) {
     logApolloError(error);
@@ -182,10 +180,11 @@ export default function OutingDetails() {
       return disconnectData.DisconnectUserWithOuting.pending_profiles;
   }, [pending_profiles, disconnectData]);
 
-  const { getAccountWithProfileData } = currentUserProfile.data;
+  console.log(currentUserProfile);
 
-  const isOutingCreator =
-    accepted_profiles[0].id === getAccountWithProfileData.profile.id;
+  const { getProfile } = currentUserProfile.data;
+
+  const isOutingCreator = accepted_profiles[0].id === getProfile.id;
   const EMAIL_MIN_LENGTH = 7;
 
   const currentDay = new Date();
@@ -341,11 +340,12 @@ export default function OutingDetails() {
                     profile={profile}
                     sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Accepted"
-                    currentUser={getAccountWithProfileData.profile.id}
+                    currentUserId={getProfile.id}
                     sentRequests={sentRequests}
                     recievedRequests={recievedRequests}
                     disconnectUser={disconnectUser}
                     outingId={getOuting.id}
+                    isOutingCreator={isOutingCreator}
                   />
                 );
               })}
@@ -360,11 +360,12 @@ export default function OutingDetails() {
                     profile={profile}
                     sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Pending"
-                    currentUser={getAccountWithProfileData.profile.id}
+                    currentUserId={getProfile.id}
                     sentRequests={sentRequests}
                     recievedRequests={recievedRequests}
                     disconnectUser={disconnectUser}
                     outingId={getOuting.id}
+                    isOutingCreator={isOutingCreator}
                   />
                 );
               })}

@@ -1,28 +1,30 @@
 import { useLazyQuery } from '@apollo/client';
 import { useEffect, useMemo, useState } from 'react';
 import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
-import { CloseX } from '../svgs/closeX';
+import { CloseX } from '~/components/svgs/closeX';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
   sendFriendRequest: ({ variables }: { variables: any }) => void;
   attendanceStatus: string;
-  currentUser: number;
+  currentUserId: number;
   sentRequests: Record<string, any>[];
   recievedRequests: Record<string, any>[];
   disconnectUser: ({ variables }: { variables: any }) => void;
   outingId: number;
+  isOutingCreator: boolean;
 };
 
 export const ProfileInOuting = ({
   profile,
   sendFriendRequest,
   attendanceStatus,
-  currentUser,
+  currentUserId,
   sentRequests,
   recievedRequests,
   disconnectUser,
   outingId,
+  isOutingCreator,
 }: ProfileInOutingProps) => {
   const [isHoveringKickIcon, setIsHoveringKickIcon] = useState<boolean>(false);
 
@@ -47,12 +49,12 @@ export const ProfileInOuting = ({
   }, [attendanceStatus]);
 
   const sameProfile = useMemo(() => {
-    if (profile.id === currentUser) {
+    if (profile.id === currentUserId) {
       return true;
     } else {
       return false;
     }
-  }, [profile, currentUser]);
+  }, [profile, currentUserId]);
 
   const alreadyRequested = useMemo(() => {
     if (!sentRequests) return false;
@@ -101,7 +103,7 @@ export const ProfileInOuting = ({
               : 'Send Friend Request'}
           </button>
         ) : null}
-        {sameProfile ? null : (
+        {sameProfile || !isOutingCreator ? null : (
           <div
             onMouseEnter={() => setIsHoveringKickIcon(true)}
             onMouseLeave={() => setIsHoveringKickIcon(false)}
