@@ -6,6 +6,7 @@ import {
   GET_SENT_FRIEND_REQUESTS,
   GET_PROFILE,
   BLOCK_PROFILE,
+  GET_RECIEVED_FRIEND_REQUEST_COUNT,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
 import { useMutation, useQuery } from '@apollo/client';
@@ -57,6 +58,7 @@ export default function FriendsIndex() {
         GET_ALL_FRIENDSHIPS,
         GET_RECIEVED_FRIEND_REQUESTS,
         GET_SENT_FRIEND_REQUESTS,
+        GET_RECIEVED_FRIEND_REQUEST_COUNT,
       ],
     }
   );

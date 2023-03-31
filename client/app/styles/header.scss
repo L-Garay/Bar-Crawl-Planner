@@ -33,6 +33,10 @@
   }
 }
 
+.link.friends-link {
+  position: relative;
+}
+
 .menuToggle {
   position: relative;
 }
@@ -53,8 +57,9 @@
   width: 8px;
   border-radius: 50%;
   background: lightseagreen;
-  top: 0;
+  top: -2px;
   right: 5px;
+  z-index: 0;
 }
 
 .menu-items {
@@ -67,18 +72,5 @@
   padding: 5px 5px;
   &:first-of-type {
     display: flex;
-  }
-
-  .notification-circle {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 20px;
-    width: 20px;
-    border-radius: 50%;
-    background: #ffb6c1;
-    color: black;
-    font-size: 0.8rem;
-    margin-left: 5px;
   }
 }

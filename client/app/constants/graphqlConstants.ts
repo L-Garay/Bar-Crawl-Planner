@@ -310,6 +310,12 @@ export const GET_RECIEVED_FRIEND_REQUESTS = gql`
   }
 `;
 
+export const GET_RECIEVED_FRIEND_REQUEST_COUNT = gql`
+  query getRecievedFriendRequestCount {
+    getRecievedFriendRequestCount
+  }
+`;
+
 export const SEND_OUTING_JOINED_EMAIL = gql`
   mutation sendOutingJoinedEmail($outing_id: Int!) {
     sendOutingJoinedEmail(outing_id: $outing_id)

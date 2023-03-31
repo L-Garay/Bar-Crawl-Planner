@@ -142,7 +142,9 @@ export default function OutingDetails() {
 
   const transition = useTransition();
 
-  const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST);
+  const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
+    refetchQueries: [GET_SENT_FRIEND_REQUESTS],
+  });
   const [disconnectUser, { data: disconnectData }] =
     useMutation(DISCONNECT_PROFILE);
 
