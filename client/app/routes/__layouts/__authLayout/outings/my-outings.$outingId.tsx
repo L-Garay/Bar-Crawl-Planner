@@ -8,7 +8,7 @@ import {
   DELETE_OUTING,
   GENERATE_FRIEND_REQUEST,
   GET_ACCOUNT_WITH_PROFILE_DATA,
-  GET_FRIEND_REQUESTS,
+  GET_RECIEVED_FRIEND_REQUESTS,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   GET_SENT_FRIEND_REQUESTS,
@@ -148,7 +148,7 @@ export default function OutingDetails() {
     refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
   });
   const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
-  const { data: friendRequestData } = useQuery(GET_FRIEND_REQUESTS);
+  const { data: friendRequestData } = useQuery(GET_RECIEVED_FRIEND_REQUESTS);
 
   const sentRequests = useMemo(() => {
     if (!sentRequestData || !sentRequestData.getSentFriendRequests) return [];

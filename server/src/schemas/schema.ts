@@ -27,6 +27,7 @@ const typeDefs = `#graphql
     social_pin: String
     friends: [Profile]
     friendsRelation: [Profile]
+    blocked_profile_ids: [Int]
   }
 
   type Outing {
@@ -101,16 +102,9 @@ const typeDefs = `#graphql
     requestor_profile_id: Int
     addressee_profile_id: Int
     created_at: String
-    frienshipStatus_friendship_relation: [FriendshipStatus]
-    notification_addressee_relation: Profile
-  }
-
-  type FriendshipStatus {
-    requestor_profile_id: Int
-    addressee_profile_id: Int
-    modifier_profile_id: Int
-    created_at: String
     status_code: String
+    last_modified_by: Int
+    modified_at: String
   }
 
   type Notification {
@@ -141,7 +135,7 @@ const typeDefs = `#graphql
   type Query {
     getAccountByEmail(email: String!): Account
     getUserAccount: Account
-    profile: Profile
+    getProfile: Profile
     getProfilesInOuting(id: Int!): OutingProfileStates
     getOuting(id: Int!): Outing
     accounts: [Account]
@@ -151,10 +145,9 @@ const typeDefs = `#graphql
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]
     getAllNotifications: [Notification]
-    getFriendRequests: [Notification]
-    getSentFriendRequests: [Notification]
+    getRecievedFriendRequests: [Friendship]
+    getSentFriendRequests: [Friendship]
     getNewNotificationCount: Int
-    getFriendshipStatus(target_id: Int!): FriendshipStatus
   }
 
   input NofiticationInput {
@@ -200,6 +193,8 @@ const typeDefs = `#graphql
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
     generateOutingNotification(outing_id: Int!): String
     generateFriendRequest(addressee_profile_id: Int!): Notification
+    updateFriend(friendship_id: Int!, status_code: String!): Friendship
+    blockProfile(blocked_profile_id: Int!): Profile
     openNotification(
       type_code: String!
       notification_created_at: String!

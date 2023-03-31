@@ -31,6 +31,7 @@ export default function CheckUser() {
   const navigate = useNavigate();
   const loaderData = useLoaderData();
   const [inviteData, setInviteData] = useState<string | null>(null);
+  const [redirectToUrl, setRedirecToUrl] = useState<string | null>(null);
   const [hasAccount, setHasAccount] = useState<boolean | undefined>(undefined);
   const [email, setEmail] = useState<string | undefined>(undefined);
 
@@ -59,12 +60,13 @@ export default function CheckUser() {
   const [ConnectProfile] = useMutation(CONNECT_PROFILE);
   const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
 
-  // Attempt to get inviteData from local storage if there
+  // Attempt to get inviteData and redirectTo from local storage if there
   useEffect(() => {
     console.log(
-      'attempting to set invite data from local storage on component mount'
+      'attempting to set invite data and redirectTo from local storage on component mount'
     );
     setInviteData(localStorage.getItem('inviteData'));
+    setRedirecToUrl(localStorage.getItem('redirectTo'));
   }, []);
 
   // Once the loader data is sent, pull the email from the authData
@@ -114,11 +116,13 @@ export default function CheckUser() {
           window.localStorage.removeItem('inviteData');
           navigate(returnTo);
         } else if (data.data.getAccountByEmail && !inviteData) {
-          // if there is an account and they are not coming from an invite, redirect them to the homepage
+          // if there is an account and they are not coming from an invite, we need to check if there is a returnToUrl that was fetched from local storage
           console.log(
-            'found and account by email and now redirecting to homepage'
+            'found and account by email and now redirecting to homepage or redirectToUrl'
           );
-          navigate('/homepage');
+          const url = redirectToUrl ? redirectToUrl : '/homepage';
+          window.localStorage.removeItem('redirectTo');
+          navigate(url);
         } else {
           // otherwise no account was found, set hasAccount to false
           console.log(
@@ -138,6 +142,7 @@ export default function CheckUser() {
     inviteData,
     navigate,
     generateNotifications,
+    redirectToUrl,
   ]);
 
   // NOTE this would indicate that there is no account, that the user is coming from an invite, and they signed into Auth0 with a different email than the one they were invited with
@@ -240,14 +245,23 @@ export default function CheckUser() {
         }
         if (data.data.CreateAccountAndProfile) {
           console.log(
-            'successfully created account and profile, redirecting to homepage'
+            'successfully created account and profile, redirecting to homepage or redirectToUrl'
           );
-          navigate('/homepage');
+          const url = redirectToUrl ? redirectToUrl : '/homepage';
+          window.localStorage.removeItem('redirectTo');
+          navigate(url);
         }
       };
       createAccountAndProfileFunction();
     }
-  }, [loaderData, createAccountAndProfile, hasAccount, inviteData, navigate]);
+  }, [
+    loaderData,
+    createAccountAndProfile,
+    hasAccount,
+    inviteData,
+    navigate,
+    redirectToUrl,
+  ]);
 
   return (
     <div>

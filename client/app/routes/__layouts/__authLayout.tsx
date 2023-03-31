@@ -1,5 +1,5 @@
 import type { LinksFunction, LoaderFunction } from '@remix-run/node';
-import { Outlet } from '@remix-run/react';
+import { Outlet, useLoaderData, useNavigate } from '@remix-run/react';
 import { logout } from '~/auth/authenticator';
 import { BasicFooter } from '~/components/organisms/Footers';
 import { BasicHeader } from '~/components/organisms/Headers';
@@ -8,7 +8,7 @@ import footerStyles from '~/generatedStyles/footer.css';
 import headerStyles from '~/generatedStyles/header.css';
 import { GET_NEW_NOTIFICATIONS_COUNT } from '~/constants/graphqlConstants';
 import { useQuery } from '@apollo/client';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export const links: LinksFunction = () => {
   return [
@@ -29,7 +29,12 @@ export const links: LinksFunction = () => {
 export const loader: LoaderFunction = async ({ request }) => {
   const { valid, user, session } = await validateUserAndSession(request);
 
-  if (!valid) {
+  const url = new URL(request.url);
+  const redirectTo = url.searchParams.get('redirectTo');
+
+  if (!valid && redirectTo) {
+    return { redirectTo, valid };
+  } else if (!valid && !redirectTo) {
     return logout(request, true);
   }
 
@@ -37,6 +42,22 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export default function AuthLayout() {
+  const { redirectTo, valid } = useLoaderData();
+  const navigate = useNavigate();
+
+  // If a user is ever linked to a page that is wrapped in this authLayout route and they are not logged in when they click the link, they will all get caugh by the loader function above
+  // They wont' have a valid session, and if we pull off a redirectTo param then we know they were trying to access a protected route
+  // so we need to store the redirectTo param in local storage so that when they log in, we can redirect them to the page they were trying to access
+  // in order to do that we need access to the DOM and therefore need to pass the redirectTo value from the loader to the rendered component so we have access to window
+  // then we save the value in local storage, and navigate user to logout route
+  useEffect(() => {
+    if (redirectTo) {
+      window.localStorage.setItem('redirectTo', redirectTo);
+      const url = `/resources/logout?returnToLogin=true`;
+      navigate(url);
+    }
+  }, [redirectTo, navigate]);
+
   const {
     data: countData,
     loading: countLoading,
@@ -50,9 +71,13 @@ export default function AuthLayout() {
 
   return (
     <>
-      <BasicHeader count={count} />
-      <Outlet />
-      <BasicFooter />
+      {valid ? (
+        <>
+          <BasicHeader count={count} />
+          <Outlet />
+          <BasicFooter />
+        </>
+      ) : null}
     </>
   );
 }

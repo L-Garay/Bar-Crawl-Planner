@@ -106,11 +106,30 @@ export const GET_ALL_FRIENDSHIPS = gql`
       id
       requestor_profile_id
       addressee_profile_id
-      frienshipStatus_friendship_relation {
-        status_code
-        modifier_profile_id
-        created_at
-      }
+      status_code
+      created_at
+    }
+  }
+`;
+
+export const GET_PROFILE = gql`
+  query getProfile {
+    getProfile {
+      id
+      name
+      account_id
+      blocked_profile_ids
+    }
+  }
+`;
+
+export const BLOCK_PROFILE = gql`
+  mutation blockProfile($blocked_profile_id: Int!) {
+    blockProfile(blocked_profile_id: $blocked_profile_id) {
+      id
+      name
+      account_id
+      blocked_profile_ids
     }
   }
 `;
@@ -302,26 +321,18 @@ export const GET_SENT_FRIEND_REQUESTS = gql`
     getSentFriendRequests {
       id
       addressee_profile_id
-      sender_profile_id
+      requestor_profile_id
       created_at
     }
   }
 `;
 
-export const GET_FRIENDSHIP_STATUS = gql`
-  query getFriendshipStatus($target_id: Int!) {
-    getFriendshipStatus(target_id: $target_id) {
-      status_code
-    }
-  }
-`;
-
-export const GET_FRIEND_REQUESTS = gql`
-  query getFriendRequests {
-    getFriendRequests {
+export const GET_RECIEVED_FRIEND_REQUESTS = gql`
+  query getRecievedFriendRequests {
+    getRecievedFriendRequests {
       id
       addressee_profile_id
-      sender_profile_id
+      requestor_profile_id
       created_at
     }
   }
@@ -345,6 +356,20 @@ export const GENERATE_FRIEND_REQUEST = gql`
         name
         profile_img
       }
+    }
+  }
+`;
+
+export const UPDATE_FRIEND = gql`
+  mutation updateFriend($friendship_id: Int!, $status_code: String!) {
+    updateFriend(friendship_id: $friendship_id, status_code: $status_code) {
+      id
+      requestor_profile_id
+      addressee_profile_id
+      created_at
+      status_code
+      last_modified_by
+      modified_at
     }
   }
 `;

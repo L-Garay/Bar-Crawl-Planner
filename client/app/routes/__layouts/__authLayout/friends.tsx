@@ -1,12 +1,18 @@
-import type { LinksFunction } from '@remix-run/node';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import {
+  UPDATE_FRIEND,
   GET_ALL_FRIENDSHIPS,
-  GET_FRIEND_REQUESTS,
+  GET_RECIEVED_FRIEND_REQUESTS,
   GET_SENT_FRIEND_REQUESTS,
+  GET_PROFILE,
+  BLOCK_PROFILE,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useMemo } from 'react';
+import logApolloError from '~/utils/getApolloError';
+import { getNewClient } from '~/apollo/getClient';
+import { useLoaderData } from '@remix-run/react';
 
 export const links: LinksFunction = () => {
   return [
@@ -18,43 +24,63 @@ export const links: LinksFunction = () => {
   ];
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const client = await getNewClient(request);
+  let profile: any;
+  try {
+    profile = await client.query({
+      query: GET_PROFILE,
+    });
+  } catch (error) {
+    logApolloError(error);
+    throw new Response(JSON.stringify(error), { status: 500 });
+  }
+  return { profile };
+};
+
 export default function FriendsIndex() {
+  const { profile } = useLoaderData();
   const { data: friendsData, error: friendsError } =
     useQuery(GET_ALL_FRIENDSHIPS);
   const { data: sentData, error: sentError } = useQuery(
     GET_SENT_FRIEND_REQUESTS
   );
 
-  const { data: recievedData, error: recievedError } =
-    useQuery(GET_FRIEND_REQUESTS);
+  const { data: recievedData, error: recievedError } = useQuery(
+    GET_RECIEVED_FRIEND_REQUESTS
+  );
+
+  const [updateFriend, { data: updateData, error: updateError }] = useMutation(
+    UPDATE_FRIEND,
+    {
+      refetchQueries: [
+        GET_ALL_FRIENDSHIPS,
+        GET_RECIEVED_FRIEND_REQUESTS,
+        GET_SENT_FRIEND_REQUESTS,
+      ],
+    }
+  );
+  const [blockProfile, { data: blockData, error: blockError }] =
+    useMutation(BLOCK_PROFILE);
 
   const friends = useMemo(() => {
-    // NOTE these are friendships, not profiles or notifications
     if (!friendsData || !friendsData.getAllFriendships) return [];
     return friendsData.getAllFriendships;
   }, [friendsData]);
 
   const sentRequests = useMemo(() => {
-    // NOTE these are notifications, not friendships
     if (!sentData || !sentData.getSentFriendRequests) return [];
     return sentData.getSentFriendRequests;
   }, [sentData]);
 
   const recievedRequests = useMemo(() => {
-    // NOTE these are notifications, not friendships
-    if (!recievedData || !recievedData.getFriendRequests) return [];
-    return recievedData.getFriendRequests;
+    if (!recievedData || !recievedData.getRecievedFriendRequests) return [];
+    return recievedData.getRecievedFriendRequests;
   }, [recievedData]);
 
   console.log('all friends', friends); // these are friendships, not users
   console.log('sent requests', sentRequests); // these are notifications, not friendships or users
   console.log('recieved requests', recievedRequests); // these are notifications, not friendships or users
-
-  // TODO
-
-  // TODO I'm not sure how much detail and what kind I want to display in these lists
-  // but if we need profile information, we can easily get it from the friendship relations
-  // however, if we need to get profile information from the notifications, we will need to make a separate query using the profile_ids stored on the notifications
 
   return (
     <>
@@ -67,15 +93,59 @@ export default function FriendsIndex() {
         <h1>This will be the friends page</h1>
         <div className="friends-lists">
           <div className="friend-requests list">
-            <h5>Your friend requests</h5>
+            <h5>Your recieved friend requests</h5>
             <div>
               <ul>
                 {/* we need to get the friend's profile data to display here */}
                 {recievedRequests.map((request: any) => {
                   return (
                     <li key={request.id}>
-                      From: {request.sender_profile_id} created at:{' '}
-                      {request.created_at}
+                      From: {request.requestor_profile_id} created at:{' '}
+                      {request.created_at}{' '}
+                      <span style={{ display: 'block' }}>
+                        <button
+                          onClick={() =>
+                            updateFriend({
+                              variables: {
+                                friendship_id: request.id,
+                                status_code: 'A',
+                              },
+                            })
+                          }
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() =>
+                            updateFriend({
+                              variables: {
+                                friendship_id: request.id,
+                                status_code: 'D',
+                              },
+                            })
+                          }
+                        >
+                          Decline
+                        </button>
+                        <button
+                          onClick={() => {
+                            updateFriend({
+                              variables: {
+                                friendship_id: request.id,
+                                status_code: 'B',
+                              },
+                            });
+                            blockProfile({
+                              variables: {
+                                blocked_profile_id:
+                                  request.requestor_profile_id,
+                              },
+                            });
+                          }}
+                        >
+                          Block
+                        </button>
+                      </span>
                     </li>
                   );
                 })}
@@ -92,11 +162,42 @@ export default function FriendsIndex() {
                     {friends.map((friend: any) => {
                       return (
                         <li key={friend.id}>
-                          Friend: {friend.id} created at:{' '}
-                          {
-                            friend.frienshipStatus_friendship_relation[0]
-                              .created_at
-                          }{' '}
+                          Friend: {friend.id} created at: {friend.created_at}{' '}
+                          <span style={{ display: 'block' }}>
+                            <button
+                              onClick={() =>
+                                updateFriend({
+                                  variables: {
+                                    friendship_id: friend.id,
+                                    status_code: 'R',
+                                  },
+                                })
+                              }
+                            >
+                              Remove
+                            </button>
+                            <button
+                              onClick={() => {
+                                updateFriend({
+                                  variables: {
+                                    friendship_id: friend.id,
+                                    status_code: 'B',
+                                  },
+                                });
+                                const blocked_profile_id =
+                                  friend.requestor_profile_id === profile.id
+                                    ? friend.addressee_profile_id
+                                    : friend.requestor_profile_id;
+                                blockProfile({
+                                  variables: {
+                                    blocked_profile_id,
+                                  },
+                                });
+                              }}
+                            >
+                              Block
+                            </button>
+                          </span>
                         </li>
                       );
                     })}
@@ -108,7 +209,7 @@ export default function FriendsIndex() {
             </div>
           </div>
           <div className="sent-requests list">
-            <h5>Pending Requests</h5>
+            <h5>Pending sent requests</h5>
             <div>
               <ul>
                 {/* we need to get the friend's profile data to display here */}

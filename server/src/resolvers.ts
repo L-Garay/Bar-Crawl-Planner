@@ -22,7 +22,10 @@ import {
   UpdateAccountBySocialPin,
   UpdateUserAccount,
 } from './prisma/mutations/accountMutations';
-import { CreateProfile } from './prisma/mutations/profileMutations';
+import {
+  BlockProfile,
+  CreateProfile,
+} from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import { CitySelectOptions, OutingInput } from './types/sharedTypes';
 import {
@@ -34,24 +37,24 @@ import {
   SendOutingJoinedNotification,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
-import { Account, Profile } from '@prisma/client';
-import { AddFriend } from './prisma/mutations/friendsMutations';
+import { Profile } from '@prisma/client';
+import {
+  UpdateFriend,
+  GenerateFriendRequestAndEmail,
+} from './prisma/mutations/friendsMutations';
 import {
   GetAllFriendships,
-  GetFriendshipStatus,
+  GetRecievedFriendRequests,
+  GetSentFriendRequests,
 } from './prisma/querries/friendsQuerries';
 import {
   AcceptFriendRequest,
   DeclineFriendRequest,
-  GenerateFriendRequestWithMachine,
-  GenerateOutingNotificationWithMachine,
   OpenNotification,
 } from './prisma/mutations/notificationMutations';
 import {
   GetAllNotifications,
-  GetFriendRequests,
   GetNewNotificationCount,
-  GetSentFriendRequests,
 } from './prisma/querries/notificationQuerries';
 
 const resolvers: Resolvers = {
@@ -130,6 +133,15 @@ const resolvers: Resolvers = {
       } else {
         return account.data;
       }
+    },
+    getProfile: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      return profile.data;
     },
     profiles: async (parent, args, context, info) => {
       const { authError } = context;
@@ -359,7 +371,7 @@ const resolvers: Resolvers = {
         return requests.data;
       }
     },
-    getFriendRequests: async (parent, args, context, info) => {
+    getRecievedFriendRequests: async (parent, args, context, info) => {
       const { authError, profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -367,7 +379,8 @@ const resolvers: Resolvers = {
         });
       }
       const { id } = profile.data;
-      const requests = await GetFriendRequests(id);
+      const requests = await GetRecievedFriendRequests(id);
+
       if (requests.status === 'Failure') {
         throw new GraphQLError('Cannot get friend requests', {
           extensions: {
@@ -379,29 +392,6 @@ const resolvers: Resolvers = {
         });
       } else {
         return requests.data;
-      }
-    },
-    getFriendshipStatus: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { id: user_id } = profile.data;
-      const { target_id } = args;
-      const status = await GetFriendshipStatus(user_id, target_id);
-      if (status.status === 'Failure') {
-        throw new GraphQLError('Cannot get friendship status', {
-          extensions: {
-            code: status.error?.name,
-            message: status.error?.message,
-            prismaMeta: status.error?.meta,
-            prismaErrorCode: status.error?.errorCode,
-          },
-        });
-      } else {
-        return status.data;
       }
     },
   },
@@ -700,9 +690,9 @@ const resolvers: Resolvers = {
       }
       const { addressee_profile_id } = args;
 
-      const notificationResponse = await GenerateFriendRequestWithMachine(
-        addressee_profile_id, // recipient_profile_id
-        sender_profile.data.id // sender_profile_id
+      const notificationResponse = await GenerateFriendRequestAndEmail(
+        addressee_profile_id,
+        sender_profile.data.id
       );
       if (notificationResponse.status === 'Failure') {
         throw new GraphQLError('Cannot generate friend request', {
@@ -715,6 +705,56 @@ const resolvers: Resolvers = {
         });
       } else {
         return notificationResponse.data;
+      }
+    },
+    updateFriend: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { friendship_id, status_code } = args;
+
+      const status = await UpdateFriend(
+        friendship_id,
+        profile.data.id,
+        status_code
+      );
+      if (status.status === 'Failure') {
+        throw new GraphQLError('Cannot accept friend request', {
+          extensions: {
+            code: status.error?.name,
+            message: status.error?.message,
+            prismaMeta: status.error?.meta,
+            prismaErrorCode: status.error?.errorCode,
+          },
+        });
+      } else {
+        return status.data;
+      }
+    },
+    blockProfile: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { blocked_profile_id } = args;
+
+      const status = await BlockProfile(profile.data.id, blocked_profile_id);
+      if (status.status === 'Failure') {
+        throw new GraphQLError('Cannot block profile', {
+          extensions: {
+            code: status.error?.name,
+            message: status.error?.message,
+            prismaMeta: status.error?.meta,
+            prismaErrorCode: status.error?.errorCode,
+          },
+        });
+      } else {
+        return status.data;
       }
     },
     generateOutingNotification: async (parent, args, context, info) => {

@@ -1,6 +1,6 @@
 import { useLazyQuery } from '@apollo/client';
 import { useEffect, useMemo } from 'react';
-import { GET_FRIENDSHIP_STATUS } from '~/constants/graphqlConstants';
+import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
@@ -19,19 +19,18 @@ export const ProfileInOuting = ({
   sentRequests,
   recievedRequests,
 }: ProfileInOutingProps) => {
-  const [getFriendshipStatus, { data: statusData }] = useLazyQuery(
-    GET_FRIENDSHIP_STATUS
-  );
+  const [getAllFriendships, { data: friendsData }] =
+    useLazyQuery(GET_ALL_FRIENDSHIPS);
 
   useEffect(() => {
     if (profile) {
-      getFriendshipStatus({
+      getAllFriendships({
         variables: {
           target_id: Number(profile.id),
         },
       });
     }
-  }, [getFriendshipStatus, profile]);
+  }, [getAllFriendships, profile]);
 
   const color = useMemo(() => {
     if (attendanceStatus === 'Accepted') return 'green';
@@ -63,9 +62,9 @@ export const ProfileInOuting = ({
   }, [profile.id, recievedRequests]);
 
   const alreadyFriends = useMemo(() => {
-    if (!statusData || statusData.getFriendshipStatus === null) return false;
-    return statusData.getFriendshipStatus.status_code === 'A';
-  }, [statusData]);
+    if (!friendsData || friendsData.getAllFriendships === null) return false;
+    return friendsData.getAllFriendships.status_code === 'A';
+  }, [friendsData]);
 
   return (
     <div className="profile-in-outing-container">

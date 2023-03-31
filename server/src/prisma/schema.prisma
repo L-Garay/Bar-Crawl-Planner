@@ -34,41 +34,33 @@ model Profile {
   social_pin                      String               @unique @default("") @db.VarChar(255)
   requestor_profile_relation      Friendship[]         @relation("Requestor_Profile")
   addressee_profile_relation      Friendship[]         @relation("Addressee_Profile")
-  modifier_profile_relation       FriendshipStatus[]   @relation("Modifier_Profile")
+  last_modified_by_relation       Friendship[]         @relation("Last_Modified_By")
   notification_sender_relation    Notification[]       @relation("Notification_Sender")
   notification_addressee_relation Notification[]       @relation("Notification_Addressee")
   notification_modifier_relation  NotificationStatus[] @relation("Notification_Modifier")
+  blocked_profile_ids             Int[]                @default([])
 }
 
 model Friendship {
-  id                                  Int                @unique @default(autoincrement())
-  requestor_profile_id                Int
-  requestor_profile_relation          Profile            @relation("Requestor_Profile", fields: [requestor_profile_id], references: [id])
-  addressee_profile_id                Int
-  addressee_profile_relation          Profile            @relation("Addressee_Profile", fields: [addressee_profile_id], references: [id])
-  created_at                          String             @db.VarChar(255)
-  frienshipStatus_friendship_relation FriendshipStatus[]
+  id                         Int              @unique @default(autoincrement())
+  requestor_profile_id       Int
+  requestor_profile_relation Profile          @relation("Requestor_Profile", fields: [requestor_profile_id], references: [id])
+  addressee_profile_id       Int
+  addressee_profile_relation Profile          @relation("Addressee_Profile", fields: [addressee_profile_id], references: [id])
+  created_at                 String           @db.VarChar(255)
+  last_modified_by           Int
+  last_modified_by_relation  Profile          @relation("Last_Modified_By", fields: [last_modified_by], references: [id])
+  modified_at                String           @db.VarChar(255)
+  status_code                String           @db.VarChar(5)
+  status_relation            FriendshipStates @relation(fields: [status_code], references: [status_code])
 
   @@id([requestor_profile_id, addressee_profile_id])
 }
 
 model FriendshipStates {
-  status_code                                String             @id @db.VarChar(5)
-  status_name                                String             @db.VarChar(255)
-  friendshipStatus_friendshipStates_relation FriendshipStatus[]
-}
-
-model FriendshipStatus {
-  requestor_profile_id                       Int
-  addressee_profile_id                       Int
-  frienshipStatus_friendship_relation        Friendship       @relation(fields: [requestor_profile_id, addressee_profile_id], references: [requestor_profile_id, addressee_profile_id])
-  modifier_profile_id                        Int
-  modifier_profile_relation                  Profile          @relation("Modifier_Profile", fields: [modifier_profile_id], references: [id])
-  created_at                                 String           @db.VarChar(255)
-  status_code                                String           @db.VarChar(5)
-  friendshipStatus_friendshipStates_relation FriendshipStates @relation(fields: [status_code], references: [status_code])
-
-  @@id([requestor_profile_id, addressee_profile_id, created_at])
+  status_code     String       @id @db.VarChar(5)
+  status_name     String       @db.VarChar(255)
+  status_relation Friendship[]
 }
 
 // TODO give each notification a simple int id instead of the composite ids

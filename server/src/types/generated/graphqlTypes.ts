@@ -30,17 +30,9 @@ export type Friendship = {
   __typename?: 'Friendship';
   addressee_profile_id?: Maybe<Scalars['Int']>;
   created_at?: Maybe<Scalars['String']>;
-  frienshipStatus_friendship_relation?: Maybe<Array<Maybe<FriendshipStatus>>>;
   id?: Maybe<Scalars['Int']>;
-  notification_addressee_relation?: Maybe<Profile>;
-  requestor_profile_id?: Maybe<Scalars['Int']>;
-};
-
-export type FriendshipStatus = {
-  __typename?: 'FriendshipStatus';
-  addressee_profile_id?: Maybe<Scalars['Int']>;
-  created_at?: Maybe<Scalars['String']>;
-  modifier_profile_id?: Maybe<Scalars['Int']>;
+  last_modified_by?: Maybe<Scalars['Int']>;
+  modified_at?: Maybe<Scalars['String']>;
   requestor_profile_id?: Maybe<Scalars['Int']>;
   status_code?: Maybe<Scalars['String']>;
 };
@@ -85,6 +77,7 @@ export type Mutation = {
   DisconnectUserWithOuting?: Maybe<Outing>;
   UpdateAccountBySocialPin?: Maybe<Account>;
   acceptFriendRequest?: Maybe<NotificationStatus>;
+  blockProfile?: Maybe<Profile>;
   createAccount?: Maybe<Account>;
   createOuting?: Maybe<Outing>;
   createProfile?: Maybe<Profile>;
@@ -95,6 +88,7 @@ export type Mutation = {
   generateOutingNotification?: Maybe<Scalars['String']>;
   openNotification?: Maybe<NotificationStatus>;
   sendOutingInvites?: Maybe<Scalars['String']>;
+  updateFriend?: Maybe<Friendship>;
   updateOuting?: Maybe<Outing>;
   updateUserAccount?: Maybe<Account>;
 };
@@ -132,6 +126,11 @@ export type MutationAcceptFriendRequestArgs = {
   notification_created_at: Scalars['String'];
   notification_id: Scalars['Int'];
   sender_profile_id: Scalars['Int'];
+};
+
+
+export type MutationBlockProfileArgs = {
+  blocked_profile_id: Scalars['Int'];
 };
 
 
@@ -193,6 +192,12 @@ export type MutationSendOutingInvitesArgs = {
   emails: Array<Scalars['String']>;
   outing_id: Scalars['Int'];
   start_date_and_time: Scalars['String'];
+};
+
+
+export type MutationUpdateFriendArgs = {
+  friendship_id: Scalars['Int'];
+  status_code: Scalars['String'];
 };
 
 
@@ -278,6 +283,7 @@ export type Profile = {
   accepted_outings?: Maybe<Array<Maybe<Outing>>>;
   account?: Maybe<Account>;
   account_id?: Maybe<Scalars['Int']>;
+  blocked_profile_ids?: Maybe<Array<Maybe<Scalars['Int']>>>;
   declined_outings?: Maybe<Array<Maybe<Outing>>>;
   friends?: Maybe<Array<Maybe<Profile>>>;
   friendsRelation?: Maybe<Array<Maybe<Profile>>>;
@@ -297,14 +303,13 @@ export type Query = {
   getAllFriendships?: Maybe<Array<Maybe<Friendship>>>;
   getAllNotifications?: Maybe<Array<Maybe<Notification>>>;
   getAllOutings?: Maybe<Array<Maybe<Outing>>>;
-  getFriendRequests?: Maybe<Array<Maybe<Notification>>>;
-  getFriendshipStatus?: Maybe<FriendshipStatus>;
   getNewNotificationCount?: Maybe<Scalars['Int']>;
   getOuting?: Maybe<Outing>;
+  getProfile?: Maybe<Profile>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
-  getSentFriendRequests?: Maybe<Array<Maybe<Notification>>>;
+  getRecievedFriendRequests?: Maybe<Array<Maybe<Friendship>>>;
+  getSentFriendRequests?: Maybe<Array<Maybe<Friendship>>>;
   getUserAccount?: Maybe<Account>;
-  profile?: Maybe<Profile>;
   profiles?: Maybe<Array<Maybe<Profile>>>;
   searchCity?: Maybe<Array<Maybe<LocationDetails>>>;
 };
@@ -317,11 +322,6 @@ export type QueryGetAccountByEmailArgs = {
 
 export type QueryGetAccountWithProfileDataArgs = {
   email: Scalars['String'];
-};
-
-
-export type QueryGetFriendshipStatusArgs = {
-  target_id: Scalars['Int'];
 };
 
 
@@ -414,7 +414,6 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
   Friendship: ResolverTypeWrapper<Friendship>;
-  FriendshipStatus: ResolverTypeWrapper<FriendshipStatus>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   LocationDetails: ResolverTypeWrapper<LocationDetails>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -436,7 +435,6 @@ export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean'];
   Float: Scalars['Float'];
   Friendship: Friendship;
-  FriendshipStatus: FriendshipStatus;
   Int: Scalars['Int'];
   LocationDetails: LocationDetails;
   Mutation: {};
@@ -467,17 +465,9 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 export type FriendshipResolvers<ContextType = any, ParentType extends ResolversParentTypes['Friendship'] = ResolversParentTypes['Friendship']> = ResolversObject<{
   addressee_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  frienshipStatus_friendship_relation?: Resolver<Maybe<Array<Maybe<ResolversTypes['FriendshipStatus']>>>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  notification_addressee_relation?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
-  requestor_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-}>;
-
-export type FriendshipStatusResolvers<ContextType = any, ParentType extends ResolversParentTypes['FriendshipStatus'] = ResolversParentTypes['FriendshipStatus']> = ResolversObject<{
-  addressee_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  modifier_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  last_modified_by?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  modified_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   requestor_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   status_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -522,6 +512,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   DisconnectUserWithOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationDisconnectUserWithOutingArgs, 'outing_id' | 'profile_id'>>;
   UpdateAccountBySocialPin?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationUpdateAccountBySocialPinArgs, 'email' | 'profile_id' | 'social_pin'>>;
   acceptFriendRequest?: Resolver<Maybe<ResolversTypes['NotificationStatus']>, ParentType, ContextType, RequireFields<MutationAcceptFriendRequestArgs, 'addressee_profile_id' | 'notification_created_at' | 'notification_id' | 'sender_profile_id'>>;
+  blockProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, RequireFields<MutationBlockProfileArgs, 'blocked_profile_id'>>;
   createAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationCreateAccountArgs>>;
   createOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, Partial<MutationCreateOutingArgs>>;
   createProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType, Partial<MutationCreateProfileArgs>>;
@@ -532,6 +523,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   generateOutingNotification?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationGenerateOutingNotificationArgs, 'outing_id'>>;
   openNotification?: Resolver<Maybe<ResolversTypes['NotificationStatus']>, ParentType, ContextType, RequireFields<MutationOpenNotificationArgs, 'id' | 'notification_created_at' | 'type_code'>>;
   sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
+  updateFriend?: Resolver<Maybe<ResolversTypes['Friendship']>, ParentType, ContextType, RequireFields<MutationUpdateFriendArgs, 'friendship_id' | 'status_code'>>;
   updateOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<MutationUpdateOutingArgs, 'id'>>;
   updateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, Partial<MutationUpdateUserAccountArgs>>;
 }>;
@@ -584,6 +576,7 @@ export type ProfileResolvers<ContextType = any, ParentType extends ResolversPare
   accepted_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
   account_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  blocked_profile_ids?: Resolver<Maybe<Array<Maybe<ResolversTypes['Int']>>>, ParentType, ContextType>;
   declined_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   friends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   friendsRelation?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
@@ -603,14 +596,13 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getAllFriendships?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getAllNotifications?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>;
   getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
-  getFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>;
-  getFriendshipStatus?: Resolver<Maybe<ResolversTypes['FriendshipStatus']>, ParentType, ContextType, RequireFields<QueryGetFriendshipStatusArgs, 'target_id'>>;
   getNewNotificationCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
+  getProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
-  getSentFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Notification']>>>, ParentType, ContextType>;
+  getRecievedFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
+  getSentFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
-  profile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   searchCity?: Resolver<Maybe<Array<Maybe<ResolversTypes['LocationDetails']>>>, ParentType, ContextType, RequireFields<QuerySearchCityArgs, 'city' | 'locationType'>>;
 }>;
@@ -618,7 +610,6 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 export type Resolvers<ContextType = any> = ResolversObject<{
   Account?: AccountResolvers<ContextType>;
   Friendship?: FriendshipResolvers<ContextType>;
-  FriendshipStatus?: FriendshipStatusResolvers<ContextType>;
   LocationDetails?: LocationDetailsResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Notification?: NotificationResolvers<ContextType>;
