@@ -1,13 +1,18 @@
-import type { LinksFunction } from '@remix-run/node';
+import type { LinksFunction, LoaderFunction } from '@remix-run/node';
 import {
   UPDATE_FRIEND,
   GET_ALL_FRIENDSHIPS,
   GET_RECIEVED_FRIEND_REQUESTS,
   GET_SENT_FRIEND_REQUESTS,
+  GET_PROFILE,
+  BLOCK_PROFILE,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
 import { useMutation, useQuery } from '@apollo/client';
 import { useMemo } from 'react';
+import logApolloError from '~/utils/getApolloError';
+import { getNewClient } from '~/apollo/getClient';
+import { useLoaderData } from '@remix-run/react';
 
 export const links: LinksFunction = () => {
   return [
@@ -19,7 +24,22 @@ export const links: LinksFunction = () => {
   ];
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const client = await getNewClient(request);
+  let profile: any;
+  try {
+    profile = await client.query({
+      query: GET_PROFILE,
+    });
+  } catch (error) {
+    logApolloError(error);
+    throw new Response(JSON.stringify(error), { status: 500 });
+  }
+  return { profile };
+};
+
 export default function FriendsIndex() {
+  const { profile } = useLoaderData();
   const { data: friendsData, error: friendsError } =
     useQuery(GET_ALL_FRIENDSHIPS);
   const { data: sentData, error: sentError } = useQuery(
@@ -40,6 +60,8 @@ export default function FriendsIndex() {
       ],
     }
   );
+  const [blockProfile, { data: blockData, error: blockError }] =
+    useMutation(BLOCK_PROFILE);
 
   const friends = useMemo(() => {
     if (!friendsData || !friendsData.getAllFriendships) return [];
@@ -106,14 +128,20 @@ export default function FriendsIndex() {
                           Decline
                         </button>
                         <button
-                          onClick={() =>
+                          onClick={() => {
                             updateFriend({
                               variables: {
                                 friendship_id: request.id,
                                 status_code: 'B',
                               },
-                            })
-                          }
+                            });
+                            blockProfile({
+                              variables: {
+                                blocked_profile_id:
+                                  request.requestor_profile_id,
+                              },
+                            });
+                          }}
                         >
                           Block
                         </button>
@@ -141,10 +169,31 @@ export default function FriendsIndex() {
                                 updateFriend({
                                   variables: {
                                     friendship_id: friend.id,
-                                    status_code: 'B',
+                                    status_code: 'R',
                                   },
                                 })
                               }
+                            >
+                              Remove
+                            </button>
+                            <button
+                              onClick={() => {
+                                updateFriend({
+                                  variables: {
+                                    friendship_id: friend.id,
+                                    status_code: 'B',
+                                  },
+                                });
+                                const blocked_profile_id =
+                                  friend.requestor_profile_id === profile.id
+                                    ? friend.addressee_profile_id
+                                    : friend.requestor_profile_id;
+                                blockProfile({
+                                  variables: {
+                                    blocked_profile_id,
+                                  },
+                                });
+                              }}
                             >
                               Block
                             </button>

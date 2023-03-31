@@ -112,6 +112,28 @@ export const GET_ALL_FRIENDSHIPS = gql`
   }
 `;
 
+export const GET_PROFILE = gql`
+  query getProfile {
+    getProfile {
+      id
+      name
+      account_id
+      blocked_profile_ids
+    }
+  }
+`;
+
+export const BLOCK_PROFILE = gql`
+  mutation blockProfile($blocked_profile_id: Int!) {
+    blockProfile(blocked_profile_id: $blocked_profile_id) {
+      id
+      name
+      account_id
+      blocked_profile_ids
+    }
+  }
+`;
+
 // ------------------- Outings -------------------
 export const CITY_SEARCH = gql`
   query searchCity($city: String!, $locationType: String!) {
