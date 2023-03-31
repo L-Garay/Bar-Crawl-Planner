@@ -23,3 +23,24 @@ export async function CreateProfile(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
+
+export async function BlockProfile(
+  user_profile_id: number,
+  blocked_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const profile = await prismaClient.profile.update({
+      where: {
+        id: user_profile_id,
+      },
+      data: {
+        blocked_profile_ids: {
+          push: blocked_profile_id,
+        },
+      },
+    });
+    return { status: 'Success', data: profile, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}

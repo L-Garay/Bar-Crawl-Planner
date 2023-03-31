@@ -38,7 +38,7 @@ export async function GetSentFriendRequests(
             requestor_profile_id: profile_id,
           },
           {
-            status_code: 'R',
+            status_code: 'S',
           },
         ],
       },
@@ -60,7 +60,7 @@ export async function GetRecievedFriendRequests(
             addressee_profile_id: profile_id,
           },
           {
-            status_code: 'R',
+            status_code: 'S',
           },
         ],
       },

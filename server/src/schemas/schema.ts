@@ -27,6 +27,7 @@ const typeDefs = `#graphql
     social_pin: String
     friends: [Profile]
     friendsRelation: [Profile]
+    blocked_profile_ids: [Int]
   }
 
   type Outing {
@@ -134,7 +135,7 @@ const typeDefs = `#graphql
   type Query {
     getAccountByEmail(email: String!): Account
     getUserAccount: Account
-    profile: Profile
+    getProfile: Profile
     getProfilesInOuting(id: Int!): OutingProfileStates
     getOuting(id: Int!): Outing
     accounts: [Account]
@@ -193,6 +194,7 @@ const typeDefs = `#graphql
     generateOutingNotification(outing_id: Int!): String
     generateFriendRequest(addressee_profile_id: Int!): Notification
     updateFriend(friendship_id: Int!, status_code: String!): Friendship
+    blockProfile(blocked_profile_id: Int!): Profile
     openNotification(
       type_code: String!
       notification_created_at: String!

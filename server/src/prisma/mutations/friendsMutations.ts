@@ -21,7 +21,7 @@ export async function AddFriend(
         requestor_profile_id: sender_profile_id,
         addressee_profile_id,
         last_modified_by: sender_profile_id,
-        status_code: 'R',
+        status_code: 'S',
       },
     });
     return { status: 'Success', data: friend, error: null };

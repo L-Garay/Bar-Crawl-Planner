@@ -38,6 +38,7 @@ model Profile {
   notification_sender_relation    Notification[]       @relation("Notification_Sender")
   notification_addressee_relation Notification[]       @relation("Notification_Addressee")
   notification_modifier_relation  NotificationStatus[] @relation("Notification_Modifier")
+  blocked_profile_ids             Int[]                @default([])
 }
 
 model Friendship {

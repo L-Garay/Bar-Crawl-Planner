@@ -22,7 +22,10 @@ import {
   UpdateAccountBySocialPin,
   UpdateUserAccount,
 } from './prisma/mutations/accountMutations';
-import { CreateProfile } from './prisma/mutations/profileMutations';
+import {
+  BlockProfile,
+  CreateProfile,
+} from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import { CitySelectOptions, OutingInput } from './types/sharedTypes';
 import {
@@ -130,6 +133,15 @@ const resolvers: Resolvers = {
       } else {
         return account.data;
       }
+    },
+    getProfile: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      return profile.data;
     },
     profiles: async (parent, args, context, info) => {
       const { authError } = context;
@@ -711,6 +723,29 @@ const resolvers: Resolvers = {
       );
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot accept friend request', {
+          extensions: {
+            code: status.error?.name,
+            message: status.error?.message,
+            prismaMeta: status.error?.meta,
+            prismaErrorCode: status.error?.errorCode,
+          },
+        });
+      } else {
+        return status.data;
+      }
+    },
+    blockProfile: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { blocked_profile_id } = args;
+
+      const status = await BlockProfile(profile.data.id, blocked_profile_id);
+      if (status.status === 'Failure') {
+        throw new GraphQLError('Cannot block profile', {
           extensions: {
             code: status.error?.name,
             message: status.error?.message,
