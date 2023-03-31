@@ -3,7 +3,7 @@ import Mailgen from 'mailgen';
 import nodemailer from 'nodemailer';
 import prismaClient from '../..';
 import { PrismaData, PrismaError } from '../../types/sharedTypes';
-import GenerateFriendRequestEmail from '../../utilities/generateEmails/generateFriendRequest';
+import { GenerateFriendRequestEmail } from '../../utilities/generateEmails';
 
 export async function AddFriend(
   sender_profile_id: number,
@@ -124,7 +124,7 @@ export async function SendFriendRequestEmail(
   }
 }
 
-export async function GenerateFriendRequestAndEmail(
+export async function SendFriendRequestAndEmail(
   addressee_profile_id: number,
   sender_profile_id: number
 ): Promise<PrismaData> {

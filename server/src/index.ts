@@ -124,26 +124,6 @@ async function StartServer() {
     return res.status(200).send('Success');
   });
 
-  app.get(
-    '/notification-machine',
-    cors(corsOptions),
-    bodyParser.json(),
-    async (req, res) => {
-      const decodedToken = await runTokenValidation(req);
-      const badToken =
-        decodedToken.error ||
-        typeof decodedToken.decoded === 'string' ||
-        typeof decodedToken.decoded === 'undefined';
-      if (badToken) {
-        return res.status(500).send('no auth');
-      }
-      console.log(
-        'this means we passed auth on the notification machine route'
-      );
-      return res.status(200).send('Success');
-    }
-  );
-
   // Set up our Express middleware to handle CORS, body parsing,
   // and our expressMiddleware function.
   app.use(

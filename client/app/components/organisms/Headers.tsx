@@ -1,22 +1,12 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from '@remix-run/react';
 import BeerIcon from '../../assets/basicBeerSvg';
 import { useOnClickOutside } from '~/utils/useOnClickOutside';
 
-export type HeaderProps = {
-  count: number;
-};
-
-const NavMenu = ({ count }: HeaderProps) => {
+const NavMenu = () => {
   return (
     <div className="menu-container">
       <div className="menu-items">
-        <Link to="/notifications" className="menuLink">
-          Inbox{' '}
-          <div className="notification-circle">
-            <div className="notification-counter">{count}</div>
-          </div>
-        </Link>
         <Link to="/profile" className="menuLink">
           Profile
         </Link>
@@ -34,12 +24,11 @@ const NavMenu = ({ count }: HeaderProps) => {
   );
 };
 
-export const BasicHeader = ({ count }: HeaderProps) => {
+export const BasicHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
 
-  const hasNotifications = useMemo(() => (count ? count > 0 : false), [count]);
   return (
     <div id="header-container">
       <div className="logo-wrapper">
@@ -61,9 +50,7 @@ export const BasicHeader = ({ count }: HeaderProps) => {
             onClick={() => setIsMenuOpen((oldValue) => !oldValue)}
             ref={menuRef}
           >
-            Menu{' '}
-            {hasNotifications && <div className="notification-marker"></div>}
-            {isMenuOpen ? <NavMenu count={count} /> : null}
+            Menu {isMenuOpen ? <NavMenu /> : null}
           </div>
         </div>
       </div>

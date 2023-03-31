@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import {
   CONNECT_PROFILE,
   DISCONNECT_PROFILE,
-  GENERATE_OUTING_NOTIFICATIONS,
+  SEND_OUTING_JOINED_EMAIL,
 } from '~/constants/graphqlConstants';
 import getConfig from '~/utils/config.server';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
@@ -28,7 +28,7 @@ export default function OutingInvite() {
 
   const [DisconnectProfile] = useMutation(DISCONNECT_PROFILE);
   const [ConnectProfile] = useMutation(CONNECT_PROFILE);
-  const [generateNotifications] = useMutation(GENERATE_OUTING_NOTIFICATIONS);
+  const [sendOutingJoinedEmail] = useMutation(SEND_OUTING_JOINED_EMAIL);
 
   // save inviteData to local storage if user does not have valid session
   useEffect(() => {
@@ -55,7 +55,7 @@ export default function OutingInvite() {
         },
       });
       // send notificaiton that user has joined
-      await generateNotifications({
+      await sendOutingJoinedEmail({
         variables: {
           outing_id: Number(outingId),
         },

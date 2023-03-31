@@ -85,28 +85,6 @@ type Friendship {
   modified_at: String
 }
 
-type Notification {
-  id: Int
-  sender_profile_id: Int
-  addressee_profile_id: Int
-  created_at: String
-  type_code: String
-  notification_relation: [NotificationStatus]
-  notification_addressee_relation: Profile
-  notification_sender_relation: Profile
-  outing_id: Int
-}
-
-type NotificationStatus {
-  id: Int
-  notification_id: Int
-  modifier_profile_id: Int
-  notification_created_at: String
-  modified_at: String
-  status_code: String
-  type_code: String
-}
-
 type Query {
   getAccountByEmail(email: String!): Account
   getUserAccount: Account
@@ -119,31 +97,8 @@ type Query {
   searchCity(city: String!, locationType: String!): [LocationDetails]
   getAccountWithProfileData(email: String!): Account
   getAllFriendships: [Friendship]
-  getAllNotifications: [Notification]
   getRecievedFriendRequests: [Friendship]
   getSentFriendRequests: [Friendship]
-  getNewNotificationCount: Int
-}
-
-input NofiticationInput {
-  id: Int
-  sender_profile_id: Int
-  addressee_profile_id: Int
-  created_at: String
-  type_code: String
-  outing_id: Int
-}
-
-input NotificationStatusInput {
-  notification_id: Int
-  modifier_profile_id: Int
-  modified_at: String
-  status_code: String
-}
-
-input NotificationMachineInput {
-  notification: NofiticationInput
-  notificationStatus: NotificationStatusInput
 }
 
 type Mutation {
@@ -177,23 +132,8 @@ type Mutation {
     email: String!
     verified: Boolean!
   ): String
-  generateOutingNotification(outing_id: Int!): String
-  generateFriendRequest(addressee_profile_id: Int!): Notification
+  sendOutingJoinedEmail(outing_id: Int!): String
+  sendFriendRequestEmail(addressee_profile_id: Int!): String
   updateFriend(friendship_id: Int!, status_code: String!): Friendship
   blockProfile(blocked_profile_id: Int!): Profile
-  openNotification(
-    type_code: String!
-    notification_created_at: String!
-    id: Int!
-  ): NotificationStatus
-  acceptFriendRequest(
-    sender_profile_id: Int!
-    addressee_profile_id: Int!
-    notification_created_at: String!
-    notification_id: Int!
-  ): NotificationStatus
-  declineFriendRequest(
-    notification_id: Int!
-    notification_created_at: String!
-  ): NotificationStatus
 }

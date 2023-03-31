@@ -34,28 +34,19 @@ import {
   DeleteOuting,
   DisconnectUserWithOuting,
   SendOutingInvites,
-  SendOutingJoinedNotification,
+  SendOutingJoinedEmail,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
 import {
   UpdateFriend,
-  GenerateFriendRequestAndEmail,
+  SendFriendRequestAndEmail,
 } from './prisma/mutations/friendsMutations';
 import {
   GetAllFriendships,
   GetRecievedFriendRequests,
   GetSentFriendRequests,
 } from './prisma/querries/friendsQuerries';
-import {
-  AcceptFriendRequest,
-  DeclineFriendRequest,
-  OpenNotification,
-} from './prisma/mutations/notificationMutations';
-import {
-  GetAllNotifications,
-  GetNewNotificationCount,
-} from './prisma/querries/notificationQuerries';
 
 const resolvers: Resolvers = {
   Query: {
@@ -303,50 +294,6 @@ const resolvers: Resolvers = {
         console.log(friends.data);
 
         return friends.data;
-      }
-    },
-    getAllNotifications: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { id } = profile.data;
-      const notifications = await GetAllNotifications(id);
-      if (notifications.status === 'Failure') {
-        throw new GraphQLError('Cannot get all notifications', {
-          extensions: {
-            code: notifications.error?.name,
-            message: notifications.error?.message,
-            prismaMeta: notifications.error?.meta,
-            prismaErrorCode: notifications.error?.errorCode,
-          },
-        });
-      } else {
-        return notifications.data;
-      }
-    },
-    getNewNotificationCount: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-      const { id } = profile.data;
-      const count = await GetNewNotificationCount(id);
-      if (count.status === 'Failure') {
-        throw new GraphQLError('Cannot get new notification count', {
-          extensions: {
-            code: count.error?.name,
-            message: count.error?.message,
-            prismaMeta: count.error?.meta,
-            prismaErrorCode: count.error?.errorCode,
-          },
-        });
-      } else {
-        return count.data;
       }
     },
     getSentFriendRequests: async (parent, args, context, info) => {
@@ -681,7 +628,7 @@ const resolvers: Resolvers = {
 
       return `Account ${account.data.id} and Profile ${profile.data.id} created`;
     },
-    generateFriendRequest: async (parent, args, context, info) => {
+    sendFriendRequestEmail: async (parent, args, context, info) => {
       const { authError, profile: sender_profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -690,21 +637,21 @@ const resolvers: Resolvers = {
       }
       const { addressee_profile_id } = args;
 
-      const notificationResponse = await GenerateFriendRequestAndEmail(
+      const emailResponse = await SendFriendRequestAndEmail(
         addressee_profile_id,
         sender_profile.data.id
       );
-      if (notificationResponse.status === 'Failure') {
+      if (emailResponse.status === 'Failure') {
         throw new GraphQLError('Cannot generate friend request', {
           extensions: {
-            code: notificationResponse.error?.name,
-            message: notificationResponse.error?.message,
-            prismaMeta: notificationResponse.error?.meta,
-            prismaErrorCode: notificationResponse.error?.errorCode,
+            code: emailResponse.error?.name,
+            message: emailResponse.error?.message,
+            prismaMeta: emailResponse.error?.meta,
+            prismaErrorCode: emailResponse.error?.errorCode,
           },
         });
       } else {
-        return notificationResponse.data;
+        return emailResponse.data;
       }
     },
     updateFriend: async (parent, args, context, info) => {
@@ -757,7 +704,7 @@ const resolvers: Resolvers = {
         return status.data;
       }
     },
-    generateOutingNotification: async (parent, args, context, info) => {
+    sendOutingJoinedEmail: async (parent, args, context, info) => {
       const { authError, profile: sender_profile } = context;
       if (authError) {
         throw new GraphQLError(authError.message, {
@@ -766,13 +713,10 @@ const resolvers: Resolvers = {
       }
       const { outing_id } = args;
 
-      const status = await SendOutingJoinedNotification(
-        outing_id,
-        sender_profile
-      );
+      const status = await SendOutingJoinedEmail(outing_id, sender_profile);
 
       if (status.status === 'Failure') {
-        throw new GraphQLError('Cannot generate outing joined notifications', {
+        throw new GraphQLError('Cannot send outing joined emails', {
           extensions: {
             code: status.error?.name,
             message: status.error?.message,
@@ -783,105 +727,6 @@ const resolvers: Resolvers = {
       }
 
       return status.data;
-    },
-    openNotification: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const { notification_created_at, id, type_code } = args;
-      const { id: modifier_profile_id } = profile.data;
-
-      const notificationResponse = await OpenNotification(
-        modifier_profile_id,
-        type_code,
-        notification_created_at,
-        id
-      );
-
-      if (notificationResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot open notification', {
-          extensions: {
-            code: notificationResponse.error?.name,
-            message: notificationResponse.error?.message,
-            prismaMeta: notificationResponse.error?.meta,
-            prismaErrorCode: notificationResponse.error?.errorCode,
-          },
-        });
-      } else {
-        return notificationResponse.data;
-      }
-    },
-    acceptFriendRequest: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const {
-        notification_created_at,
-        notification_id,
-        sender_profile_id,
-        addressee_profile_id,
-      } = args;
-
-      const { id: modifier_profile_id } = profile.data;
-
-      const notificationResponse = await AcceptFriendRequest(
-        sender_profile_id,
-        addressee_profile_id,
-        notification_created_at,
-        notification_id,
-        modifier_profile_id
-      );
-
-      if (notificationResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot accept friend request', {
-          extensions: {
-            code: notificationResponse.error?.name,
-            message: notificationResponse.error?.message,
-            prismaMeta: notificationResponse.error?.meta,
-            prismaErrorCode: notificationResponse.error?.errorCode,
-          },
-        });
-      } else {
-        return notificationResponse.data;
-      }
-    },
-    declineFriendRequest: async (parent, args, context, info) => {
-      const { authError, profile } = context;
-      if (authError) {
-        throw new GraphQLError(authError.message, {
-          extensions: { code: authError.code },
-        });
-      }
-
-      const { notification_created_at, notification_id } = args;
-      const { id: modifier_profile_id } = profile.data;
-
-      const notificationResponse = await DeclineFriendRequest(
-        modifier_profile_id,
-        notification_id,
-        notification_created_at
-      );
-
-      if (notificationResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot decline friend request', {
-          extensions: {
-            code: notificationResponse.error?.name,
-            message: notificationResponse.error?.message,
-            prismaMeta: notificationResponse.error?.meta,
-            prismaErrorCode: notificationResponse.error?.errorCode,
-          },
-        });
-      } else {
-        return notificationResponse.data;
-      }
     },
   },
 };

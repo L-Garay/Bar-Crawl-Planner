@@ -79,8 +79,8 @@ export default function FriendsIndex() {
   }, [recievedData]);
 
   console.log('all friends', friends); // these are friendships, not users
-  console.log('sent requests', sentRequests); // these are notifications, not friendships or users
-  console.log('recieved requests', recievedRequests); // these are notifications, not friendships or users
+  console.log('sent requests', sentRequests);
+  console.log('recieved requests', recievedRequests);
 
   return (
     <>

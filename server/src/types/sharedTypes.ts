@@ -157,24 +157,3 @@ export type Profile = {
   friends: Profile[];
   friendsRelation: Profile[];
 };
-
-export type Notification = {
-  id: number;
-  sender_profile_id: number;
-  addressee_profile_id: number;
-  created_at: string;
-  type_code: string;
-  notification_relation: NotificationStatus[];
-  notification_addressee_relation: Profile;
-  notification_sender_relation: Profile;
-  outing_id: number;
-};
-
-export type NotificationStatus = {
-  notification_id: number;
-  modifier_profile_id: number;
-  notification_created_at: string;
-  modified_at: string;
-  status_code: string;
-  type_code: string;
-};
