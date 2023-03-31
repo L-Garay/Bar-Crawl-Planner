@@ -70,3 +70,25 @@ export async function GetRecievedFriendRequests(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
+
+export async function GetRecievedFriendRequestCount(
+  profile_id: number
+): Promise<PrismaData> {
+  try {
+    const recieved = await prismaClient.friendship.count({
+      where: {
+        AND: [
+          {
+            addressee_profile_id: profile_id,
+          },
+          {
+            status_code: 'S',
+          },
+        ],
+      },
+    });
+    return { status: 'Success', data: recieved, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}

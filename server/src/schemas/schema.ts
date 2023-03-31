@@ -123,6 +123,7 @@ const typeDefs = `#graphql
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]
     getRecievedFriendRequests: [Friendship]
+    getRecievedFriendRequestCount: Int
     getSentFriendRequests: [Friendship]
   }
 

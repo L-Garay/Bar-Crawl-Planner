@@ -236,6 +236,7 @@ export type Query = {
   getOuting?: Maybe<Outing>;
   getProfile?: Maybe<Profile>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
+  getRecievedFriendRequestCount?: Maybe<Scalars['Int']>;
   getRecievedFriendRequests?: Maybe<Array<Maybe<Friendship>>>;
   getSentFriendRequests?: Maybe<Array<Maybe<Friendship>>>;
   getUserAccount?: Maybe<Account>;
@@ -490,6 +491,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
   getProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
+  getRecievedFriendRequestCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   getRecievedFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getSentFriendRequests?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;

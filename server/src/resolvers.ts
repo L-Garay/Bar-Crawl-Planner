@@ -49,6 +49,7 @@ import {
 } from './prisma/mutations/friendsMutations';
 import {
   GetAllFriendships,
+  GetRecievedFriendRequestCount,
   GetRecievedFriendRequests,
   GetSentFriendRequests,
 } from './prisma/querries/friendsQuerries';
@@ -262,8 +263,10 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+
       const city = args.city as CitySelectOptions;
       const locations = await SearchCity(city, args.locationType);
+
       if (locations.status === 'Failure') {
         throw new GraphQLError('Cannot search city', {
           extensions: {
@@ -284,8 +287,10 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+
       const { id } = profile.data;
       const friends = await GetAllFriendships(id);
+
       if (friends.status === 'Failure') {
         throw new GraphQLError('Cannot get all friends', {
           extensions: {
@@ -308,6 +313,7 @@ const resolvers: Resolvers = {
       }
       const { id } = profile.data;
       const requests = await GetSentFriendRequests(id);
+
       if (requests.status === 'Failure') {
         throw new GraphQLError('Cannot get sent friend requests', {
           extensions: {
@@ -328,11 +334,36 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+
       const { id } = profile.data;
       const requests = await GetRecievedFriendRequests(id);
 
       if (requests.status === 'Failure') {
         throw new GraphQLError('Cannot get friend requests', {
+          extensions: {
+            code: requests.error?.name,
+            message: requests.error?.message,
+            prismaMeta: requests.error?.meta,
+            prismaErrorCode: requests.error?.errorCode,
+          },
+        });
+      } else {
+        return requests.data;
+      }
+    },
+    getRecievedFriendRequestCount: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id } = profile.data;
+      const requests = await GetRecievedFriendRequestCount(id);
+
+      if (requests.status === 'Failure') {
+        throw new GraphQLError('Cannot get friend request count', {
           extensions: {
             code: requests.error?.name,
             message: requests.error?.message,
