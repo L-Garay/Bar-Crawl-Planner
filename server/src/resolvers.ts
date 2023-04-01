@@ -1,5 +1,7 @@
 import {
   GetAllOutings,
+  GetCreatedOutings,
+  GetJoinedOutings,
   GetOutingByOutingId,
 } from './prisma/querries/outingsQuerries';
 import {
@@ -225,6 +227,50 @@ const resolvers: Resolvers = {
       const outings = await GetAllOutings(profile.data.id);
       if (outings.status === 'Failure') {
         throw new GraphQLError('Cannot get all outings', {
+          extensions: {
+            code: outings.error?.name,
+            message: outings.error?.message,
+            prismaMeta: outings.error?.meta,
+            prismaErrorCode: outings.error?.errorCode,
+          },
+        });
+      } else {
+        return outings.data;
+      }
+    },
+    getCreatedOutings: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const outings = await GetCreatedOutings(profile.data.id);
+      if (outings.status === 'Failure') {
+        throw new GraphQLError('Cannot get created outings', {
+          extensions: {
+            code: outings.error?.name,
+            message: outings.error?.message,
+            prismaMeta: outings.error?.meta,
+            prismaErrorCode: outings.error?.errorCode,
+          },
+        });
+      } else {
+        return outings.data;
+      }
+    },
+    getJoinedOutings: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const outings = await GetJoinedOutings(profile.data.id);
+      if (outings.status === 'Failure') {
+        throw new GraphQLError('Cannot get joined outings', {
           extensions: {
             code: outings.error?.name,
             message: outings.error?.message,

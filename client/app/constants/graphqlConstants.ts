@@ -310,6 +310,27 @@ export const GET_OUTINGS = gql`
   }
 `;
 
+export const GET_CREATED_AND_JOINED_OUTINGS = gql`
+  query outings {
+    getCreatedOutings {
+      id
+      name
+      creator_profile_id
+      created_at
+      start_date_and_time
+      place_ids
+    }
+    getJoinedOutings {
+      id
+      name
+      creator_profile_id
+      created_at
+      start_date_and_time
+      place_ids
+    }
+  }
+`;
+
 export const GET_SENT_FRIEND_REQUESTS = gql`
   query getSentFriendRequests {
     getSentFriendRequests {

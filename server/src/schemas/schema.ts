@@ -119,6 +119,8 @@ const typeDefs = `#graphql
     accounts: [Account]
     profiles: [Profile]
     getAllOutings: [Outing]
+    getCreatedOutings: [Outing]
+    getJoinedOutings: [Outing]
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]

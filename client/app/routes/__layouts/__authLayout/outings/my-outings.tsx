@@ -1,7 +1,8 @@
 import type { LoaderFunction } from '@remix-run/node';
 import { useLoaderData, useNavigate } from '@remix-run/react';
+import { useMemo } from 'react';
 import { getNewClient } from '~/apollo/getClient';
-import { GET_OUTINGS } from '~/constants/graphqlConstants';
+import { GET_CREATED_AND_JOINED_OUTINGS } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -9,41 +10,85 @@ export const loader: LoaderFunction = async ({ request }) => {
   let outings: any;
   try {
     outings = await client.query({
-      query: GET_OUTINGS,
+      query: GET_CREATED_AND_JOINED_OUTINGS,
     });
   } catch (error) {
     logApolloError(error);
     throw new Response(JSON.stringify(error), { status: 500 });
   }
-  return outings;
+  const { getCreatedOutings, getJoinedOutings } = outings.data;
+
+  return { getCreatedOutings, getJoinedOutings };
 };
 
 export default function MyOutings() {
   const navigate = useNavigate();
   const loaderData = useLoaderData();
 
-  const { getAllOutings } = loaderData.data;
+  const { getCreatedOutings, getJoinedOutings } = loaderData;
+
+  const noOutings = useMemo(() => {
+    if (getCreatedOutings.length === 0 && getJoinedOutings.length === 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }, [getCreatedOutings, getJoinedOutings]);
 
   return (
     <div>
       <h1>My Outings</h1>
-      {getAllOutings.length === 0 ? (
+      {noOutings ? (
         <p>No outings yet</p>
       ) : (
-        <>
-          {getAllOutings.map((outing: any) => {
-            return (
-              <div
-                key={outing.id}
-                style={{ display: 'flex' }}
-                onClick={() => navigate(`/outings/my-outings/${outing.id}`)}
-              >
-                <p style={{ paddingRight: 10 }}>{outing.name}</p>
-                <p>{outing.start_date_and_time}</p>
-              </div>
-            );
-          })}
-        </>
+        <div className="outing-tables" style={{ display: 'flex' }}>
+          <div className="created-outings" style={{ minWidth: 300 }}>
+            <h4>Created</h4>
+            <>
+              {getCreatedOutings.length === 0 ? (
+                <div style={{ display: 'flex' }}>
+                  <p>You have not created any yet</p>
+                </div>
+              ) : (
+                <>
+                  {getCreatedOutings.map((outing: any) => {
+                    return (
+                      <div
+                        key={outing.id}
+                        style={{
+                          display: 'flex',
+                          cursor: 'pointer',
+                          marginRight: 20,
+                        }}
+                        onClick={() =>
+                          navigate(`/outings/my-outings/${outing.id}`)
+                        }
+                      >
+                        <p style={{ paddingRight: 10 }}>{outing.name}</p>
+                        <p>{outing.start_date_and_time}</p>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </>
+          </div>
+          <div className="joined-outings" style={{ minWidth: 300 }}>
+            <h4>Joined</h4>
+            {getJoinedOutings.map((outing: any) => {
+              return (
+                <div
+                  key={outing.id}
+                  style={{ display: 'flex', cursor: 'pointer' }}
+                  onClick={() => navigate(`/outings/my-outings/${outing.id}`)}
+                >
+                  <p style={{ paddingRight: 10 }}>{outing.name}</p>
+                  <p>{outing.start_date_and_time}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );

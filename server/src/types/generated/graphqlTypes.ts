@@ -240,6 +240,8 @@ export type Query = {
   getAllFriendships?: Maybe<Array<Maybe<Friendship>>>;
   getAllOutings?: Maybe<Array<Maybe<Outing>>>;
   getBlockedProfiles?: Maybe<Array<Maybe<Profile>>>;
+  getCreatedOutings?: Maybe<Array<Maybe<Outing>>>;
+  getJoinedOutings?: Maybe<Array<Maybe<Outing>>>;
   getOuting?: Maybe<Outing>;
   getProfile?: Maybe<Profile>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
@@ -497,6 +499,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getAllFriendships?: Resolver<Maybe<Array<Maybe<ResolversTypes['Friendship']>>>, ParentType, ContextType>;
   getAllOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getBlockedProfiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
+  getCreatedOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
+  getJoinedOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
   getProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
