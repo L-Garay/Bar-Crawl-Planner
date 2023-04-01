@@ -5,7 +5,6 @@ import { CloseX } from '~/components/svgs/closeX';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
-  sendFriendRequest: ({ variables }: { variables: any }) => void;
   attendanceStatus: string;
   currentUserId: number;
   sentRequests: Record<string, any>[];
@@ -13,6 +12,7 @@ export type ProfileInOutingProps = {
   disconnectUser: ({ variables }: { variables: any }) => void;
   outingId: number;
   isOutingCreator: boolean;
+  sendFriendRequest?: ({ variables }: { variables: any }) => void;
 };
 
 export const ProfileInOuting = ({
@@ -71,9 +71,39 @@ export const ProfileInOuting = ({
   }, [profile.id, recievedRequests]);
 
   const alreadyFriends = useMemo(() => {
-    if (!friendsData || friendsData.getAllFriendships === null) return false;
-    return friendsData.getAllFriendships.status_code === 'A';
-  }, [friendsData]);
+    const noFriendsCondition =
+      !friendsData ||
+      friendsData.getAllFriendships === undefined ||
+      friendsData.getAllFriendships.length === 0;
+    // this indicates that we are unable to get the friendship data OR that the user has no friendships
+    if (noFriendsCondition) {
+      return false;
+    }
+    // if the user has friendships, we first check to see if any of them are with the current profile in the list
+    // also check to make sure that the status is accepted and not just requested
+    // then a final check to make sure it's not the same profile as the current user's
+    if (
+      friendsData.getAllFriendships.some((friendship: any) => {
+        const hasRequested =
+          friendship.addressee_profile_id === profile.id ||
+          friendship.requestor_profile_id === profile.id;
+        if (friendship.status_code === 'A' && hasRequested) {
+          return true;
+        } else {
+          return false;
+        }
+      }) &&
+      !sameProfile
+    ) {
+      return true;
+    }
+  }, [friendsData, profile.id, sameProfile]);
+
+  const showFriendRequestButton = useMemo(() => {
+    if (sameProfile || attendanceStatus === 'Pending' || alreadyFriends)
+      return false;
+    return true;
+  }, [sameProfile, attendanceStatus, alreadyFriends]);
 
   return (
     <div className="profile-in-outing-container">
@@ -82,12 +112,12 @@ export const ProfileInOuting = ({
         style={{ display: 'flex', alignItems: 'center' }}
       >
         <p style={{ color, paddingRight: 10 }}>
-          {profile.name} with id {profile.id}
+          {sameProfile ? 'You' : `${profile.name} with id ${profile.id}`}
         </p>
         <p>({attendanceStatus})</p>
         {alreadyFriends ? (
           <p>(Friend)</p>
-        ) : !sameProfile ? (
+        ) : showFriendRequestButton && sendFriendRequest ? (
           <button
             disabled={alreadyRequested || hasRecievedRequest}
             onClick={() => {

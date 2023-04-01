@@ -7,7 +7,6 @@ import { authenticator } from '~/auth/authenticator';
 import {
   DELETE_OUTING,
   SEND_FRIEND_REQUEST,
-  GET_ACCOUNT_WITH_PROFILE_DATA,
   GET_RECIEVED_FRIEND_REQUESTS,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
@@ -356,7 +355,6 @@ export default function OutingDetails() {
                   <ProfileInOuting
                     key={profile.id}
                     profile={profile}
-                    sendFriendRequest={sendFriendRequest}
                     attendanceStatus="Pending"
                     currentUserId={getProfile.id}
                     sentRequests={sentRequests}
