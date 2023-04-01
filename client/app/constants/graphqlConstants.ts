@@ -134,6 +134,28 @@ export const BLOCK_PROFILE = gql`
   }
 `;
 
+export const UNBLOCK_PROFILE = gql`
+  mutation unblockProfile($blocked_profile_id: Int!) {
+    unblockProfile(blocked_profile_id: $blocked_profile_id) {
+      id
+      name
+      account_id
+      blocked_profile_ids
+    }
+  }
+`;
+
+export const GET_BLOCKED_PROFILES = gql`
+  query getBlockedProfiles {
+    getBlockedProfiles {
+      id
+      name
+      account_id
+      blocked_profile_ids
+    }
+  }
+`;
+
 // ------------------- Outings -------------------
 export const CITY_SEARCH = gql`
   query searchCity($city: String!, $locationType: String!) {
