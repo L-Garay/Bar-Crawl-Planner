@@ -7,6 +7,7 @@ import {
   GetAcceptedProfilesInOuting,
   GetPendingProfilesInOuting,
   GetDeclinedProfilesInOuting,
+  GetBlockedProfiles,
 } from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
@@ -26,6 +27,7 @@ import {
 import {
   BlockProfile,
   CreateProfile,
+  UnblockProfile,
 } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import {
@@ -373,6 +375,29 @@ const resolvers: Resolvers = {
         });
       } else {
         return requests.data;
+      }
+    },
+    getBlockedProfiles: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const blockedProfiles = await GetBlockedProfiles(profile.data);
+
+      if (blockedProfiles.status === 'Failure') {
+        throw new GraphQLError('Cannot get blocked profiles', {
+          extensions: {
+            code: blockedProfiles.error?.name,
+            message: blockedProfiles.error?.message,
+            prismaMeta: blockedProfiles.error?.meta,
+            prismaErrorCode: blockedProfiles.error?.errorCode,
+          },
+        });
+      } else {
+        return blockedProfiles.data;
       }
     },
   },
@@ -741,6 +766,29 @@ const resolvers: Resolvers = {
       const status = await BlockProfile(profile.data.id, blocked_profile_id);
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot block profile', {
+          extensions: {
+            code: status.error?.name,
+            message: status.error?.message,
+            prismaMeta: status.error?.meta,
+            prismaErrorCode: status.error?.errorCode,
+          },
+        });
+      } else {
+        return status.data;
+      }
+    },
+    unblockProfile: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { blocked_profile_id } = args;
+
+      const status = await UnblockProfile(profile.data, blocked_profile_id);
+      if (status.status === 'Failure') {
+        throw new GraphQLError('Cannot unblock profile', {
           extensions: {
             code: status.error?.name,
             message: status.error?.message,

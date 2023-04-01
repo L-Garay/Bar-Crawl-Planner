@@ -125,6 +125,7 @@ const typeDefs = `#graphql
     getRecievedFriendRequests: [Friendship]
     getRecievedFriendRequestCount: Int
     getSentFriendRequests: [Friendship]
+    getBlockedProfiles: [Profile]
   }
 
   type Mutation {
@@ -149,6 +150,7 @@ const typeDefs = `#graphql
     sendFriendRequestEmail(addressee_profile_id: Int!): String
     updateFriend(friendship_id: Int!, status_code: String!): Friendship
     blockProfile(blocked_profile_id: Int!): Profile
+    unblockProfile(blocked_profile_id: Int!): Profile
   }
 `;
 

@@ -1,3 +1,4 @@
+import { Profile } from '@prisma/client';
 import prismaClient from '../../index';
 import { PrismaError, PrismaData } from '../../types/sharedTypes';
 
@@ -85,6 +86,36 @@ export async function GetDeclinedProfilesInOuting(
       },
     });
     return { status: 'Success', data: profiles, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function GetBlockedProfiles(
+  profile: Profile
+): Promise<PrismaData> {
+  try {
+    const blockedProfiles = await Promise.allSettled(
+      profile.blocked_profile_ids.map(async (id) => {
+        return await prismaClient.profile.findUnique({
+          where: {
+            id,
+          },
+        });
+      })
+    );
+
+    const noNulls = blockedProfiles
+      .map((promise) => {
+        if (promise.status === 'fulfilled') {
+          return promise.value;
+        } else {
+          return null;
+        }
+      })
+      .filter((value) => value !== null);
+
+    return { status: 'Success', data: noNulls, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
