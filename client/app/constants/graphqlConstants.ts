@@ -108,6 +108,16 @@ export const GET_ALL_FRIENDSHIPS = gql`
       addressee_profile_id
       status_code
       created_at
+      requestor_profile_relation {
+        id
+        name
+        account_Id
+      }
+      addressee_profile_relation {
+        id
+        name
+        account_Id
+      }
     }
   }
 `;
@@ -117,7 +127,7 @@ export const GET_PROFILE = gql`
     getProfile {
       id
       name
-      account_id
+      account_Id
       blocked_profile_ids
     }
   }
@@ -128,7 +138,7 @@ export const BLOCK_PROFILE = gql`
     blockProfile(blocked_profile_id: $blocked_profile_id) {
       id
       name
-      account_id
+      account_Id
       blocked_profile_ids
     }
   }
@@ -139,7 +149,7 @@ export const UNBLOCK_PROFILE = gql`
     unblockProfile(blocked_profile_id: $blocked_profile_id) {
       id
       name
-      account_id
+      account_Id
       blocked_profile_ids
     }
   }
@@ -150,7 +160,7 @@ export const GET_BLOCKED_PROFILES = gql`
     getBlockedProfiles {
       id
       name
-      account_id
+      account_Id
       blocked_profile_ids
     }
   }
@@ -259,12 +269,12 @@ export const DISCONNECT_PROFILE = gql`
       accepted_profiles {
         id
         name
-        account_id
+        account_Id
       }
       pending_profiles {
         id
         name
-        account_id
+        account_Id
       }
     }
   }
