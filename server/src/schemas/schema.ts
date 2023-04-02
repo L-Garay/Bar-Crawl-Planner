@@ -20,7 +20,7 @@ const typeDefs = `#graphql
     profile_img: String
     updated_at: String
     account: Account
-    account_id: Int
+    account_Id: Int
     accepted_outings: [Outing]
     pending_outings: [Outing]
     declined_outings: [Outing]
@@ -100,7 +100,9 @@ const typeDefs = `#graphql
   type Friendship {
     id: Int
     requestor_profile_id: Int
+    requestor_profile_relation: Profile
     addressee_profile_id: Int
+    addressee_profile_relation: Profile
     created_at: String
     status_code: String
     last_modified_by: Int
@@ -132,7 +134,7 @@ const typeDefs = `#graphql
 
   type Mutation {
     createAccount(email: String, email_verified: Boolean): Account
-    createProfile(name: String, profile_img: String, account_id: Int): Profile
+    createProfile(name: String, profile_img: String, account_Id: Int): Profile
     updateUserAccount(email: String, phone_number: String): Account
     deactivateUserAccount(id: Int!): Account
     createOuting(

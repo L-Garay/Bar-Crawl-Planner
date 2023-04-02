@@ -19,6 +19,10 @@ export async function GetAllFriendships(id: number): Promise<PrismaData> {
           },
         ],
       },
+      include: {
+        requestor_profile_relation: true,
+        addressee_profile_relation: true,
+      },
     });
 
     return { status: 'Success', data: friends, error: null };

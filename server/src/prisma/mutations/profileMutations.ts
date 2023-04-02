@@ -6,7 +6,7 @@ import short from 'short-uuid';
 export async function CreateProfile(
   name: string = 'New User',
   profile_img: string,
-  account_id: number
+  account_Id: number
 ): Promise<PrismaData> {
   try {
     const profile = await prismaClient.profile.create({
@@ -14,7 +14,7 @@ export async function CreateProfile(
         name,
         profile_img,
         updated_at: new Date().toISOString(),
-        account_Id: account_id,
+        account_Id: account_Id,
         social_pin: short.generate(),
       },
     });

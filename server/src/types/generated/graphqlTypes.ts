@@ -29,11 +29,13 @@ export type Account = {
 export type Friendship = {
   __typename?: 'Friendship';
   addressee_profile_id?: Maybe<Scalars['Int']>;
+  addressee_profile_relation?: Maybe<Profile>;
   created_at?: Maybe<Scalars['String']>;
   id?: Maybe<Scalars['Int']>;
   last_modified_by?: Maybe<Scalars['Int']>;
   modified_at?: Maybe<Scalars['String']>;
   requestor_profile_id?: Maybe<Scalars['Int']>;
+  requestor_profile_relation?: Maybe<Profile>;
   status_code?: Maybe<Scalars['String']>;
 };
 
@@ -139,7 +141,7 @@ export type MutationCreateOutingArgs = {
 
 
 export type MutationCreateProfileArgs = {
-  account_id?: InputMaybe<Scalars['Int']>;
+  account_Id?: InputMaybe<Scalars['Int']>;
   name?: InputMaybe<Scalars['String']>;
   profile_img?: InputMaybe<Scalars['String']>;
 };
@@ -219,7 +221,7 @@ export type Profile = {
   __typename?: 'Profile';
   accepted_outings?: Maybe<Array<Maybe<Outing>>>;
   account?: Maybe<Account>;
-  account_id?: Maybe<Scalars['Int']>;
+  account_Id?: Maybe<Scalars['Int']>;
   blocked_profile_ids?: Maybe<Array<Maybe<Scalars['Int']>>>;
   declined_outings?: Maybe<Array<Maybe<Outing>>>;
   friends?: Maybe<Array<Maybe<Profile>>>;
@@ -393,11 +395,13 @@ export type AccountResolvers<ContextType = any, ParentType extends ResolversPare
 
 export type FriendshipResolvers<ContextType = any, ParentType extends ResolversParentTypes['Friendship'] = ResolversParentTypes['Friendship']> = ResolversObject<{
   addressee_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  addressee_profile_relation?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   created_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   last_modified_by?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   modified_at?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   requestor_profile_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  requestor_profile_relation?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   status_code?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
@@ -478,7 +482,7 @@ export type OutingProfileStatesResolvers<ContextType = any, ParentType extends R
 export type ProfileResolvers<ContextType = any, ParentType extends ResolversParentTypes['Profile'] = ResolversParentTypes['Profile']> = ResolversObject<{
   accepted_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   account?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType>;
-  account_id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  account_Id?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   blocked_profile_ids?: Resolver<Maybe<Array<Maybe<ResolversTypes['Int']>>>, ParentType, ContextType>;
   declined_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   friends?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;

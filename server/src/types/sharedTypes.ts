@@ -149,7 +149,7 @@ export type Profile = {
   profile_img: string;
   updated_at: string;
   account: Account;
-  account_id: number;
+  account_Id: number;
   accepted_outings: Outing[];
   pending_outings: Outing[];
   declined_outings: Outing[];
