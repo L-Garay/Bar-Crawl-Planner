@@ -20,12 +20,15 @@ export const validateUserAndSession = async (
   const session = await getSession(request.headers.get('Cookie'));
 
   // Run token validation
-  const data = await fetch(`${config.SERVER.ADDRESS}/validate`, {
-    headers: {
-      Authorization: `Bearer ${user?.authData.extraParams.id_token}`,
-    },
-  });
-  const isTokenValid: boolean = await data.json();
+  let data: Response | null = null;
+  if (user) {
+    data = await fetch(`${config.SERVER.ADDRESS}/validate`, {
+      headers: {
+        Authorization: `Bearer ${user.authData.extraParams.id_token}`,
+      },
+    });
+  }
+  const isTokenValid: boolean = data ? await data.json() : false;
 
   const valid = Boolean(user) && Boolean(session.has('user')) && isTokenValid;
 
