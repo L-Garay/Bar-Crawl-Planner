@@ -110,6 +110,7 @@ export async function GetBlockedProfiles(
         if (promise.status === 'fulfilled') {
           return promise.value;
         } else {
+          console.log(promise.reason);
           return null;
         }
       })

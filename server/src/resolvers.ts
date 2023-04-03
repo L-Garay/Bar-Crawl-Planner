@@ -33,6 +33,7 @@ import {
 } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
 import {
+  Account,
   CitySelectOptions,
   OutingInput,
   PrismaData,
@@ -43,6 +44,7 @@ import {
   DeleteOuting,
   DisconnectUserWithOuting,
   SendOutingInvites,
+  SendOutingInvitesAndCreate,
   SendOutingJoinedEmail,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
@@ -577,6 +579,59 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+      const { outing_id, start_date_and_time, account_Ids, outing_name } = args;
+
+      // I don't believe we need to check for blocked emails, since these will be coming from the user's friends list
+      // We can have a client side check to make sure the user isn't inviting someone who is already invited
+      // OR should we check those things here anyway?
+
+      // 1. get the emails of the accounts that are being invited
+      const accounts = await Promise.allSettled(
+        account_Ids.map(async (id: number) => {
+          return await GetAccountByAccountId(id);
+        })
+      );
+      let noNullAccounts: Account[] = [];
+      accounts.forEach((promise) => {
+        if (promise.status === 'rejected') {
+          console.log(promise.reason);
+        }
+        if (promise.status === 'fulfilled') {
+          if (promise.value.data !== null) {
+            noNullAccounts.push(promise.value.data);
+          }
+        }
+      });
+      // 2. send emails
+      const inviteArgs = {
+        outing_id,
+        outing_name,
+        start_date_and_time,
+        accounts: noNullAccounts,
+        senderName: profile.data.name,
+      };
+      const emailStatus = await SendOutingInvites(inviteArgs);
+
+      if (emailStatus.status === 'Failure') {
+        throw new GraphQLError('Cannot get friends', {
+          extensions: {
+            code: emailStatus.error?.name,
+            message: emailStatus.error?.message,
+            prismaMeta: emailStatus.error?.meta,
+            prismaErrorCode: emailStatus.error?.errorCode,
+          },
+        });
+      } else {
+        return emailStatus.data;
+      }
+    },
+    sendOutingInvitesAndCreate: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
       const { outing_id, start_date_and_time, emails } = args;
 
       // check to make sure user isn't trying to invite someone who has blocked them or they have blocked
@@ -626,7 +681,7 @@ const resolvers: Resolvers = {
         senderName: profile.data.name,
       };
 
-      const status = await SendOutingInvites(inviteArgs);
+      const status = await SendOutingInvitesAndCreate(inviteArgs);
 
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot send outing invites', {

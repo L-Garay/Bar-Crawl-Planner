@@ -20,6 +20,9 @@ export async function GetAccountByAccountId(id: number): Promise<PrismaData> {
       where: {
         id: id,
       },
+      include: {
+        profile: true,
+      },
     });
     return { status: 'Success', data: user, error: null };
   } catch (error) {
@@ -103,6 +106,41 @@ export async function GetBlockedAccountEmails(
     );
 
     return { status: 'Success', data: blockedEmails, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function GetAccountEmails(
+  account_Ids: number[]
+): Promise<PrismaData> {
+  try {
+    const emails = await Promise.allSettled(
+      account_Ids.map(async (id: number) => {
+        const email = await prismaClient.account.findUnique({
+          where: {
+            id: id,
+          },
+          select: {
+            email: true,
+          },
+        });
+        return email;
+      })
+    );
+    console.log(emails, 'from get account emails');
+    const accountEmails = emails
+      .map((promise) => {
+        if (promise.status === 'fulfilled') {
+          return promise.value;
+        } else {
+          console.log(promise.reason);
+          return null;
+        }
+      })
+      .filter((email) => email !== null);
+    console.log(accountEmails, 'account emails');
+    return { status: 'Success', data: accountEmails, error: null };
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
