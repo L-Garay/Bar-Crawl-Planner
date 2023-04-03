@@ -145,7 +145,13 @@ const typeDefs = `#graphql
     ): Outing
     updateOuting(id: Int!, name: String, start_date_and_time: String): Outing
     deleteOuting(id: Int!): String
-    sendOutingInvites(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
+    sendOutingInvitesAndCreate(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
+    sendOutingInvites(
+    outing_id: Int!
+    start_date_and_time: String!
+    account_Ids: [Int!]!
+    outing_name: String!
+    ): String
     ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account

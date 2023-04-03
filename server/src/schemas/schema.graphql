@@ -123,6 +123,12 @@ type Mutation {
   sendOutingInvites(
     outing_id: Int!
     start_date_and_time: String!
+    account_Ids: [Int!]!
+    outing_name: String!
+  ): String
+  sendOutingInvitesAndCreate(
+    outing_id: Int!
+    start_date_and_time: String!
     emails: [String!]!
   ): String
   ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
