@@ -3,7 +3,6 @@ import { redirect } from '@remix-run/node';
 import { Form, useLoaderData, useTransition } from '@remix-run/react';
 import { useEffect, useMemo, useState } from 'react';
 import { getNewClient } from '~/apollo/getClient';
-import { authenticator } from '~/auth/authenticator';
 import {
   DELETE_OUTING,
   SEND_FRIEND_REQUEST,
@@ -11,7 +10,7 @@ import {
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   GET_SENT_FRIEND_REQUESTS,
-  SEND_OUTING_EMAIL,
+  SEND_OUTING_INVITES_AND_CREATE,
   UPDATE_OUTING,
   DISCONNECT_PROFILE,
   GET_PROFILE,
@@ -39,7 +38,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
       try {
         const data = await client.mutate({
-          mutation: SEND_OUTING_EMAIL,
+          mutation: SEND_OUTING_INVITES_AND_CREATE,
           variables: {
             emails: emailsArray,
             start_date_and_time,
@@ -97,8 +96,6 @@ export const action: ActionFunction = async ({ request, params }) => {
 export const loader: LoaderFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
   // should never not be authenticated at this point
-  const user = await authenticator.isAuthenticated(request);
-  const email = user!.authData.profile.emails[0].value;
 
   let outing: any;
   let profiles: any;
@@ -386,7 +383,12 @@ export default function OutingDetails() {
               </div>
             ) : null}
           </div>
-          <FriendsTable user_id={getProfile.id} />
+          <FriendsTable
+            userId={getProfile.id}
+            outingId={getOuting.id}
+            outingName={getOuting.name}
+            startDateAndTime={getOuting.start_date_and_time}
+          />
         </div>
       ) : (
         <p>Outing not found</p>

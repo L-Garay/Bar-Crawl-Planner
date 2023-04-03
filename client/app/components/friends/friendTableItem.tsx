@@ -3,7 +3,7 @@ import MinusCircle from '../svgs/minusCircle';
 import PlusCircle from '../svgs/plusCircle';
 
 export type FriendTableItemProps = {
-  user_id: number;
+  userId: number;
   friend: Record<string, any>;
   addFriend: (accountId: number) => void;
   removeFriend: (accountId: number) => void;
@@ -11,7 +11,7 @@ export type FriendTableItemProps = {
 };
 
 export const FriendTableItem = ({
-  user_id,
+  userId,
   friend,
   addFriend,
   removeFriend,
@@ -31,8 +31,8 @@ export const FriendTableItem = ({
     account_Id: requestor_account_Id,
   } = friend.requestor_profile_relation;
 
-  const friendId = user_id === addressee_id ? requestor_id : addressee_id;
-  const nameToShow = user_id === addressee_id ? requestor_name : addressee_name;
+  const friendId = userId === addressee_id ? requestor_id : addressee_id;
+  const nameToShow = userId === addressee_id ? requestor_name : addressee_name;
 
   const alreadyAdded = useMemo(() => {
     return accountIds.includes(friendId);

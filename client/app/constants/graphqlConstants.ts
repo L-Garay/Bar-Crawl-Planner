@@ -293,16 +293,32 @@ export const GET_OUTING = gql`
   }
 `;
 
-export const SEND_OUTING_EMAIL = gql`
-  mutation sendOutingInvites(
+export const SEND_OUTING_INVITES_AND_CREATE = gql`
+  mutation sendOutingInvitesAndCreate(
     $outing_id: Int!
     $start_date_and_time: String!
     $emails: [String!]!
   ) {
-    sendOutingInvites(
+    sendOutingInvitesAndCreate(
       outing_id: $outing_id
       start_date_and_time: $start_date_and_time
       emails: $emails
+    )
+  }
+`;
+
+export const SEND_OUTING_INVITES = gql`
+  mutation sendOutingInvites(
+    $outing_id: Int!
+    $start_date_and_time: String!
+    $account_Ids: [Int!]!
+    $outing_name: String!
+  ) {
+    sendOutingInvites(
+      outing_id: $outing_id
+      start_date_and_time: $start_date_and_time
+      account_Ids: $account_Ids
+      outing_name: $outing_name
     )
   }
 `;

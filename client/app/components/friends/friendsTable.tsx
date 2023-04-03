@@ -1,17 +1,36 @@
-import { useQuery } from '@apollo/client';
-import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
+import { useMutation, useQuery } from '@apollo/client';
+import {
+  GET_ALL_FRIENDSHIPS,
+  GET_PROFILES_IN_OUTING,
+  SEND_OUTING_INVITES,
+} from '~/constants/graphqlConstants';
 import FriendTableItem from './friendTableItem';
 import { useState } from 'react';
 
 export type FriendsTableProps = {
-  user_id: number;
+  userId: number;
+  outingId: number;
+  outingName: string;
+  startDateAndTime: string;
 };
 
-const FriendsTable = ({ user_id }: FriendsTableProps) => {
+const FriendsTable = ({
+  userId,
+  outingId,
+  outingName,
+  startDateAndTime,
+}: FriendsTableProps) => {
   const { data: friendsData } = useQuery(GET_ALL_FRIENDSHIPS);
   console.log('friends', friendsData);
   const friends = friendsData ? friendsData.getAllFriendships : [];
-  console.log(user_id);
+  console.log(userId);
+
+  const [inviteFriends, { data: inviteData }] = useMutation(
+    SEND_OUTING_INVITES
+    // {
+    //   refetchQueries: [GET_PROFILES_IN_OUTING], // don't think this will work since the original query for the parent component comes from the loader, and so the updated/refecthed data will not be made available unless the page refreshes
+    // }
+  );
 
   // for added friends, we can store their account ids here and then when it's time to invite them we can just look up their accounts and grab their emails
   const [accountIds, setAccountIds] = useState<number[]>([]);
@@ -52,7 +71,7 @@ const FriendsTable = ({ user_id }: FriendsTableProps) => {
               {friends.map((friend: any) => (
                 <FriendTableItem
                   key={friend.id}
-                  user_id={user_id}
+                  userId={userId}
                   friend={friend}
                   addFriend={addFriend}
                   removeFriend={removeFriend}
@@ -63,7 +82,22 @@ const FriendsTable = ({ user_id }: FriendsTableProps) => {
           </div>
           <div className="friends-table-button">
             {/* TODO create mutation to send outing invites to friends */}
-            <button>Invite Friends</button>
+            {/* NOTE try to reuse as much of the sendOutingInvitesAndCreate mutation as possible. As in, just as the GetBlockedAccountEmails code was split out, see if you can do the same with the code that gets the emails using the account ids */}
+            <button
+              onClick={() => {
+                inviteFriends({
+                  variables: {
+                    outing_id: outingId,
+                    start_date_and_time: startDateAndTime,
+                    account_Ids: accountIds,
+                    outing_name: outingName,
+                  },
+                });
+                setAccountIds([]);
+              }}
+            >
+              Invite Friends
+            </button>
           </div>
         </div>
       )}
