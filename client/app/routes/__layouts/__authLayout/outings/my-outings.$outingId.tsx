@@ -98,7 +98,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   // should never not be authenticated at this point
 
   let outing: any;
-  let profiles: any;
   let currentUserProfile: any;
   // TODO 1. add a query to get the friends of the user
   // TODO 2. once that is working, combine the 4 querries into one large one that calls the 4 sub queries
@@ -106,12 +105,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   try {
     outing = await client.query({
       query: GET_OUTING,
-      variables: {
-        id: Number(params.outingId),
-      },
-    });
-    profiles = await client.query({
-      query: GET_PROFILES_IN_OUTING,
       variables: {
         id: Number(params.outingId),
       },
@@ -125,8 +118,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   }
   return {
     outing,
-    profiles,
     currentUserProfile,
+    outingId: params.outingId,
   };
 };
 
@@ -137,6 +130,7 @@ export default function OutingDetails() {
   const [isHoveringDateIcon, setIsHoveringDateIcon] = useState(false);
   const [showEditDate, setShowEditDate] = useState(false);
 
+  const { outing, currentUserProfile, outingId } = useLoaderData();
   const transition = useTransition();
 
   const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
@@ -147,21 +141,40 @@ export default function OutingDetails() {
 
   const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
   const { data: friendRequestData } = useQuery(GET_RECIEVED_FRIEND_REQUESTS);
+  const { data: profilesInOutingData, loading: profilesLoading } = useQuery(
+    GET_PROFILES_IN_OUTING,
+    {
+      variables: {
+        id: Number(outingId),
+      },
+      fetchPolicy: 'no-cache',
+      nextFetchPolicy: 'no-cache',
+    }
+  );
+  console.log('PROFILES ARE LOADING:', profilesLoading, profilesInOutingData);
 
-  const sentRequests = useMemo(() => {
-    if (!sentRequestData || !sentRequestData.getSentFriendRequests) return [];
-    return sentRequestData.getSentFriendRequests;
-  }, [sentRequestData]);
+  const hasSentRequest =
+    sentRequestData && sentRequestData.getSentFriendRequests;
+  const sentRequests = hasSentRequest
+    ? sentRequestData.getSentFriendRequests
+    : [];
 
-  const recievedRequests = useMemo(() => {
-    if (!friendRequestData || !friendRequestData.getFriendRequests) return [];
-    return friendRequestData.getFriendRequests;
-  }, [friendRequestData]);
+  const hasRecievedRequests =
+    friendRequestData && friendRequestData.getFriendRequests;
+  const recievedRequests = hasRecievedRequests
+    ? friendRequestData.getFriendRequests
+    : [];
 
-  const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;
-  const { accepted_profiles, pending_profiles, declined_profiles } =
-    profiles.data.getProfilesInOuting;
+
+  const accepted_profiles = useMemo(() => {
+    if (profilesLoading) return [];
+    return profilesInOutingData.getProfilesInOuting.accepted_profiles;
+  }, [profilesLoading, profilesInOutingData]);
+  const pending_profiles = useMemo(() => {
+    if (profilesLoading) return [];
+    return profilesInOutingData.getProfilesInOuting.pending_profiles;
+  }, [profilesLoading, profilesInOutingData]);
 
   const currentAcceptedProfiles = useMemo(() => {
     if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
@@ -179,7 +192,9 @@ export default function OutingDetails() {
 
   const { getProfile } = currentUserProfile.data;
 
-  const isOutingCreator = accepted_profiles[0].id === getProfile.id;
+  const isOutingCreator = accepted_profiles.length
+    ? accepted_profiles[0].id === getProfile.id
+    : false;
   const EMAIL_MIN_LENGTH = 7;
 
   const currentDay = new Date();

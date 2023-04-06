@@ -37,7 +37,6 @@ export const FriendTableItem = ({
   const alreadyAdded = useMemo(() => {
     return accountIds.includes(friendId);
   }, [accountIds, friendId]);
-  console.log('alreadyAdded', alreadyAdded);
 
   return (
     <div

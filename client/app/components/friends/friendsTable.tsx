@@ -21,15 +21,13 @@ const FriendsTable = ({
   startDateAndTime,
 }: FriendsTableProps) => {
   const { data: friendsData } = useQuery(GET_ALL_FRIENDSHIPS);
-  console.log('friends', friendsData);
   const friends = friendsData ? friendsData.getAllFriendships : [];
-  console.log(userId);
 
   const [inviteFriends, { data: inviteData }] = useMutation(
-    SEND_OUTING_INVITES
-    // {
-    //   refetchQueries: [GET_PROFILES_IN_OUTING], // don't think this will work since the original query for the parent component comes from the loader, and so the updated/refecthed data will not be made available unless the page refreshes
-    // }
+    SEND_OUTING_INVITES,
+    {
+      refetchQueries: [GET_PROFILES_IN_OUTING], // don't think this will work since the original query for the parent component comes from the loader, and so the updated/refecthed data will not be made available unless the page refreshes
+    }
   );
 
   // for added friends, we can store their account ids here and then when it's time to invite them we can just look up their accounts and grab their emails
@@ -45,7 +43,6 @@ const FriendsTable = ({
       setAccountIds(newAccountIds);
     }
   };
-  console.log('accountIds', accountIds);
 
   return (
     <div
