@@ -76,11 +76,19 @@ export type OutingUpdateInput = {
   start_date_and_time?: string;
 };
 
-export type SendingOutingsInvitesInput = {
+export type SendingOutingInvitesAndCreateInput = {
   outing_id: number;
   emails: string[];
   start_date_and_time: string;
   senderName: string;
+};
+
+export type SendingOutingInvitesInput = Omit<
+  SendingOutingInvitesAndCreateInput,
+  'emails'
+> & {
+  accounts: Account[];
+  outing_name: string;
 };
 
 export type OutingInviteProfiles = {
@@ -89,18 +97,24 @@ export type OutingInviteProfiles = {
   social_pin: string;
 };
 
-export type GenerateOutingInviteEmailParams = {
+export type GenerateOutingInviteEmailInput = {
   outing_name: string;
   outing_id: number;
   start_date_and_time: string;
-  profiles: OutingInviteProfiles[];
   senderName: string;
 };
 
-export type GenerateOutingJoinedEmailInput = Omit<
-  GenerateOutingInviteEmailParams,
-  'profiles'
-> & {
+export type GenerateOutingInviteEmailsWithAccountsInput =
+  GenerateOutingInviteEmailInput & {
+    accounts: Account[];
+  };
+
+export type GenerateOutingInviteEmailWithProfilesInput =
+  GenerateOutingInviteEmailInput & {
+    profiles: OutingInviteProfiles[];
+  };
+
+export type GenerateOutingJoinedEmailInput = GenerateOutingInviteEmailInput & {
   names: string[];
 };
 
@@ -149,7 +163,7 @@ export type Profile = {
   profile_img: string;
   updated_at: string;
   account: Account;
-  account_id: number;
+  account_Id: number;
   accepted_outings: Outing[];
   pending_outings: Outing[];
   declined_outings: Outing[];

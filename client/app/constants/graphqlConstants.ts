@@ -108,6 +108,16 @@ export const GET_ALL_FRIENDSHIPS = gql`
       addressee_profile_id
       status_code
       created_at
+      requestor_profile_relation {
+        id
+        name
+        account_Id
+      }
+      addressee_profile_relation {
+        id
+        name
+        account_Id
+      }
     }
   }
 `;
@@ -117,7 +127,7 @@ export const GET_PROFILE = gql`
     getProfile {
       id
       name
-      account_id
+      account_Id
       blocked_profile_ids
     }
   }
@@ -128,7 +138,29 @@ export const BLOCK_PROFILE = gql`
     blockProfile(blocked_profile_id: $blocked_profile_id) {
       id
       name
-      account_id
+      account_Id
+      blocked_profile_ids
+    }
+  }
+`;
+
+export const UNBLOCK_PROFILE = gql`
+  mutation unblockProfile($blocked_profile_id: Int!) {
+    unblockProfile(blocked_profile_id: $blocked_profile_id) {
+      id
+      name
+      account_Id
+      blocked_profile_ids
+    }
+  }
+`;
+
+export const GET_BLOCKED_PROFILES = gql`
+  query getBlockedProfiles {
+    getBlockedProfiles {
+      id
+      name
+      account_Id
       blocked_profile_ids
     }
   }
@@ -234,6 +266,16 @@ export const DISCONNECT_PROFILE = gql`
     DisconnectUserWithOuting(outing_id: $outing_id, profile_id: $profile_id) {
       id
       name
+      accepted_profiles {
+        id
+        name
+        account_Id
+      }
+      pending_profiles {
+        id
+        name
+        account_Id
+      }
     }
   }
 `;
@@ -251,13 +293,13 @@ export const GET_OUTING = gql`
   }
 `;
 
-export const SEND_OUTING_EMAIL = gql`
-  mutation sendOutingInvites(
+export const SEND_OUTING_INVITES_AND_CREATE = gql`
+  mutation sendOutingInvitesAndCreate(
     $outing_id: Int!
     $start_date_and_time: String!
     $emails: [String!]!
   ) {
-    sendOutingInvites(
+    sendOutingInvitesAndCreate(
       outing_id: $outing_id
       start_date_and_time: $start_date_and_time
       emails: $emails
@@ -265,9 +307,46 @@ export const SEND_OUTING_EMAIL = gql`
   }
 `;
 
+export const SEND_OUTING_INVITES = gql`
+  mutation sendOutingInvites(
+    $outing_id: Int!
+    $start_date_and_time: String!
+    $account_Ids: [Int!]!
+    $outing_name: String!
+  ) {
+    sendOutingInvites(
+      outing_id: $outing_id
+      start_date_and_time: $start_date_and_time
+      account_Ids: $account_Ids
+      outing_name: $outing_name
+    )
+  }
+`;
+
 export const GET_OUTINGS = gql`
   query getAllOutings {
     getAllOutings {
+      id
+      name
+      creator_profile_id
+      created_at
+      start_date_and_time
+      place_ids
+    }
+  }
+`;
+
+export const GET_CREATED_AND_JOINED_OUTINGS = gql`
+  query outings {
+    getCreatedOutings {
+      id
+      name
+      creator_profile_id
+      created_at
+      start_date_and_time
+      place_ids
+    }
+    getJoinedOutings {
       id
       name
       creator_profile_id
@@ -297,6 +376,12 @@ export const GET_RECIEVED_FRIEND_REQUESTS = gql`
       requestor_profile_id
       created_at
     }
+  }
+`;
+
+export const GET_RECIEVED_FRIEND_REQUEST_COUNT = gql`
+  query getRecievedFriendRequestCount {
+    getRecievedFriendRequestCount
   }
 `;
 

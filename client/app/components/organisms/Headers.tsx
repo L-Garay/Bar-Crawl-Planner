@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from '@remix-run/react';
 import BeerIcon from '../../assets/basicBeerSvg';
 import { useOnClickOutside } from '~/utils/useOnClickOutside';
+
+export type HeaderProps = {
+  hasFriendRequests: boolean;
+};
 
 const NavMenu = () => {
   return (
@@ -24,7 +28,7 @@ const NavMenu = () => {
   );
 };
 
-export const BasicHeader = () => {
+export const BasicHeader = ({ hasFriendRequests }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
@@ -42,8 +46,9 @@ export const BasicHeader = () => {
           <Link to="/outings" className="link">
             Outings
           </Link>
-          <Link to="/friends" className="link">
-            Friends
+          <Link to="/friends" className="link friends-link">
+            Friends{' '}
+            {hasFriendRequests && <div className="notification-marker"></div>}
           </Link>
           <div
             className="menuToggle link"

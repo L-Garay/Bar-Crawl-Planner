@@ -43,3 +43,40 @@ export async function GetAllOutings(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
+
+export async function GetCreatedOutings(
+  creator_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const outings = await prismaClient.outing.findMany({
+      where: {
+        creator_profile_id: creator_profile_id,
+      },
+    });
+    return { status: 'Success', data: outings, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function GetJoinedOutings(
+  creator_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const outings = await prismaClient.outing.findMany({
+      where: {
+        creator_profile_id: {
+          not: creator_profile_id,
+        },
+        accepted_profiles: {
+          some: {
+            id: creator_profile_id,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: outings, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}

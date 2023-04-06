@@ -3,17 +3,17 @@ import { redirect } from '@remix-run/node';
 import { Form, useLoaderData, useTransition } from '@remix-run/react';
 import { useEffect, useMemo, useState } from 'react';
 import { getNewClient } from '~/apollo/getClient';
-import { authenticator } from '~/auth/authenticator';
 import {
   DELETE_OUTING,
   SEND_FRIEND_REQUEST,
-  GET_ACCOUNT_WITH_PROFILE_DATA,
   GET_RECIEVED_FRIEND_REQUESTS,
   GET_OUTING,
   GET_PROFILES_IN_OUTING,
   GET_SENT_FRIEND_REQUESTS,
-  SEND_OUTING_EMAIL,
+  SEND_OUTING_INVITES_AND_CREATE,
   UPDATE_OUTING,
+  DISCONNECT_PROFILE,
+  GET_PROFILE,
 } from '~/constants/graphqlConstants';
 // import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
@@ -21,6 +21,7 @@ import EditIcon from '~/components/svgs/editIcon';
 import moment from 'moment';
 import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
+import FriendsTable from '~/components/friends/friendsTable';
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -37,7 +38,7 @@ export const action: ActionFunction = async ({ request, params }) => {
 
       try {
         const data = await client.mutate({
-          mutation: SEND_OUTING_EMAIL,
+          mutation: SEND_OUTING_INVITES_AND_CREATE,
           variables: {
             emails: emailsArray,
             start_date_and_time,
@@ -95,8 +96,6 @@ export const action: ActionFunction = async ({ request, params }) => {
 export const loader: LoaderFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
   // should never not be authenticated at this point
-  const user = await authenticator.isAuthenticated(request);
-  const email = user!.authData.profile.emails[0].value;
 
   let outing: any;
   let profiles: any;
@@ -118,10 +117,7 @@ export const loader: LoaderFunction = async ({ request, params }) => {
       },
     });
     currentUserProfile = await client.query({
-      query: GET_ACCOUNT_WITH_PROFILE_DATA,
-      variables: {
-        email,
-      },
+      query: GET_PROFILE,
     });
   } catch (error) {
     logApolloError(error);
@@ -144,8 +140,11 @@ export default function OutingDetails() {
   const transition = useTransition();
 
   const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
-    refetchQueries: [{ query: GET_SENT_FRIEND_REQUESTS }],
+    refetchQueries: [GET_SENT_FRIEND_REQUESTS],
   });
+  const [disconnectUser, { data: disconnectData }] =
+    useMutation(DISCONNECT_PROFILE);
+
   const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
   const { data: friendRequestData } = useQuery(GET_RECIEVED_FRIEND_REQUESTS);
 
@@ -163,10 +162,24 @@ export default function OutingDetails() {
   const { getOuting } = outing.data;
   const { accepted_profiles, pending_profiles, declined_profiles } =
     profiles.data.getProfilesInOuting;
-  const { getAccountWithProfileData } = currentUserProfile.data;
 
-  const isOutingCreator =
-    accepted_profiles[0].id === getAccountWithProfileData.profile.id;
+  const currentAcceptedProfiles = useMemo(() => {
+    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
+      return accepted_profiles;
+    if (disconnectData && disconnectData.DisconnectUserWithOuting)
+      return disconnectData.DisconnectUserWithOuting.accepted_profiles;
+  }, [accepted_profiles, disconnectData]);
+
+  const currentPendingProfiles = useMemo(() => {
+    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
+      return pending_profiles;
+    if (disconnectData && disconnectData.DisconnectUserWithOuting)
+      return disconnectData.DisconnectUserWithOuting.pending_profiles;
+  }, [pending_profiles, disconnectData]);
+
+  const { getProfile } = currentUserProfile.data;
+
+  const isOutingCreator = accepted_profiles[0].id === getProfile.id;
   const EMAIL_MIN_LENGTH = 7;
 
   const currentDay = new Date();
@@ -199,181 +212,184 @@ export default function OutingDetails() {
   return (
     <div>
       {getOuting ? (
-        <>
-          {showEditName === false ? (
-            <span style={{ display: 'flex', alignItems: 'center' }}>
-              <h1>{nameToShow}</h1>
-              {isOutingCreator ? (
-                <span
-                  onMouseEnter={() => setIsHoveringNameIcon(true)}
-                  onMouseLeave={() => setIsHoveringNameIcon(false)}
-                  onClick={() => {
-                    setShowEditDate(false);
-                    setShowEditName(true);
-                    setIsHoveringNameIcon(false);
-                  }}
-                >
-                  <EditIcon
-                    pathId={getOuting.name}
-                    fill={isHoveringNameIcon ? '#20b2aa' : undefined}
-                    size="medium"
-                  />
-                </span>
-              ) : null}
-            </span>
-          ) : (
-            <Form method="post" style={{ paddingTop: 15 }}>
-              <input
-                type="text"
-                name="outing-name"
-                id="outing-name"
-                spellCheck
-                defaultValue={getOuting.name}
-              />
-              <button type="submit" name="intent" value="put">
-                Save Change
-              </button>
-            </Form>
-          )}
-          {showEditDate === false ? (
-            <span style={{ display: 'flex', alignItems: 'center' }}>
-              <p>{dateToShow}</p>
-              {isOutingCreator ? (
-                <span
-                  onMouseEnter={() => setIsHoveringDateIcon(true)}
-                  onMouseLeave={() => setIsHoveringDateIcon(false)}
-                  onClick={() => {
-                    setShowEditName(false);
-                    setShowEditDate(true);
-                    setIsHoveringDateIcon(false);
-                  }}
-                >
-                  <EditIcon
-                    pathId={getOuting.start_date_and_time}
-                    fill={isHoveringDateIcon ? '#20b2aa' : undefined}
-                    size="small"
-                  />
-                </span>
-              ) : null}
-            </span>
-          ) : (
-            <Form method="post" style={{ paddingTop: 15 }}>
-              <input
-                type="datetime-local"
-                name="outing-date"
-                id="outing-date"
-                min={currentDayInputValue}
-                max={maxDateValue}
-                defaultValue={getOuting.start_date_and_time}
-              />
-              <button type="submit" name="intent" value="put">
-                Save Change
-              </button>
-            </Form>
-          )}
-
-          <br />
-          <div className="add-profiles">
-            <form method="post">
-              {/* TODO: add validation to make sure emails are valid */}
-              <label htmlFor="profile-email">Send invitation email to: </label>
-              <input
-                type="email"
-                name="profile-email"
-                id="profile-email"
-                // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
-                // pattern={`${VALID_EMAIL_REGEX}`}
-                title="figure out what pattern(s) to show here"
-                minLength={EMAIL_MIN_LENGTH} // what should this be?
-                onChange={(e) => {
-                  setShouldDisableSend(
-                    e.target.value.length < EMAIL_MIN_LENGTH
-                  );
-                }}
-              />
-              <input
-                type="hidden"
-                name="start-date-and-time"
-                value={getOuting.start_date_and_time}
-              />
-              <button
-                type="submit"
-                name="intent"
-                value="post"
-                disabled={shouldDisableSend}
-              >
-                Send Invite
-              </button>
-            </form>
-          </div>
-          <h4>Profiles in Outing</h4>
-          {accepted_profiles.length ? (
-            <>
-              {accepted_profiles.map((profile: any) => {
-                return (
-                  <ProfileInOuting
-                    key={profile.id}
-                    profile={profile}
-                    sendFriendRequest={sendFriendRequest}
-                    attendanceStatus="Accepted"
-                    currentUser={getAccountWithProfileData.profile.id}
-                    sentRequests={sentRequests}
-                    recievedRequests={recievedRequests}
-                  />
-                );
-              })}
-            </>
-          ) : null}
-          {pending_profiles.length ? (
-            <>
-              {pending_profiles.map((profile: any) => {
-                return (
-                  <ProfileInOuting
-                    key={profile.id}
-                    profile={profile}
-                    sendFriendRequest={sendFriendRequest}
-                    attendanceStatus="Pending"
-                    currentUser={getAccountWithProfileData.profile.id}
-                    sentRequests={sentRequests}
-                    recievedRequests={recievedRequests}
-                  />
-                );
-              })}
-            </>
-          ) : null}
-          {declined_profiles.length ? (
-            <>
-              {declined_profiles.map((profile: any) => {
-                return (
-                  <ProfileInOuting
-                    key={profile.id}
-                    profile={profile}
-                    sendFriendRequest={sendFriendRequest}
-                    attendanceStatus="Declined"
-                    currentUser={getAccountWithProfileData.profile.id}
-                    sentRequests={sentRequests}
-                    recievedRequests={recievedRequests}
-                  />
-                );
-              })}
-            </>
-          ) : null}
-          <br />
-          {isOutingCreator ? (
-            <div className="delete-outing-container">
-              <form method="post">
-                <button
-                  className="delete-outing"
-                  name="intent"
-                  value="delete"
-                  type="submit"
-                >
-                  Delete Outing
+        <div className="outing-details-container" style={{ display: 'flex' }}>
+          <div className="outing-detials">
+            {showEditName === false ? (
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                <h1>{nameToShow}</h1>
+                {isOutingCreator ? (
+                  <span
+                    onMouseEnter={() => setIsHoveringNameIcon(true)}
+                    onMouseLeave={() => setIsHoveringNameIcon(false)}
+                    onClick={() => {
+                      setShowEditDate(false);
+                      setShowEditName(true);
+                      setIsHoveringNameIcon(false);
+                    }}
+                  >
+                    <EditIcon
+                      pathId={getOuting.name}
+                      fill={isHoveringNameIcon ? '#20b2aa' : undefined}
+                      size="medium"
+                    />
+                  </span>
+                ) : null}
+              </span>
+            ) : (
+              <Form method="post" style={{ paddingTop: 15 }}>
+                <input
+                  type="text"
+                  name="outing-name"
+                  id="outing-name"
+                  spellCheck
+                  defaultValue={getOuting.name}
+                />
+                <button type="submit" name="intent" value="put">
+                  Save Change
                 </button>
-              </form>
-            </div>
-          ) : null}
-        </>
+              </Form>
+            )}
+            {showEditDate === false ? (
+              <span style={{ display: 'flex', alignItems: 'center' }}>
+                <p>{dateToShow}</p>
+                {isOutingCreator ? (
+                  <span
+                    onMouseEnter={() => setIsHoveringDateIcon(true)}
+                    onMouseLeave={() => setIsHoveringDateIcon(false)}
+                    onClick={() => {
+                      setShowEditName(false);
+                      setShowEditDate(true);
+                      setIsHoveringDateIcon(false);
+                    }}
+                  >
+                    <EditIcon
+                      pathId={getOuting.start_date_and_time}
+                      fill={isHoveringDateIcon ? '#20b2aa' : undefined}
+                      size="small"
+                    />
+                  </span>
+                ) : null}
+              </span>
+            ) : (
+              <Form method="post" style={{ paddingTop: 15 }}>
+                <input
+                  type="datetime-local"
+                  name="outing-date"
+                  id="outing-date"
+                  min={currentDayInputValue}
+                  max={maxDateValue}
+                  defaultValue={getOuting.start_date_and_time}
+                />
+                <button type="submit" name="intent" value="put">
+                  Save Change
+                </button>
+              </Form>
+            )}
+
+            <br />
+            <>
+              {isOutingCreator ? (
+                <div className="add-profiles">
+                  <form method="post">
+                    {/* TODO: add validation to make sure emails are valid */}
+                    {/* NOTE if we want users to be able to submit multiple emails at the same time, we will need to change the input type to be textfield or something else that just takes strings, but email input and it's default validation rules won't allow mutliple emails */}
+                    <label htmlFor="profile-email">
+                      Send invitation email to:{' '}
+                    </label>
+                    <input
+                      type="email"
+                      name="profile-email"
+                      id="profile-email"
+                      // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
+                      // pattern={`${VALID_EMAIL_REGEX}`}
+                      title="figure out what pattern(s) to show here"
+                      minLength={EMAIL_MIN_LENGTH} // what should this be?
+                      onChange={(e) => {
+                        setShouldDisableSend(
+                          e.target.value.length < EMAIL_MIN_LENGTH
+                        );
+                      }}
+                    />
+                    <input
+                      type="hidden"
+                      name="start-date-and-time"
+                      value={getOuting.start_date_and_time}
+                    />
+                    <button
+                      type="submit"
+                      name="intent"
+                      value="post"
+                      disabled={shouldDisableSend}
+                    >
+                      Send Invite
+                    </button>
+                  </form>
+                </div>
+              ) : null}
+            </>
+            <h4>Profiles in Outing</h4>
+            {currentAcceptedProfiles.length ? (
+              <>
+                {currentAcceptedProfiles.map((profile: any) => {
+                  return (
+                    <ProfileInOuting
+                      key={profile.id}
+                      profile={profile}
+                      sendFriendRequest={sendFriendRequest}
+                      attendanceStatus="Accepted"
+                      currentUserId={getProfile.id}
+                      sentRequests={sentRequests}
+                      recievedRequests={recievedRequests}
+                      disconnectUser={disconnectUser}
+                      outingId={getOuting.id}
+                      isOutingCreator={isOutingCreator}
+                    />
+                  );
+                })}
+              </>
+            ) : null}
+            {currentPendingProfiles.length ? (
+              <>
+                {currentPendingProfiles.map((profile: any) => {
+                  return (
+                    <ProfileInOuting
+                      key={profile.id}
+                      profile={profile}
+                      attendanceStatus="Pending"
+                      currentUserId={getProfile.id}
+                      sentRequests={sentRequests}
+                      recievedRequests={recievedRequests}
+                      disconnectUser={disconnectUser}
+                      outingId={getOuting.id}
+                      isOutingCreator={isOutingCreator}
+                    />
+                  );
+                })}
+              </>
+            ) : null}
+            <br />
+            {isOutingCreator ? (
+              <div className="delete-outing-container">
+                <form method="post">
+                  <button
+                    className="delete-outing"
+                    name="intent"
+                    value="delete"
+                    type="submit"
+                  >
+                    Delete Outing
+                  </button>
+                </form>
+              </div>
+            ) : null}
+          </div>
+          <FriendsTable
+            userId={getProfile.id}
+            outingId={getOuting.id}
+            outingName={getOuting.name}
+            startDateAndTime={getOuting.start_date_and_time}
+          />
+        </div>
       ) : (
         <p>Outing not found</p>
       )}

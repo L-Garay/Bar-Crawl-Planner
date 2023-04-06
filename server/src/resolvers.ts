@@ -1,5 +1,7 @@
 import {
   GetAllOutings,
+  GetCreatedOutings,
+  GetJoinedOutings,
   GetOutingByOutingId,
 } from './prisma/querries/outingsQuerries';
 import {
@@ -7,6 +9,7 @@ import {
   GetAcceptedProfilesInOuting,
   GetPendingProfilesInOuting,
   GetDeclinedProfilesInOuting,
+  GetBlockedProfiles,
 } from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
@@ -15,6 +18,7 @@ import {
   GetAccountByEmail,
   GetAccountWithProfileData,
   GetAllAccounts,
+  GetBlockedAccountEmails,
 } from './prisma/querries/accountQuerries';
 import {
   CreateAccount,
@@ -25,15 +29,22 @@ import {
 import {
   BlockProfile,
   CreateProfile,
+  UnblockProfile,
 } from './prisma/mutations/profileMutations';
 import { SearchCity } from './prisma/querries/mapQuerries';
-import { CitySelectOptions, OutingInput } from './types/sharedTypes';
+import {
+  Account,
+  CitySelectOptions,
+  OutingInput,
+  PrismaData,
+} from './types/sharedTypes';
 import {
   ConnectUserWithOuting,
   CreateOuting,
   DeleteOuting,
   DisconnectUserWithOuting,
   SendOutingInvites,
+  SendOutingInvitesAndCreate,
   SendOutingJoinedEmail,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
@@ -44,6 +55,7 @@ import {
 } from './prisma/mutations/friendsMutations';
 import {
   GetAllFriendships,
+  GetRecievedFriendRequestCount,
   GetRecievedFriendRequests,
   GetSentFriendRequests,
 } from './prisma/querries/friendsQuerries';
@@ -228,6 +240,50 @@ const resolvers: Resolvers = {
         return outings.data;
       }
     },
+    getCreatedOutings: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const outings = await GetCreatedOutings(profile.data.id);
+      if (outings.status === 'Failure') {
+        throw new GraphQLError('Cannot get created outings', {
+          extensions: {
+            code: outings.error?.name,
+            message: outings.error?.message,
+            prismaMeta: outings.error?.meta,
+            prismaErrorCode: outings.error?.errorCode,
+          },
+        });
+      } else {
+        return outings.data;
+      }
+    },
+    getJoinedOutings: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const outings = await GetJoinedOutings(profile.data.id);
+      if (outings.status === 'Failure') {
+        throw new GraphQLError('Cannot get joined outings', {
+          extensions: {
+            code: outings.error?.name,
+            message: outings.error?.message,
+            prismaMeta: outings.error?.meta,
+            prismaErrorCode: outings.error?.errorCode,
+          },
+        });
+      } else {
+        return outings.data;
+      }
+    },
     getOuting: async (parent, args, context, info) => {
       const { authError } = context;
       if (authError) {
@@ -257,8 +313,10 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+
       const city = args.city as CitySelectOptions;
       const locations = await SearchCity(city, args.locationType);
+
       if (locations.status === 'Failure') {
         throw new GraphQLError('Cannot search city', {
           extensions: {
@@ -279,8 +337,10 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+
       const { id } = profile.data;
       const friends = await GetAllFriendships(id);
+
       if (friends.status === 'Failure') {
         throw new GraphQLError('Cannot get all friends', {
           extensions: {
@@ -291,8 +351,6 @@ const resolvers: Resolvers = {
           },
         });
       } else {
-        console.log(friends.data);
-
         return friends.data;
       }
     },
@@ -305,6 +363,7 @@ const resolvers: Resolvers = {
       }
       const { id } = profile.data;
       const requests = await GetSentFriendRequests(id);
+
       if (requests.status === 'Failure') {
         throw new GraphQLError('Cannot get sent friend requests', {
           extensions: {
@@ -325,6 +384,7 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+
       const { id } = profile.data;
       const requests = await GetRecievedFriendRequests(id);
 
@@ -339,6 +399,53 @@ const resolvers: Resolvers = {
         });
       } else {
         return requests.data;
+      }
+    },
+    getRecievedFriendRequestCount: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id } = profile.data;
+      const requests = await GetRecievedFriendRequestCount(id);
+
+      if (requests.status === 'Failure') {
+        throw new GraphQLError('Cannot get friend request count', {
+          extensions: {
+            code: requests.error?.name,
+            message: requests.error?.message,
+            prismaMeta: requests.error?.meta,
+            prismaErrorCode: requests.error?.errorCode,
+          },
+        });
+      } else {
+        return requests.data;
+      }
+    },
+    getBlockedProfiles: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const blockedProfiles = await GetBlockedProfiles(profile.data);
+
+      if (blockedProfiles.status === 'Failure') {
+        throw new GraphQLError('Cannot get blocked profiles', {
+          extensions: {
+            code: blockedProfiles.error?.name,
+            message: blockedProfiles.error?.message,
+            prismaMeta: blockedProfiles.error?.meta,
+            prismaErrorCode: blockedProfiles.error?.errorCode,
+          },
+        });
+      } else {
+        return blockedProfiles.data;
       }
     },
   },
@@ -472,25 +579,95 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
+      const { outing_id, start_date_and_time, account_Ids, outing_name } = args;
+
+      // I don't believe we need to check for blocked emails, since these will be coming from the user's friends list
+      // We can have a client side check to make sure the user isn't inviting someone who is already invited
+      // OR should we check those things here anyway?
+
+      // 1. get the emails of the accounts that are being invited
+      const accounts = await Promise.allSettled(
+        account_Ids.map(async (id: number) => {
+          return await GetAccountByAccountId(id);
+        })
+      );
+      let noNullAccounts: Account[] = [];
+      accounts.forEach((promise) => {
+        if (promise.status === 'rejected') {
+          console.log(promise.reason);
+        }
+        if (promise.status === 'fulfilled') {
+          if (promise.value.data !== null) {
+            noNullAccounts.push(promise.value.data);
+          }
+        }
+      });
+      // 2. send emails
+      const inviteArgs = {
+        outing_id,
+        outing_name,
+        start_date_and_time,
+        accounts: noNullAccounts,
+        senderName: profile.data.name,
+      };
+      const emailStatus = await SendOutingInvites(inviteArgs);
+
+      if (emailStatus.status === 'Failure') {
+        throw new GraphQLError('Cannot get friends', {
+          extensions: {
+            code: emailStatus.error?.name,
+            message: emailStatus.error?.message,
+            prismaMeta: emailStatus.error?.meta,
+            prismaErrorCode: emailStatus.error?.errorCode,
+          },
+        });
+      } else {
+        return emailStatus.data;
+      }
+    },
+    sendOutingInvitesAndCreate: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
       const { outing_id, start_date_and_time, emails } = args;
+
+      // check to make sure user isn't trying to invite someone who has blocked them or they have blocked
+      const blockedEmails = await GetBlockedAccountEmails(emails, profile.data);
+      if (blockedEmails.status === 'Failure') {
+        // should we allow this to continue if this fails?
+        console.log(blockedEmails.error);
+      }
 
       // iterate through emails and remove those who are already accepted
       // get the accepted profiles
       const acceptedProfiles = await GetAcceptedProfilesInOuting(outing_id);
       // get the accepted accounts from the accepted profiles
-      const acceptedAccounts = acceptedProfiles.data.map(
-        async (profile: Profile) => {
+      const resolvedAcceptedAccounts = await Promise.all(
+        acceptedProfiles.data.map(async (profile: Profile) => {
           return await GetAccountByAccountId(profile.account_Id);
-        }
+        })
       );
-      const resolvedAcceptedAccounts = await Promise.all(acceptedAccounts);
-      // filter out the emails that are already accepted
-      const emailsToSend = emails.filter((email: string) => {
+
+      // if one of the emails provided is associated with an account that is already attending the outing, return false
+      const nonAcceptedEmails = emails.filter((email: string) => {
         if (
           resolvedAcceptedAccounts.find(
             (account: any) => account.data.email === email
           )
         ) {
+          return false;
+        } else {
+          return true;
+        }
+      });
+
+      // the nonAcceptedEmails will have all emails that are not already accepted, it doesn't filter out blocked emails
+      // so we need to do so here
+      const emailsToSend = nonAcceptedEmails.filter((email) => {
+        if (blockedEmails.data.includes(email)) {
           return false;
         } else {
           return true;
@@ -504,7 +681,7 @@ const resolvers: Resolvers = {
         senderName: profile.data.name,
       };
 
-      const status = await SendOutingInvites(inviteArgs);
+      const status = await SendOutingInvitesAndCreate(inviteArgs);
 
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot send outing invites', {
@@ -550,21 +727,18 @@ const resolvers: Resolvers = {
         });
       }
       const { outing_id, profile_id } = args;
-      const disconnectedUser = await DisconnectUserWithOuting(
-        outing_id,
-        profile_id
-      );
-      if (disconnectedUser.status === 'Failure') {
+      const outing = await DisconnectUserWithOuting(profile_id, outing_id);
+      if (outing.status === 'Failure') {
         throw new GraphQLError('Cannot disconnect user from outing', {
           extensions: {
-            code: disconnectedUser.error?.name,
-            message: disconnectedUser.error?.message,
-            prismaMeta: disconnectedUser.error?.meta,
-            prismaErrorCode: disconnectedUser.error?.errorCode,
+            code: outing.error?.name,
+            message: outing.error?.message,
+            prismaMeta: outing.error?.meta,
+            prismaErrorCode: outing.error?.errorCode,
           },
         });
       } else {
-        return disconnectedUser.data;
+        return outing.data;
       }
     },
     UpdateAccountBySocialPin: async (parent, args, context, info) => {
@@ -693,6 +867,29 @@ const resolvers: Resolvers = {
       const status = await BlockProfile(profile.data.id, blocked_profile_id);
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot block profile', {
+          extensions: {
+            code: status.error?.name,
+            message: status.error?.message,
+            prismaMeta: status.error?.meta,
+            prismaErrorCode: status.error?.errorCode,
+          },
+        });
+      } else {
+        return status.data;
+      }
+    },
+    unblockProfile: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { blocked_profile_id } = args;
+
+      const status = await UnblockProfile(profile.data, blocked_profile_id);
+      if (status.status === 'Failure') {
+        throw new GraphQLError('Cannot unblock profile', {
           extensions: {
             code: status.error?.name,
             message: status.error?.message,

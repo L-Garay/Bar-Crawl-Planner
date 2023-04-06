@@ -36,7 +36,7 @@ export const getNewClient = async (request: Request) => {
   const config = getConfig();
   const session = await getSession(request.headers.get('Cookie'));
   const user = session.get('user');
-  const idToken = user.authData.extraParams.id_token;
+  const idToken = user ? user.authData.extraParams.id_token : null;
 
   return new ApolloClient({
     uri: `${config.SERVER.ADDRESS}/graphql`,

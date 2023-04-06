@@ -20,7 +20,7 @@ const typeDefs = `#graphql
     profile_img: String
     updated_at: String
     account: Account
-    account_id: Int
+    account_Id: Int
     accepted_outings: [Outing]
     pending_outings: [Outing]
     declined_outings: [Outing]
@@ -100,7 +100,9 @@ const typeDefs = `#graphql
   type Friendship {
     id: Int
     requestor_profile_id: Int
+    requestor_profile_relation: Profile
     addressee_profile_id: Int
+    addressee_profile_relation: Profile
     created_at: String
     status_code: String
     last_modified_by: Int
@@ -119,16 +121,20 @@ const typeDefs = `#graphql
     accounts: [Account]
     profiles: [Profile]
     getAllOutings: [Outing]
+    getCreatedOutings: [Outing]
+    getJoinedOutings: [Outing]
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]
     getRecievedFriendRequests: [Friendship]
+    getRecievedFriendRequestCount: Int
     getSentFriendRequests: [Friendship]
+    getBlockedProfiles: [Profile]
   }
 
   type Mutation {
     createAccount(email: String, email_verified: Boolean): Account
-    createProfile(name: String, profile_img: String, account_id: Int): Profile
+    createProfile(name: String, profile_img: String, account_Id: Int): Profile
     updateUserAccount(email: String, phone_number: String): Account
     deactivateUserAccount(id: Int!): Account
     createOuting(
@@ -139,7 +145,13 @@ const typeDefs = `#graphql
     ): Outing
     updateOuting(id: Int!, name: String, start_date_and_time: String): Outing
     deleteOuting(id: Int!): String
-    sendOutingInvites(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
+    sendOutingInvitesAndCreate(outing_id: Int!, start_date_and_time: String!, emails: [String!]!): String
+    sendOutingInvites(
+    outing_id: Int!
+    start_date_and_time: String!
+    account_Ids: [Int!]!
+    outing_name: String!
+    ): String
     ConnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     DisconnectUserWithOuting(outing_id: Int!, profile_id: Int!): Outing
     UpdateAccountBySocialPin(profile_id: Int!, social_pin: String!, email: String!): Account
@@ -148,6 +160,7 @@ const typeDefs = `#graphql
     sendFriendRequestEmail(addressee_profile_id: Int!): String
     updateFriend(friendship_id: Int!, status_code: String!): Friendship
     blockProfile(blocked_profile_id: Int!): Profile
+    unblockProfile(blocked_profile_id: Int!): Profile
   }
 `;
 

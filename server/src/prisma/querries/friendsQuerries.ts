@@ -19,6 +19,10 @@ export async function GetAllFriendships(id: number): Promise<PrismaData> {
           },
         ],
       },
+      include: {
+        requestor_profile_relation: true,
+        addressee_profile_relation: true,
+      },
     });
 
     return { status: 'Success', data: friends, error: null };
@@ -54,6 +58,28 @@ export async function GetRecievedFriendRequests(
 ): Promise<PrismaData> {
   try {
     const recieved = await prismaClient.friendship.findMany({
+      where: {
+        AND: [
+          {
+            addressee_profile_id: profile_id,
+          },
+          {
+            status_code: 'S',
+          },
+        ],
+      },
+    });
+    return { status: 'Success', data: recieved, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function GetRecievedFriendRequestCount(
+  profile_id: number
+): Promise<PrismaData> {
+  try {
+    const recieved = await prismaClient.friendship.count({
       where: {
         AND: [
           {

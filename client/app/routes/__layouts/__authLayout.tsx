@@ -6,7 +6,9 @@ import { BasicHeader } from '~/components/organisms/Headers';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 import footerStyles from '~/generatedStyles/footer.css';
 import headerStyles from '~/generatedStyles/header.css';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useQuery } from '@apollo/client';
+import { GET_RECIEVED_FRIEND_REQUEST_COUNT } from '~/constants/graphqlConstants';
 
 export const links: LinksFunction = () => {
   return [
@@ -56,11 +58,18 @@ export default function AuthLayout() {
     }
   }, [redirectTo, navigate]);
 
+  const { data: requestCount } = useQuery(GET_RECIEVED_FRIEND_REQUEST_COUNT);
+
+  const hasFriendRequests = useMemo(() => {
+    if (!requestCount) return false;
+    return requestCount.getRecievedFriendRequestCount > 0;
+  }, [requestCount]);
+
   return (
     <>
       {valid ? (
         <>
-          <BasicHeader />
+          <BasicHeader hasFriendRequests={hasFriendRequests} />
           <Outlet />
           <BasicFooter />
         </>

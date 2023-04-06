@@ -1,4 +1,4 @@
-import type { LinksFunction, LoaderFunction } from '@remix-run/node';
+import type { LinksFunction } from '@remix-run/node';
 import {
   UPDATE_FRIEND,
   GET_ALL_FRIENDSHIPS,
@@ -6,13 +6,11 @@ import {
   GET_SENT_FRIEND_REQUESTS,
   GET_PROFILE,
   BLOCK_PROFILE,
+  GET_RECIEVED_FRIEND_REQUEST_COUNT,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
 import { useMutation, useQuery } from '@apollo/client';
 import { useMemo } from 'react';
-import logApolloError from '~/utils/getApolloError';
-import { getNewClient } from '~/apollo/getClient';
-import { useLoaderData } from '@remix-run/react';
 
 export const links: LinksFunction = () => {
   return [
@@ -24,22 +22,8 @@ export const links: LinksFunction = () => {
   ];
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const client = await getNewClient(request);
-  let profile: any;
-  try {
-    profile = await client.query({
-      query: GET_PROFILE,
-    });
-  } catch (error) {
-    logApolloError(error);
-    throw new Response(JSON.stringify(error), { status: 500 });
-  }
-  return { profile };
-};
-
 export default function FriendsIndex() {
-  const { profile } = useLoaderData();
+  const { data: profileData } = useQuery(GET_PROFILE);
   const { data: friendsData, error: friendsError } =
     useQuery(GET_ALL_FRIENDSHIPS);
   const { data: sentData, error: sentError } = useQuery(
@@ -57,6 +41,7 @@ export default function FriendsIndex() {
         GET_ALL_FRIENDSHIPS,
         GET_RECIEVED_FRIEND_REQUESTS,
         GET_SENT_FRIEND_REQUESTS,
+        GET_RECIEVED_FRIEND_REQUEST_COUNT,
       ],
     }
   );
@@ -77,10 +62,6 @@ export default function FriendsIndex() {
     if (!recievedData || !recievedData.getRecievedFriendRequests) return [];
     return recievedData.getRecievedFriendRequests;
   }, [recievedData]);
-
-  console.log('all friends', friends); // these are friendships, not users
-  console.log('sent requests', sentRequests);
-  console.log('recieved requests', recievedRequests);
 
   return (
     <>
@@ -185,7 +166,7 @@ export default function FriendsIndex() {
                                   },
                                 });
                                 const blocked_profile_id =
-                                  friend.requestor_profile_id === profile.id
+                                  friend.requestor_profile_id === profileData.id
                                     ? friend.addressee_profile_id
                                     : friend.requestor_profile_id;
                                 blockProfile({
