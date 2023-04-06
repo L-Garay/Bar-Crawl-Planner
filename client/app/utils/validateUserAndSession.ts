@@ -28,9 +28,9 @@ export const validateUserAndSession = async (
       },
     });
   }
-  const isTokenValid: boolean = data ? await data.json() : false;
+  const isTokenValid: boolean = data ? Boolean(await data.json()) : false;
 
-  const valid = Boolean(user) && Boolean(session.has('user')) && isTokenValid;
+  const valid = Boolean(user) && session.has('user') && isTokenValid;
 
   if (valid) {
     return { valid: true, user, session };
