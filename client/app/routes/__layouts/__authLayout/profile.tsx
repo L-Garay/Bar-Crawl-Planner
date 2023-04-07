@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from '@apollo/client';
 import {
   GET_BLOCKED_PROFILES,
+  GET_PROFILE,
   UNBLOCK_PROFILE,
 } from '~/constants/graphqlConstants';
 
 export default function ProfileIndex() {
+  const { data: profileData } = useQuery(GET_PROFILE);
   const { data: blockedProfiles } = useQuery(GET_BLOCKED_PROFILES);
-  console.log('blockedProfiles', blockedProfiles);
 
   const [unblockProfile, { data: unblockedProfile }] = useMutation(
     UNBLOCK_PROFILE,
@@ -14,6 +15,7 @@ export default function ProfileIndex() {
       refetchQueries: [GET_BLOCKED_PROFILES],
     }
   );
+  const social_pin = profileData ? profileData.getProfile.social_pin : '';
 
   return (
     <>
@@ -46,6 +48,16 @@ export default function ProfileIndex() {
           I figure it's 'okay' for it to be more basic, but it'd be nice if it
           looked cool
         </p>
+        <div
+          className="social-pin"
+          style={{ display: 'flex', alignContent: 'center' }}
+        >
+          Your social pin:
+          <p style={{ margin: 0, marginLeft: 10, fontWeight: 'bolder' }}>
+            {' '}
+            {social_pin}
+          </p>
+        </div>
         <div className="blocked-profiles-container">
           <h3>Blocked Profiles</h3>
           <div className="blocked-profiles-list">

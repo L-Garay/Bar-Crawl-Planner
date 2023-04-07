@@ -254,6 +254,7 @@ export default function CheckUser() {
       const createAccountAndProfileFunction = async () => {
         const data = await createAccountAndProfile({ variables: variables });
         if (data.errors) {
+          navigate('/logout');
           // NOTE not sure what to do in this case, have them try again on our end?
           // would probably need some cleanup on the backend to remove the broken account(s) and profile(s) that were created
           console.log('error creating account and profile');

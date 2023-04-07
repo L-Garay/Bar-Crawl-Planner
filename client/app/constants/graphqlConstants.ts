@@ -130,6 +130,7 @@ export const GET_PROFILE = gql`
       name
       account_Id
       blocked_profile_ids
+      social_pin
     }
   }
 `;
