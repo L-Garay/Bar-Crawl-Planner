@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import MinusCircle from '../svgs/minusCircle';
 import PlusCircle from '../svgs/plusCircle';
+import GradientCheck from '~/assets/gradient-check32px.png';
 
 export type FriendTableItemProps = {
   userId: number;
@@ -8,6 +9,8 @@ export type FriendTableItemProps = {
   addFriend: (accountId: number) => void;
   removeFriend: (accountId: number) => void;
   accountIds: number[];
+  pendingProfiles: Record<string, any>[];
+  acceptedProfiles: Record<string, any>[];
 };
 
 export const FriendTableItem = ({
@@ -16,6 +19,8 @@ export const FriendTableItem = ({
   addFriend,
   removeFriend,
   accountIds,
+  pendingProfiles,
+  acceptedProfiles,
 }: FriendTableItemProps) => {
   // can use this to determine if they are hovering over either plus or minus icon
   const [isHoveringIcon, setIsHoveringIcon] = useState<boolean>(false);
@@ -34,9 +39,13 @@ export const FriendTableItem = ({
   const friendId = userId === addressee_id ? requestor_id : addressee_id;
   const nameToShow = userId === addressee_id ? requestor_name : addressee_name;
 
-  const alreadyAdded = useMemo(() => {
+  const alreadySelected = useMemo(() => {
     return accountIds.includes(friendId);
   }, [accountIds, friendId]);
+
+  const alreadyAdded =
+    pendingProfiles.some((profile) => profile.id == friendId) ||
+    acceptedProfiles.some((profile) => profile.id == friendId);
 
   return (
     <div
@@ -44,7 +53,7 @@ export const FriendTableItem = ({
       style={{
         display: 'flex',
         alignItems: 'center',
-        background: alreadyAdded ? 'lightgray' : undefined,
+        background: alreadySelected ? 'lightgray' : undefined,
       }}
     >
       <p
@@ -53,37 +62,50 @@ export const FriendTableItem = ({
       >
         {nameToShow}
       </p>
-      {alreadyAdded ? (
-        <span
-          className="plus-icon-wrapper"
-          onMouseEnter={() => setIsHoveringIcon(true)}
-          onMouseLeave={() => setIsHoveringIcon(false)}
-          onClick={() => {
-            console.log('should be adding friend');
+      <>
+        {alreadyAdded ? (
+          <img
+            src={GradientCheck}
+            alt="check mark inside circle with color gradient"
+            height={20}
+            width={20}
+          />
+        ) : (
+          <div>
+            {alreadySelected ? (
+              <span
+                className="plus-icon-wrapper"
+                onMouseEnter={() => setIsHoveringIcon(true)}
+                onMouseLeave={() => setIsHoveringIcon(false)}
+                onClick={() => {
+                  console.log('should be adding friend');
 
-            removeFriend(friendId);
-          }}
-        >
-          <MinusCircle
-            pathId={friendId!}
-            stroke={isHoveringIcon ? 'lightseagreen' : undefined}
-          />
-        </span>
-      ) : (
-        <span
-          className="plus-icon-wrapper"
-          onMouseEnter={() => setIsHoveringIcon(true)}
-          onMouseLeave={() => setIsHoveringIcon(false)}
-          onClick={() => {
-            addFriend(friendId);
-          }}
-        >
-          <PlusCircle
-            pathId={friendId!}
-            stroke={isHoveringIcon ? 'lightcoral' : undefined}
-          />
-        </span>
-      )}
+                  removeFriend(friendId);
+                }}
+              >
+                <MinusCircle
+                  pathId={friendId!}
+                  stroke={isHoveringIcon ? 'lightseagreen' : undefined}
+                />
+              </span>
+            ) : (
+              <span
+                className="plus-icon-wrapper"
+                onMouseEnter={() => setIsHoveringIcon(true)}
+                onMouseLeave={() => setIsHoveringIcon(false)}
+                onClick={() => {
+                  addFriend(friendId);
+                }}
+              >
+                <PlusCircle
+                  pathId={friendId!}
+                  stroke={isHoveringIcon ? 'lightcoral' : undefined}
+                />
+              </span>
+            )}
+          </div>
+        )}
+      </>
     </div>
   );
 };

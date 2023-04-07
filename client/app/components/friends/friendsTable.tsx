@@ -12,6 +12,8 @@ export type FriendsTableProps = {
   outingId: number;
   outingName: string;
   startDateAndTime: string;
+  pendingProfiles: any[];
+  acceptedProfiles: any[];
 };
 
 const FriendsTable = ({
@@ -19,6 +21,8 @@ const FriendsTable = ({
   outingId,
   outingName,
   startDateAndTime,
+  acceptedProfiles,
+  pendingProfiles,
 }: FriendsTableProps) => {
   const { data: friendsData } = useQuery(GET_ALL_FRIENDSHIPS);
   const friends = friendsData ? friendsData.getAllFriendships : [];
@@ -73,6 +77,8 @@ const FriendsTable = ({
                   addFriend={addFriend}
                   removeFriend={removeFriend}
                   accountIds={accountIds}
+                  pendingProfiles={pendingProfiles}
+                  acceptedProfiles={acceptedProfiles}
                 />
               ))}
             </>
@@ -81,6 +87,7 @@ const FriendsTable = ({
             {/* TODO create mutation to send outing invites to friends */}
             {/* NOTE try to reuse as much of the sendOutingInvitesAndCreate mutation as possible. As in, just as the GetBlockedAccountEmails code was split out, see if you can do the same with the code that gets the emails using the account ids */}
             <button
+              disabled={accountIds.length == 0}
               onClick={() => {
                 inviteFriends({
                   variables: {

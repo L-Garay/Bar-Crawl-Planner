@@ -137,8 +137,9 @@ export default function OutingDetails() {
   const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
     refetchQueries: [GET_SENT_FRIEND_REQUESTS],
   });
-  const [disconnectUser, { data: disconnectData }] =
-    useMutation(DISCONNECT_PROFILE);
+  const [disconnectUser] = useMutation(DISCONNECT_PROFILE, {
+    refetchQueries: [GET_PROFILES_IN_OUTING],
+  });
 
   const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
   const { data: friendRequestData } = useQuery(GET_RECIEVED_FRIEND_REQUESTS);
@@ -148,11 +149,8 @@ export default function OutingDetails() {
       variables: {
         id: Number(outingId),
       },
-      fetchPolicy: 'no-cache',
-      nextFetchPolicy: 'no-cache',
     }
   );
-  // console.log('PROFILES ARE LOADING:', profilesLoading, profilesInOutingData);
 
   const hasSentRequest =
     sentRequestData && sentRequestData.getSentFriendRequests;
@@ -172,43 +170,23 @@ export default function OutingDetails() {
     if (profilesLoading) return [];
     return profilesInOutingData.getProfilesInOuting.accepted_profiles;
   }, [profilesLoading, profilesInOutingData]);
+
   const pending_profiles = useMemo(() => {
     if (profilesLoading) return [];
     return profilesInOutingData.getProfilesInOuting.pending_profiles;
   }, [profilesLoading, profilesInOutingData]);
 
-  const currentAcceptedProfiles = useMemo(() => {
-    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
-      return accepted_profiles;
-    if (disconnectData && disconnectData.DisconnectUserWithOuting)
-      return disconnectData.DisconnectUserWithOuting.accepted_profiles;
-  }, [accepted_profiles, disconnectData]);
-
-  const currentPendingProfiles = useMemo(() => {
-    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
-      return pending_profiles;
-    if (disconnectData && disconnectData.DisconnectUserWithOuting)
-      return disconnectData.DisconnectUserWithOuting.pending_profiles;
-  }, [pending_profiles, disconnectData]);
-
   const { getProfile } = currentUserProfile.data;
-
-  console.log(
-    'BEFORE REVERSE',
-    currentAcceptedProfiles,
-    currentPendingProfiles
-  );
 
   // when a user is connected to the outing, prisma 'unshifts' the user to the front of the accepted_profiles array
   // I was able to determine this when an invited user accepted the invitation and was added, they're name appeared at the top of the list
   // meaning they were the first index in accepted_profiles
   // so we'll need to account for this when dealing with relational data collections
-  const sortedAcceptedProfiles = [...currentAcceptedProfiles];
-  currentAcceptedProfiles.reverse();
-  console.log(currentAcceptedProfiles, sortedAcceptedProfiles);
+  const sortedAcceptedProfiles = [...accepted_profiles];
+  accepted_profiles.reverse();
 
-  const sortedPendingProfiles = [...currentPendingProfiles];
-  currentPendingProfiles.reverse();
+  const sortedPendingProfiles = [...pending_profiles];
+  pending_profiles.reverse();
 
   const isOutingCreator = sortedAcceptedProfiles.length
     ? sortedAcceptedProfiles[0].id == getOuting.creator_profile_id &&
@@ -445,6 +423,8 @@ export default function OutingDetails() {
               outingId={getOuting.id}
               outingName={getOuting.name}
               startDateAndTime={getOuting.start_date_and_time}
+              pendingProfiles={sortedPendingProfiles}
+              acceptedProfiles={sortedAcceptedProfiles}
             />
           ) : null}
         </div>
