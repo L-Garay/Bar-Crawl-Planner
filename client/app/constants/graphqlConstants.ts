@@ -85,16 +85,17 @@ export const GET_PROFILES_IN_OUTING = gql`
         id
         name
         social_pin
+        account {
+          email_verified
+        }
       }
       pending_profiles {
         id
         name
         social_pin
-      }
-      declined_profiles {
-        id
-        name
-        social_pin
+        account {
+          email_verified
+        }
       }
     }
   }

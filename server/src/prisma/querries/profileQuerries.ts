@@ -48,6 +48,13 @@ export async function GetAcceptedProfilesInOuting(
           },
         },
       },
+      include: {
+        account: {
+          select: {
+            email_verified: true,
+          },
+        },
+      },
     });
     return { status: 'Success', data: profiles, error: null };
   } catch (error) {
@@ -63,6 +70,13 @@ export async function GetPendingProfilesInOuting(
         pending_outings: {
           some: {
             id,
+          },
+        },
+      },
+      include: {
+        account: {
+          select: {
+            email_verified: true,
           },
         },
       },

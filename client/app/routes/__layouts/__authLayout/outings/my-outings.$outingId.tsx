@@ -22,6 +22,7 @@ import moment from 'moment';
 import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
 import FriendsTable from '~/components/friends/friendsTable';
+import Crown32px from '~/assets/crown32px.png';
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -151,7 +152,7 @@ export default function OutingDetails() {
       nextFetchPolicy: 'no-cache',
     }
   );
-  console.log('PROFILES ARE LOADING:', profilesLoading, profilesInOutingData);
+  // console.log('PROFILES ARE LOADING:', profilesLoading, profilesInOutingData);
 
   const hasSentRequest =
     sentRequestData && sentRequestData.getSentFriendRequests;
@@ -192,9 +193,28 @@ export default function OutingDetails() {
 
   const { getProfile } = currentUserProfile.data;
 
-  const isOutingCreator = accepted_profiles.length
-    ? accepted_profiles[0].id === getProfile.id
+  console.log(
+    'BEFORE REVERSE',
+    currentAcceptedProfiles,
+    currentPendingProfiles
+  );
+
+  // when a user is connected to the outing, prisma 'unshifts' the user to the front of the accepted_profiles array
+  // I was able to determine this when an invited user accepted the invitation and was added, they're name appeared at the top of the list
+  // meaning they were the first index in accepted_profiles
+  // so we'll need to account for this when dealing with relational data collections
+  const sortedAcceptedProfiles = [...currentAcceptedProfiles];
+  currentAcceptedProfiles.reverse();
+  console.log(currentAcceptedProfiles, sortedAcceptedProfiles);
+
+  const sortedPendingProfiles = [...currentPendingProfiles];
+  currentPendingProfiles.reverse();
+
+  const isOutingCreator = sortedAcceptedProfiles.length
+    ? sortedAcceptedProfiles[0].id == getOuting.creator_profile_id &&
+      sortedAcceptedProfiles[0].id == getProfile.id
     : false;
+
   const EMAIL_MIN_LENGTH = 7;
 
   const currentDay = new Date();
@@ -343,33 +363,54 @@ export default function OutingDetails() {
               ) : null}
             </>
             <h4>Profiles in Outing</h4>
-            {currentAcceptedProfiles.length ? (
+            {sortedAcceptedProfiles.length ? (
               <>
-                {currentAcceptedProfiles.map((profile: any) => {
+                {sortedAcceptedProfiles.map((profile: any, index: number) => {
+                  const outingCreator =
+                    profile.id == getOuting.creator_profile_id;
+
+                  return (
+                    <div
+                      key={profile.id}
+                      style={{ display: 'flex', alignContent: 'center' }}
+                    >
+                      {outingCreator ? (
+                        <img
+                          src={Crown32px}
+                          alt="small animated gold crown"
+                          style={{
+                            height: '20px',
+                            width: '20px',
+                            marginRight: 10,
+                            alignSelf: 'center',
+                          }}
+                        />
+                      ) : null}
+
+                      <ProfileInOuting
+                        profile={profile}
+                        sendFriendRequest={sendFriendRequest}
+                        attendanceStatus="Accepted"
+                        currentUserId={getProfile.id}
+                        sentRequests={sentRequests}
+                        recievedRequests={recievedRequests}
+                        disconnectUser={disconnectUser}
+                        outingId={getOuting.id}
+                        isOutingCreator={isOutingCreator}
+                      />
+                    </div>
+                  );
+                })}
+              </>
+            ) : null}
+            {sortedPendingProfiles.length ? (
+              <>
+                {sortedPendingProfiles.map((profile: any) => {
                   return (
                     <ProfileInOuting
                       key={profile.id}
                       profile={profile}
                       sendFriendRequest={sendFriendRequest}
-                      attendanceStatus="Accepted"
-                      currentUserId={getProfile.id}
-                      sentRequests={sentRequests}
-                      recievedRequests={recievedRequests}
-                      disconnectUser={disconnectUser}
-                      outingId={getOuting.id}
-                      isOutingCreator={isOutingCreator}
-                    />
-                  );
-                })}
-              </>
-            ) : null}
-            {currentPendingProfiles.length ? (
-              <>
-                {currentPendingProfiles.map((profile: any) => {
-                  return (
-                    <ProfileInOuting
-                      key={profile.id}
-                      profile={profile}
                       attendanceStatus="Pending"
                       currentUserId={getProfile.id}
                       sentRequests={sentRequests}
@@ -398,12 +439,14 @@ export default function OutingDetails() {
               </div>
             ) : null}
           </div>
-          <FriendsTable
-            userId={getProfile.id}
-            outingId={getOuting.id}
-            outingName={getOuting.name}
-            startDateAndTime={getOuting.start_date_and_time}
-          />
+          {isOutingCreator ? (
+            <FriendsTable
+              userId={getProfile.id}
+              outingId={getOuting.id}
+              outingName={getOuting.name}
+              startDateAndTime={getOuting.start_date_and_time}
+            />
+          ) : null}
         </div>
       ) : (
         <p>Outing not found</p>

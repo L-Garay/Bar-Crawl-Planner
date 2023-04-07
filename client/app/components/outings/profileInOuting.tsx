@@ -48,13 +48,7 @@ export const ProfileInOuting = ({
     else return 'black';
   }, [attendanceStatus]);
 
-  const sameProfile = useMemo(() => {
-    if (profile.id === currentUserId) {
-      return true;
-    } else {
-      return false;
-    }
-  }, [profile, currentUserId]);
+  const sameProfile = profile.id === currentUserId;
 
   const alreadyRequested = useMemo(() => {
     if (!sentRequests) return false;
@@ -99,11 +93,8 @@ export const ProfileInOuting = ({
     }
   }, [friendsData, profile.id, sameProfile]);
 
-  const showFriendRequestButton = useMemo(() => {
-    if (sameProfile || attendanceStatus === 'Pending' || alreadyFriends)
-      return false;
-    return true;
-  }, [sameProfile, attendanceStatus, alreadyFriends]);
+  const showFriendRequestButton =
+    !sameProfile && profile.account.email_verified == true && !alreadyFriends;
 
   return (
     <div className="profile-in-outing-container">
