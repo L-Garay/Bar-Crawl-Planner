@@ -776,6 +776,7 @@ const resolvers: Resolvers = {
       }
       const { name, picture, email, verified } = args;
 
+      // TODO make this a transaction, so if the profile creation fails, the account is rolled back
       const account = await CreateAccount(email, verified);
       if (account.status === 'Failure') {
         throw new GraphQLError('Cannot create user account', {

@@ -15,7 +15,6 @@ import Mailgen from 'mailgen';
 import nodemailer from 'nodemailer';
 import { Account, Profile } from '@prisma/client';
 import dotenv from 'dotenv';
-import short from 'short-uuid';
 import { GetOutingByOutingId } from '../querries/outingsQuerries';
 import { GetAccountByAccountId } from '../querries/accountQuerries';
 import { GetAcceptedProfilesInOuting } from '../querries/profileQuerries';
@@ -24,6 +23,7 @@ import {
   GenerateOutingInviteEmailWithAccounts,
   GenerateOutingInviteEmailWithProfiles,
 } from '../../utilities/generateEmails';
+import { nanoid } from 'nanoid';
 
 dotenv.config();
 
@@ -417,7 +417,7 @@ export async function SendOutingInvitesAndCreate({
               account_Id: account.value.id,
               profile_img: '',
               updated_at: new Date().toISOString(),
-              social_pin: short.generate(),
+              social_pin: nanoid(8),
             },
           });
           return newProfile;
