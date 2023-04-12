@@ -182,11 +182,18 @@ export default function OutingDetails() {
   // I was able to determine this when an invited user accepted the invitation and was added, they're name appeared at the top of the list
   // meaning they were the first index in accepted_profiles
   // so we'll need to account for this when dealing with relational data collections
-  const sortedAcceptedProfiles = [...accepted_profiles];
-  accepted_profiles.reverse();
+  let sortedAcceptedProfiles: any[] = [];
+  accepted_profiles.forEach((profile: any) =>
+    sortedAcceptedProfiles.unshift(profile)
+  );
+  // TODO figure out why all of a sudden this produces this error: "Uncaught TypeError: 0 is read-only"
+  // accepted_profiles.reverse();
 
-  const sortedPendingProfiles = [...pending_profiles];
-  pending_profiles.reverse();
+  let sortedPendingProfiles: any[] = [];
+  pending_profiles.forEach((profile: any) =>
+    sortedPendingProfiles.unshift(profile)
+  );
+  // pending_profiles.reverse();
 
   const isOutingCreator = sortedAcceptedProfiles.length
     ? sortedAcceptedProfiles[0].id == getOuting.creator_profile_id &&

@@ -135,6 +135,14 @@ export const GET_PROFILE = gql`
   }
 `;
 
+export const GET_PROFILE_ID = gql`
+  query getProfile {
+    getProfile {
+      id
+    }
+  }
+`;
+
 export const BLOCK_PROFILE = gql`
   mutation blockProfile($blocked_profile_id: Int!) {
     blockProfile(blocked_profile_id: $blocked_profile_id) {

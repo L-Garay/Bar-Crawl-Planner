@@ -2,12 +2,17 @@
 
 import { useQuery } from '@apollo/client';
 import { useState } from 'react';
-import { GET_PENDING_OUTINGS } from '~/constants/graphqlConstants';
+import {
+  GET_PENDING_OUTINGS,
+  GET_PROFILE_ID,
+} from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
+import OutingInvite from '~/components/outings/outingInvite';
 
 export default function OutingInvites() {
   const [pendingOutings, setPendingOutings] = useState<any[]>([]);
   const [outingCreatorProfiles, setOutingCreatorProfiles] = useState<any[]>([]);
+  const [profileId, setProfileId] = useState<number>(0);
   const { data: pendingData, error: pendingError } = useQuery(
     GET_PENDING_OUTINGS,
     {
@@ -23,16 +28,40 @@ export default function OutingInvites() {
       },
     }
   );
+  useQuery(GET_PROFILE_ID, {
+    onCompleted: (data) => setProfileId(data.getProfile.id),
+  });
   console.log(
     'pendingOutings',
     pendingOutings,
     'outingCreatorProfiles',
-    outingCreatorProfiles
+    outingCreatorProfiles,
+    'profileId',
+    profileId
   );
 
   return (
     <div>
       <h1>Outing Invites</h1>
+      {pendingOutings.length ? (
+        <>
+          {pendingOutings.map((outing, index) => {
+            const outingCreatorProfile = outingCreatorProfiles[index];
+            return (
+              <OutingInvite
+                key={outing.id}
+                creatorName={outingCreatorProfile.name}
+                outingName={outing.name}
+                startDateAndTime={outing.start_date_and_time}
+                outingId={outing.id}
+                profileId={profileId}
+              />
+            );
+          })}
+        </>
+      ) : (
+        <p>No pending outings</p>
+      )}
     </div>
   );
 }

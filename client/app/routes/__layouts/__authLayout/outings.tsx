@@ -27,7 +27,7 @@ export default function OutingsIndex() {
     { name: 'Create an Outing', path: '/outings/create' },
     { name: 'My Outings', path: '/outings/my-outings' },
     {
-      name: `Outing Invites${inviteCount > 1 ? `(${inviteCount})` : ''}`,
+      name: `Outing Invites${inviteCount >= 1 ? `(${inviteCount})` : ''}`,
       path: '/outings/invites',
     },
   ];
