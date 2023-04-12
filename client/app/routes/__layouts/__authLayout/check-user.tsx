@@ -7,8 +7,6 @@ import { authenticator } from '~/auth/authenticator';
 import {
   UPDATE_ACCOUNT_BY_SOCIAL_PIN,
   CREATE_ACCOUNT_AND_PROFILE,
-  CONNECT_PROFILE,
-  SEND_OUTING_JOINED_EMAIL,
   GET_ACCOUNT_WITH_PROFILE_DATA,
 } from '~/constants/graphqlConstants';
 import spinnerStyles from '~/generatedStyles/spinners.css';
@@ -60,8 +58,6 @@ export default function CheckUser() {
       },
     },
   });
-  const [ConnectProfile] = useMutation(CONNECT_PROFILE);
-  const [sendOutingJoinedEmail] = useMutation(SEND_OUTING_JOINED_EMAIL);
 
   // Attempt to get inviteData and redirectTo from local storage if there
   useEffect(() => {
@@ -91,50 +87,31 @@ export default function CheckUser() {
         const data = await getAccountWithProfileData({ variables: { email } });
 
         if (data.data.getAccountWithProfileData && inviteData) {
-          const { outingId, profileId, returnTo } = JSON.parse(inviteData);
+          const { profileId } = JSON.parse(inviteData);
 
           const signedInAccountProfileId =
             data.data.getAccountWithProfileData.profile.id;
           if (signedInAccountProfileId != profileId) {
+            // if somehow a user clicks on an invite sent to someone else and logs in, and the profile ids do not match, just redirect them to the homepage
             console.log(
               'signed in account profile id does not match profile id from invite data, redirecting to homepage'
             );
             window.localStorage.removeItem('inviteData');
+            window.localStorage.removeItem('redirectTo');
             navigate('/homepage');
           } else {
-            // if account exists we need to update the status of the profile to accepted
-            const connectProfileData = await ConnectProfile({
-              variables: {
-                profile_id: Number(profileId),
-                outing_id: Number(outingId),
-              },
-            });
-            // if there is an error at this step, we don't want to throw anything, worst case scenario they stay pending
-            if (connectProfileData.errors) {
-              console.log(
-                'error connecting profile after getting account by email',
-                connectProfileData.errors
-              );
-              window.localStorage.removeItem('inviteData');
-              navigate('/homepage');
-            }
+            // if account exists we need to send them to the outing invites page so they can accept/decline invite
             console.log(
-              'found and account by email and connected the profile to the outing, now redirecting to outing details page with outingId: ',
-              outingId
+              'found account by email, has invite data, redirecting to outing invites page'
             );
-            // send email that user has joined
-            await sendOutingJoinedEmail({
-              variables: {
-                outing_id: Number(outingId),
-              },
-            });
             window.localStorage.removeItem('inviteData');
-            navigate(returnTo);
+            window.localStorage.removeItem('redirectTo');
+            navigate(redirectToUrl ? redirectToUrl : '/outing-invites');
           }
         } else if (data.data.getAccountWithProfileData && !inviteData) {
           // if there is an account and they are not coming from an invite, we need to check if there is a returnToUrl that was fetched from local storage
           console.log(
-            'found and account by email and now redirecting to homepage or redirectToUrl'
+            'found and account by email with no invite data and now redirecting to homepage or redirectToUrl'
           );
           const url = redirectToUrl ? redirectToUrl : '/homepage';
           window.localStorage.removeItem('redirectTo');
@@ -151,15 +128,7 @@ export default function CheckUser() {
 
       getAccountFunction();
     }
-  }, [
-    ConnectProfile,
-    email,
-    getAccountWithProfileData,
-    inviteData,
-    navigate,
-    sendOutingJoinedEmail,
-    redirectToUrl,
-  ]);
+  }, [email, getAccountWithProfileData, inviteData, navigate, redirectToUrl]);
 
   // NOTE this would indicate that there is no account, that the user is coming from an invite, and they signed into Auth0 with a different email than the one they were invited with
   // If account does not exist, fire off a mutation using the social pin to find the pre-created profile, find the associated account, and update account with the email just recieved from Auth0
@@ -167,11 +136,9 @@ export default function CheckUser() {
   // then redirect to the returnTo url
   useEffect(() => {
     if (hasAccount === false && inviteData) {
-      const { returnTo, profileId, socialPin, outingId } =
-        JSON.parse(inviteData);
+      const { profileId, socialPin, outingId } = JSON.parse(inviteData);
       console.log(
         'attempting to update account by social pin',
-        returnTo,
         profileId,
         socialPin,
         outingId
@@ -195,34 +162,12 @@ export default function CheckUser() {
           console.log(data.errors);
         }
         if (data.data.UpdateAccountBySocialPin) {
-          console.log('successfully updated account by social pin');
-        }
-        const connectProfileData = await ConnectProfile({
-          variables: {
-            profile_id: Number(profileId),
-            outing_id: Number(outingId),
-          },
-        });
-
-        if (connectProfileData.errors) {
           console.log(
-            'error connecting profile after updating account by social pin'
+            'successfully updated account by social pin, now redirecting to returnToUrl'
           );
-          console.log(connectProfileData.errors);
-        }
-        if (connectProfileData.data.ConnectUserWithOuting) {
-          console.log(
-            'successfully connected profile after updating account by social pin, attempting to redirect to returnTo: ',
-            returnTo
-          );
-          // send email that user has joined
-          await sendOutingJoinedEmail({
-            variables: {
-              outing_id: Number(outingId),
-            },
-          });
           window.localStorage.removeItem('inviteData');
-          navigate(returnTo);
+          window.localStorage.removeItem('redirectTo');
+          navigate(redirectToUrl ? redirectToUrl : '/outing-invites');
         }
       };
       claimAccountAndConnectProfile();
@@ -232,9 +177,8 @@ export default function CheckUser() {
     inviteData,
     navigate,
     updateAccountBySocialPin,
+    redirectToUrl,
     email,
-    ConnectProfile,
-    sendOutingJoinedEmail,
   ]);
 
   // NOTE this would indicate that there is no account, that the user is not coming from an invite, and that they just signed up with Auth0

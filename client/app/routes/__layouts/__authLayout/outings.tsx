@@ -22,6 +22,7 @@ export default function OutingsIndex() {
     { name: 'Home', path: '/outings' },
     { name: 'Create an Outing', path: '/outings/create' },
     { name: 'My Outings', path: '/outings/my-outings' },
+    { name: 'Outing Invites', path: '/outings/invites' },
   ];
 
   return (

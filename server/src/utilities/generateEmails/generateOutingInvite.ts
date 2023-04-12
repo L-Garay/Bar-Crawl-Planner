@@ -24,7 +24,7 @@ export const GenerateOutingInviteEmailWithProfiles = ({
           button: {
             color: '#ffb6c1',
             text: 'Accept Invite',
-            link: `http://localhost:3000/outinginvite?outingId=${outing_id}&profileId=${profile.id}&socialPin=${profile.social_pin}`,
+            link: `http://localhost:3000/outings/invites?redirectTo=/outings/invites&outingId=${outing_id}&profileId=${profile.id}&socialPin=${profile.social_pin}`,
           },
         },
         outro:
@@ -55,7 +55,7 @@ export const GenerateOutingInviteEmailWithAccounts = ({
           button: {
             color: '#ffb6c1',
             text: 'Accept Invite',
-            link: `http://localhost:3000/outinginvite?outingId=${outing_id}&profileId=${account.profile.id}&socialPin=${account.profile.social_pin}`,
+            link: `http://localhost:3000/outings/invites?redirectTo=/outings/invites&outingId=${outing_id}&profileId=${account.profile.id}&socialPin=${account.profile.social_pin}`,
           },
         },
         outro:
