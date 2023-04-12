@@ -7,10 +7,12 @@ import {
   GET_PROFILE,
   BLOCK_PROFILE,
   GET_RECIEVED_FRIEND_REQUEST_COUNT,
+  SEND_FRIEND_REQUEST_SOCIAL_PIN,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
 import { useMutation, useQuery } from '@apollo/client';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import logApolloError from '~/utils/getApolloError';
 
 export const links: LinksFunction = () => {
   return [
@@ -23,15 +25,40 @@ export const links: LinksFunction = () => {
 };
 
 export default function FriendsIndex() {
+  const [addFriendInputValue, setAddFriendInputValue] = useState<string>('');
+  const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
   const { data: profileData } = useQuery(GET_PROFILE);
   const { data: friendsData, error: friendsError } =
     useQuery(GET_ALL_FRIENDSHIPS);
   const { data: sentData, error: sentError } = useQuery(
-    GET_SENT_FRIEND_REQUESTS
+    GET_SENT_FRIEND_REQUESTS,
+    {
+      onError: (error) => {
+        logApolloError(error);
+        setShowErrorMessage(true);
+      },
+    }
   );
 
   const { data: recievedData, error: recievedError } = useQuery(
-    GET_RECIEVED_FRIEND_REQUESTS
+    GET_RECIEVED_FRIEND_REQUESTS,
+    {
+      onError: (error) => {
+        logApolloError(error);
+        setShowErrorMessage(true);
+      },
+    }
+  );
+
+  const [sendRequest, { data: requestData, error: requestError }] = useMutation(
+    SEND_FRIEND_REQUEST_SOCIAL_PIN,
+    {
+      refetchQueries: [GET_SENT_FRIEND_REQUESTS],
+      onError: (error) => {
+        logApolloError(error);
+        setShowErrorMessage(true);
+      },
+    }
   );
 
   const [updateFriend, { data: updateData, error: updateError }] = useMutation(
@@ -43,10 +70,21 @@ export default function FriendsIndex() {
         GET_SENT_FRIEND_REQUESTS,
         GET_RECIEVED_FRIEND_REQUEST_COUNT,
       ],
+      onError: (error) => {
+        logApolloError(error);
+        setShowErrorMessage(true);
+      },
     }
   );
-  const [blockProfile, { data: blockData, error: blockError }] =
-    useMutation(BLOCK_PROFILE);
+  const [blockProfile, { data: blockData, error: blockError }] = useMutation(
+    BLOCK_PROFILE,
+    {
+      onError: (error) => {
+        logApolloError(error);
+        setShowErrorMessage(true);
+      },
+    }
+  );
 
   const friends = useMemo(() => {
     if (!friendsData || !friendsData.getAllFriendships) return [];
@@ -63,6 +101,14 @@ export default function FriendsIndex() {
     return recievedData.getRecievedFriendRequests;
   }, [recievedData]);
 
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => {
+      setShowErrorMessage(false);
+    }, 5000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [showErrorMessage]);
+
   return (
     <>
       <div
@@ -72,6 +118,40 @@ export default function FriendsIndex() {
         }}
       >
         <h1>This will be the friends page</h1>
+        <div className="add-friend">
+          <div className="add-friend-form" style={{ display: 'flex' }}>
+            <label htmlFor="addFriend">Add a friend: </label>
+            <input
+              type="text"
+              name="addFriend"
+              id="addFriend"
+              onChange={(event) => setAddFriendInputValue(event.target.value)}
+              value={addFriendInputValue}
+            />
+            <button
+              disabled={addFriendInputValue.length == 0}
+              onClick={() => {
+                sendRequest({
+                  variables: {
+                    social_pin: addFriendInputValue,
+                  },
+                });
+                setAddFriendInputValue('');
+              }}
+            >
+              Send Request
+            </button>
+          </div>
+          <div className="add-friend-status" style={{ height: 50 }}>
+            {requestError && showErrorMessage && (
+              <p>
+                {requestError.graphQLErrors[0].message == 'Already friends'
+                  ? 'Already friends'
+                  : 'Error trying to add friend. If problem continues contact support.'}
+              </p>
+            )}
+          </div>
+        </div>
         <div className="friends-lists">
           <div className="friend-requests list">
             <h5>Your recieved friend requests</h5>

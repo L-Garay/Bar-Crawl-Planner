@@ -399,6 +399,12 @@ export const SEND_FRIEND_REQUEST = gql`
   }
 `;
 
+export const SEND_FRIEND_REQUEST_SOCIAL_PIN = gql`
+  mutation sendFriendRequestFromSocialPin($social_pin: String!) {
+    sendFriendRequestFromSocialPin(social_pin: $social_pin)
+  }
+`;
+
 export const UPDATE_FRIEND = gql`
   mutation updateFriend($friendship_id: Int!, $status_code: String!) {
     updateFriend(friendship_id: $friendship_id, status_code: $status_code) {
