@@ -96,3 +96,52 @@ export async function GetRecievedFriendRequestCount(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
+
+export async function CheckFriendShipStatus(
+  addressee_profile_id: number,
+  requestor_profile_id: number
+): Promise<PrismaData> {
+  try {
+    // This should find the friendship, if it exists, between the two profiles where if they are in one of these states we know they shouldn't be allowed to send another friend request.
+    // Where the data value should either be 1 or 0
+    const friendship = await prismaClient.friendship.count({
+      where: {
+        OR: [
+          {
+            requestor_profile_id,
+            addressee_profile_id,
+            status_code: 'S',
+          },
+          {
+            requestor_profile_id,
+            addressee_profile_id,
+            status_code: 'A',
+          },
+          {
+            requestor_profile_id,
+            addressee_profile_id,
+            status_code: 'B',
+          },
+          {
+            requestor_profile_id: addressee_profile_id,
+            addressee_profile_id: requestor_profile_id,
+            status_code: 'S',
+          },
+          {
+            requestor_profile_id: addressee_profile_id,
+            addressee_profile_id: requestor_profile_id,
+            status_code: 'A',
+          },
+          {
+            requestor_profile_id: addressee_profile_id,
+            addressee_profile_id: requestor_profile_id,
+            status_code: 'B',
+          },
+        ],
+      },
+    });
+    return { status: 'Success', data: friendship, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}

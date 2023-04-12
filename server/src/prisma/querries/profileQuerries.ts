@@ -27,6 +27,21 @@ export async function GetProfileByProfileId(id: number): Promise<PrismaData> {
   }
 }
 
+export async function GetProfileBySocialPin(
+  social_pin: string
+): Promise<PrismaData> {
+  try {
+    const profile = await prismaClient.profile.findUnique({
+      where: {
+        social_pin,
+      },
+    });
+    return { status: 'Success', data: profile, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
 export async function GetAllProfiles(): Promise<PrismaData> {
   try {
     const profiles = await prismaClient.profile.findMany();

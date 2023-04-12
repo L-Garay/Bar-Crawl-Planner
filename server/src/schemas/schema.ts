@@ -158,6 +158,7 @@ const typeDefs = `#graphql
     CreateAccountAndProfile(name: String!, picture: String!, email: String!, verified: Boolean!): String
     sendOutingJoinedEmail(outing_id: Int!): String
     sendFriendRequestEmail(addressee_profile_id: Int!): String
+    sendFriendRequestFromSocialPin(social_pin: String!): String
     updateFriend(friendship_id: Int!, status_code: String!): Friendship
     blockProfile(blocked_profile_id: Int!): Profile
     unblockProfile(blocked_profile_id: Int!): Profile
