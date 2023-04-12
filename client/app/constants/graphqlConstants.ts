@@ -315,6 +315,12 @@ export const GET_PENDING_OUTINGS = gql`
   }
 `;
 
+export const GET_PENDING_OUTINGS_COUNT = gql`
+  query getPendingOutingsCount {
+    getPendingOutingsCount
+  }
+`;
+
 export const SEND_OUTING_INVITES_AND_CREATE = gql`
   mutation sendOutingInvitesAndCreate(
     $outing_id: Int!

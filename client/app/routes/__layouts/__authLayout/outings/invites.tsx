@@ -1,19 +1,34 @@
 // export const loader: LoaderFunction = async ({ request }) => {};
 
 import { useQuery } from '@apollo/client';
+import { useState } from 'react';
 import { GET_PENDING_OUTINGS } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
 
 export default function OutingInvites() {
+  const [pendingOutings, setPendingOutings] = useState<any[]>([]);
+  const [outingCreatorProfiles, setOutingCreatorProfiles] = useState<any[]>([]);
   const { data: pendingData, error: pendingError } = useQuery(
     GET_PENDING_OUTINGS,
     {
       onError: (error) => {
         logApolloError(error);
       },
+      onCompleted: (data) => {
+        console.log('pendingData', data);
+        setPendingOutings(data.getPendingOutings.pending_outings);
+        setOutingCreatorProfiles(
+          data.getPendingOutings.outing_creator_profiles
+        );
+      },
     }
   );
-  console.log('pendingData', pendingData);
+  console.log(
+    'pendingOutings',
+    pendingOutings,
+    'outingCreatorProfiles',
+    outingCreatorProfiles
+  );
 
   return (
     <div>

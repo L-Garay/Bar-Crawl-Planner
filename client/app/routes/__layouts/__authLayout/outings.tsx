@@ -4,6 +4,8 @@ import { Outlet } from '@remix-run/react';
 import SimpleNav from '~/components/molecules/simpleNav';
 import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
 import { Dynamic } from '~/components/animated/loadingSpinners';
+import { useQuery } from '@apollo/client';
+import { GET_PENDING_OUTINGS_COUNT } from '~/constants/graphqlConstants';
 
 export const links: LinksFunction = () => {
   return [
@@ -17,12 +19,17 @@ export const links: LinksFunction = () => {
 
 export default function OutingsIndex() {
   const isDomLoaded = useIsDomLoaded();
+  const { data: outingsCount } = useQuery(GET_PENDING_OUTINGS_COUNT);
+  const inviteCount = outingsCount ? outingsCount.getPendingOutingsCount : 0;
 
   const navLinks = [
     { name: 'Home', path: '/outings' },
     { name: 'Create an Outing', path: '/outings/create' },
     { name: 'My Outings', path: '/outings/my-outings' },
-    { name: 'Outing Invites', path: '/outings/invites' },
+    {
+      name: `Outing Invites${inviteCount > 1 ? `(${inviteCount})` : ''}`,
+      path: '/outings/invites',
+    },
   ];
 
   return (

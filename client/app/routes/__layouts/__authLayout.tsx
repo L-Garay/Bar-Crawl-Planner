@@ -8,7 +8,10 @@ import footerStyles from '~/generatedStyles/footer.css';
 import headerStyles from '~/generatedStyles/header.css';
 import { useEffect, useMemo } from 'react';
 import { useQuery } from '@apollo/client';
-import { GET_RECIEVED_FRIEND_REQUEST_COUNT } from '~/constants/graphqlConstants';
+import {
+  GET_PENDING_OUTINGS_COUNT,
+  GET_RECIEVED_FRIEND_REQUEST_COUNT,
+} from '~/constants/graphqlConstants';
 
 export const links: LinksFunction = () => {
   return [
@@ -70,17 +73,26 @@ export default function AuthLayout() {
   }, [redirectTo, outingId, profileId, navigate, hasOutingParams, socialPin]);
 
   const { data: requestCount } = useQuery(GET_RECIEVED_FRIEND_REQUEST_COUNT);
+  const { data: outingsCount } = useQuery(GET_PENDING_OUTINGS_COUNT);
 
   const hasFriendRequests = useMemo(() => {
     if (!requestCount) return false;
     return requestCount.getRecievedFriendRequestCount > 0;
   }, [requestCount]);
 
+  const hasOutingInvites = useMemo(() => {
+    if (!outingsCount) return false;
+    return outingsCount.getPendingOutingsCount > 0;
+  }, [outingsCount]);
+
   return (
     <>
       {valid ? (
         <>
-          <BasicHeader hasFriendRequests={hasFriendRequests} />
+          <BasicHeader
+            hasFriendRequests={hasFriendRequests}
+            hasOutingInvites={hasOutingInvites}
+          />
           <Outlet />
           <BasicFooter />
         </>

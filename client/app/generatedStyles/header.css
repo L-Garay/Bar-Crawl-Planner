@@ -21,6 +21,7 @@
 }
 
 .link, .menuLink {
+  position: relative;
   padding: 0 10px;
   text-decoration: none;
   font-size: 1.2rem;
@@ -31,14 +32,6 @@
 .link:hover, .menuLink:hover {
   color: lightseagreen;
   cursor: pointer;
-}
-
-.link.friends-link, .friends-link.menuLink {
-  position: relative;
-}
-
-.menuToggle {
-  position: relative;
 }
 
 .menu-container {
