@@ -4,6 +4,7 @@ import {
   GetJoinedOutings,
   GetOutingByOutingId,
   GetPendingOutings,
+  GetPendingOutingsCount,
 } from './prisma/querries/outingsQuerries';
 import {
   GetAllProfiles,
@@ -340,9 +341,6 @@ const resolvers: Resolvers = {
 
       const creatorProfiles = creatorProfilePromisesArray
         .map((promise) => {
-          // each promise's value will be a PrismaData object since we call GetProfileByProfileId
-          // and sicne we always return a valid object, whose properties just change, I'm not sure if the promise status itself will ever be 'rejected'
-          // so we'll also check for the status of the value (PrismaData object)
           if (
             promise.status === 'fulfilled' &&
             promise.value.status === 'Success'
@@ -365,6 +363,30 @@ const resolvers: Resolvers = {
         pending_outings: outings.data,
         outing_creator_profiles: creatorProfiles,
       };
+    },
+    getPendingOutingsCount: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id } = profile.data;
+      const count = await GetPendingOutingsCount(id);
+
+      if (count.status === 'Failure') {
+        throw new GraphQLError('Cannot get pending count count', {
+          extensions: {
+            code: count.error?.name,
+            message: count.error?.message,
+            prismaMeta: count.error?.meta,
+            prismaErrorCode: count.error?.errorCode,
+          },
+        });
+      }
+
+      return count.data;
     },
     searchCity: async (parent, args, context, info) => {
       const { authError } = context;

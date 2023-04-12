@@ -267,6 +267,7 @@ export type Query = {
   getJoinedOutings?: Maybe<Array<Maybe<Outing>>>;
   getOuting?: Maybe<Outing>;
   getPendingOutings?: Maybe<OutingInviteData>;
+  getPendingOutingsCount?: Maybe<Scalars['Int']>;
   getProfile?: Maybe<Profile>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
   getRecievedFriendRequestCount?: Maybe<Scalars['Int']>;
@@ -539,6 +540,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getJoinedOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
   getPendingOutings?: Resolver<Maybe<ResolversTypes['OutingInviteData']>, ParentType, ContextType>;
+  getPendingOutingsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   getProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
   getRecievedFriendRequestCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;

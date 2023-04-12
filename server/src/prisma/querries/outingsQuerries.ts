@@ -102,3 +102,22 @@ export async function GetPendingOutings(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
+
+export async function GetPendingOutingsCount(
+  profile_id: number
+): Promise<PrismaData> {
+  try {
+    const count = await prismaClient.outing.count({
+      where: {
+        pending_profiles: {
+          some: {
+            id: profile_id,
+          },
+        },
+      },
+    });
+    return { status: 'Success', data: count, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}

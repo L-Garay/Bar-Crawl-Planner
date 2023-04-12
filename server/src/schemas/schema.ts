@@ -129,6 +129,7 @@ const typeDefs = `#graphql
     getCreatedOutings: [Outing]
     getJoinedOutings: [Outing]
     getPendingOutings: OutingInviteData
+    getPendingOutingsCount: Int
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]
