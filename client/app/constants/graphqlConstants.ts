@@ -295,6 +295,26 @@ export const GET_OUTING = gql`
   }
 `;
 
+export const GET_PENDING_OUTINGS = gql`
+  query getPendingOutings {
+    getPendingOutings {
+      pending_outings {
+        id
+        name
+        creator_profile_id
+        start_date_and_time
+        place_ids
+      }
+      outing_creator_profiles {
+        id
+        name
+        account_Id
+        social_pin
+      }
+    }
+  }
+`;
+
 export const SEND_OUTING_INVITES_AND_CREATE = gql`
   mutation sendOutingInvitesAndCreate(
     $outing_id: Int!

@@ -1,6 +1,20 @@
 // export const loader: LoaderFunction = async ({ request }) => {};
 
+import { useQuery } from '@apollo/client';
+import { GET_PENDING_OUTINGS } from '~/constants/graphqlConstants';
+import logApolloError from '~/utils/getApolloError';
+
 export default function OutingInvites() {
+  const { data: pendingData, error: pendingError } = useQuery(
+    GET_PENDING_OUTINGS,
+    {
+      onError: (error) => {
+        logApolloError(error);
+      },
+    }
+  );
+  console.log('pendingData', pendingData);
+
   return (
     <div>
       <h1>Outing Invites</h1>
