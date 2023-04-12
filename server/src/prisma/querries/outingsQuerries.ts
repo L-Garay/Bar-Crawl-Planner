@@ -80,3 +80,25 @@ export async function GetJoinedOutings(
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
 }
+
+export async function GetPendingOutings(
+  profile_id: number
+): Promise<PrismaData> {
+  try {
+    const outings = await prismaClient.outing.findMany({
+      where: {
+        pending_profiles: {
+          some: {
+            id: profile_id,
+          },
+        },
+      },
+      include: {
+        pending_profiles: true,
+      },
+    });
+    return { status: 'Success', data: outings, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}

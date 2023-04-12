@@ -3,6 +3,7 @@ import {
   GetCreatedOutings,
   GetJoinedOutings,
   GetOutingByOutingId,
+  GetPendingOutings,
 } from './prisma/querries/outingsQuerries';
 import {
   GetAllProfiles,
@@ -11,6 +12,7 @@ import {
   GetDeclinedProfilesInOuting,
   GetBlockedProfiles,
   GetProfileBySocialPin,
+  GetProfileByProfileId,
 } from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
@@ -307,6 +309,62 @@ const resolvers: Resolvers = {
       } else {
         return outing.data;
       }
+    },
+    getPendingOutings: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id } = profile.data;
+      const outings = await GetPendingOutings(id);
+
+      if (outings.status === 'Failure') {
+        throw new GraphQLError('Cannot get pending outings', {
+          extensions: {
+            code: outings.error?.name,
+            message: outings.error?.message,
+            prismaMeta: outings.error?.meta,
+            prismaErrorCode: outings.error?.errorCode,
+          },
+        });
+      }
+
+      const creatorProfilePromisesArray = await Promise.allSettled(
+        outings.data.map(async (outing: any) => {
+          return await GetProfileByProfileId(outing.creator_profile_id);
+        })
+      );
+
+      const creatorProfiles = creatorProfilePromisesArray
+        .map((promise) => {
+          // each promise's value will be a PrismaData object since we call GetProfileByProfileId
+          // and sicne we always return a valid object, whose properties just change, I'm not sure if the promise status itself will ever be 'rejected'
+          // so we'll also check for the status of the value (PrismaData object)
+          if (
+            promise.status === 'fulfilled' &&
+            promise.value.status === 'Success'
+          ) {
+            return promise.value.data;
+          } else if (promise.status === 'rejected') {
+            // log to some service
+            console.log(
+              'Error getting creator profile for pending outing: ',
+              promise.reason
+            );
+            // even though we are return null here
+            // logging the creatorProfiles array below will show that 'undefined' is actually inserted into the array
+            return null;
+          }
+        })
+        .filter((profile) => profile !== undefined);
+
+      return {
+        pending_outings: outings.data,
+        outing_creator_profiles: creatorProfiles,
+      };
     },
     searchCity: async (parent, args, context, info) => {
       const { authError } = context;
