@@ -5,11 +5,11 @@ import { useState, useEffect } from 'react';
 import { Basic as BasicSpinner } from '~/components/animated/loadingSpinners';
 import { authenticator } from '~/auth/authenticator';
 import {
-  GET_ACCOUNT_BY_EMAIL,
   UPDATE_ACCOUNT_BY_SOCIAL_PIN,
   CREATE_ACCOUNT_AND_PROFILE,
   CONNECT_PROFILE,
   SEND_OUTING_JOINED_EMAIL,
+  GET_ACCOUNT_WITH_PROFILE_DATA,
 } from '~/constants/graphqlConstants';
 import spinnerStyles from '~/generatedStyles/spinners.css';
 
@@ -35,13 +35,16 @@ export default function CheckUser() {
   const [hasAccount, setHasAccount] = useState<boolean | undefined>(undefined);
   const [email, setEmail] = useState<string | undefined>(undefined);
 
-  const [getAccountByEmail] = useLazyQuery(GET_ACCOUNT_BY_EMAIL, {
-    context: {
-      headers: {
-        inviteData: inviteData,
+  const [getAccountWithProfileData] = useLazyQuery(
+    GET_ACCOUNT_WITH_PROFILE_DATA,
+    {
+      context: {
+        headers: {
+          inviteData: inviteData,
+        },
       },
-    },
-  });
+    }
+  );
   const [updateAccountBySocialPin] = useMutation(UPDATE_ACCOUNT_BY_SOCIAL_PIN, {
     context: {
       headers: {
@@ -85,37 +88,50 @@ export default function CheckUser() {
     if (email) {
       console.log('attempting to get account by email');
       const getAccountFunction = async () => {
-        const data = await getAccountByEmail({ variables: { email } });
+        const data = await getAccountWithProfileData({ variables: { email } });
 
-        if (data.data.getAccountByEmail && inviteData) {
-          // if account exists redirect them to the returnTo(outing details page) here
+        if (data.data.getAccountWithProfileData && inviteData) {
           const { outingId, profileId, returnTo } = JSON.parse(inviteData);
-          const connectProfileData = await ConnectProfile({
-            variables: {
-              profile_id: Number(profileId),
-              outing_id: Number(outingId),
-            },
-          });
-          // if there is an error at this step, we don't want to throw anything, worst case scenario they stay pending
-          if (connectProfileData.errors) {
+
+          const signedInAccountProfileId =
+            data.data.getAccountWithProfileData.profile.id;
+          if (signedInAccountProfileId != profileId) {
             console.log(
-              'error connecting profile after getting account by email',
-              connectProfileData.errors
+              'signed in account profile id does not match profile id from invite data, redirecting to homepage'
             );
+            window.localStorage.removeItem('inviteData');
+            navigate('/homepage');
+          } else {
+            // if account exists we need to update the status of the profile to accepted
+            const connectProfileData = await ConnectProfile({
+              variables: {
+                profile_id: Number(profileId),
+                outing_id: Number(outingId),
+              },
+            });
+            // if there is an error at this step, we don't want to throw anything, worst case scenario they stay pending
+            if (connectProfileData.errors) {
+              console.log(
+                'error connecting profile after getting account by email',
+                connectProfileData.errors
+              );
+              window.localStorage.removeItem('inviteData');
+              navigate('/homepage');
+            }
+            console.log(
+              'found and account by email and connected the profile to the outing, now redirecting to outing details page with outingId: ',
+              outingId
+            );
+            // send email that user has joined
+            await sendOutingJoinedEmail({
+              variables: {
+                outing_id: Number(outingId),
+              },
+            });
+            window.localStorage.removeItem('inviteData');
+            navigate(returnTo);
           }
-          console.log(
-            'found and account by email and connected the profile to the outing, now redirecting to outing details page with outingId: ',
-            outingId
-          );
-          // send email that user has joined
-          await sendOutingJoinedEmail({
-            variables: {
-              outing_id: Number(outingId),
-            },
-          });
-          window.localStorage.removeItem('inviteData');
-          navigate(returnTo);
-        } else if (data.data.getAccountByEmail && !inviteData) {
+        } else if (data.data.getAccountWithProfileData && !inviteData) {
           // if there is an account and they are not coming from an invite, we need to check if there is a returnToUrl that was fetched from local storage
           console.log(
             'found and account by email and now redirecting to homepage or redirectToUrl'
@@ -138,7 +154,7 @@ export default function CheckUser() {
   }, [
     ConnectProfile,
     email,
-    getAccountByEmail,
+    getAccountWithProfileData,
     inviteData,
     navigate,
     sendOutingJoinedEmail,
@@ -238,6 +254,7 @@ export default function CheckUser() {
       const createAccountAndProfileFunction = async () => {
         const data = await createAccountAndProfile({ variables: variables });
         if (data.errors) {
+          navigate('/logout');
           // NOTE not sure what to do in this case, have them try again on our end?
           // would probably need some cleanup on the backend to remove the broken account(s) and profile(s) that were created
           console.log('error creating account and profile');

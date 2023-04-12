@@ -12,6 +12,8 @@ export type FriendsTableProps = {
   outingId: number;
   outingName: string;
   startDateAndTime: string;
+  pendingProfiles: any[];
+  acceptedProfiles: any[];
 };
 
 const FriendsTable = ({
@@ -19,17 +21,17 @@ const FriendsTable = ({
   outingId,
   outingName,
   startDateAndTime,
+  acceptedProfiles,
+  pendingProfiles,
 }: FriendsTableProps) => {
   const { data: friendsData } = useQuery(GET_ALL_FRIENDSHIPS);
-  console.log('friends', friendsData);
   const friends = friendsData ? friendsData.getAllFriendships : [];
-  console.log(userId);
 
   const [inviteFriends, { data: inviteData }] = useMutation(
-    SEND_OUTING_INVITES
-    // {
-    //   refetchQueries: [GET_PROFILES_IN_OUTING], // don't think this will work since the original query for the parent component comes from the loader, and so the updated/refecthed data will not be made available unless the page refreshes
-    // }
+    SEND_OUTING_INVITES,
+    {
+      refetchQueries: [GET_PROFILES_IN_OUTING], // don't think this will work since the original query for the parent component comes from the loader, and so the updated/refecthed data will not be made available unless the page refreshes
+    }
   );
 
   // for added friends, we can store their account ids here and then when it's time to invite them we can just look up their accounts and grab their emails
@@ -45,7 +47,6 @@ const FriendsTable = ({
       setAccountIds(newAccountIds);
     }
   };
-  console.log('accountIds', accountIds);
 
   return (
     <div
@@ -76,6 +77,8 @@ const FriendsTable = ({
                   addFriend={addFriend}
                   removeFriend={removeFriend}
                   accountIds={accountIds}
+                  pendingProfiles={pendingProfiles}
+                  acceptedProfiles={acceptedProfiles}
                 />
               ))}
             </>
@@ -84,6 +87,7 @@ const FriendsTable = ({
             {/* TODO create mutation to send outing invites to friends */}
             {/* NOTE try to reuse as much of the sendOutingInvitesAndCreate mutation as possible. As in, just as the GetBlockedAccountEmails code was split out, see if you can do the same with the code that gets the emails using the account ids */}
             <button
+              disabled={accountIds.length == 0}
               onClick={() => {
                 inviteFriends({
                   variables: {

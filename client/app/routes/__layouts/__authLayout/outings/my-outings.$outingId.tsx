@@ -22,6 +22,7 @@ import moment from 'moment';
 import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
 import FriendsTable from '~/components/friends/friendsTable';
+import Crown32px from '~/assets/crown32px.png';
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -98,7 +99,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   // should never not be authenticated at this point
 
   let outing: any;
-  let profiles: any;
   let currentUserProfile: any;
   // TODO 1. add a query to get the friends of the user
   // TODO 2. once that is working, combine the 4 querries into one large one that calls the 4 sub queries
@@ -106,12 +106,6 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   try {
     outing = await client.query({
       query: GET_OUTING,
-      variables: {
-        id: Number(params.outingId),
-      },
-    });
-    profiles = await client.query({
-      query: GET_PROFILES_IN_OUTING,
       variables: {
         id: Number(params.outingId),
       },
@@ -125,8 +119,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
   }
   return {
     outing,
-    profiles,
     currentUserProfile,
+    outingId: params.outingId,
   };
 };
 
@@ -137,49 +131,68 @@ export default function OutingDetails() {
   const [isHoveringDateIcon, setIsHoveringDateIcon] = useState(false);
   const [showEditDate, setShowEditDate] = useState(false);
 
+  const { outing, currentUserProfile, outingId } = useLoaderData();
   const transition = useTransition();
 
   const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
     refetchQueries: [GET_SENT_FRIEND_REQUESTS],
   });
-  const [disconnectUser, { data: disconnectData }] =
-    useMutation(DISCONNECT_PROFILE);
+  const [disconnectUser] = useMutation(DISCONNECT_PROFILE, {
+    refetchQueries: [GET_PROFILES_IN_OUTING],
+  });
 
   const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
   const { data: friendRequestData } = useQuery(GET_RECIEVED_FRIEND_REQUESTS);
+  const { data: profilesInOutingData, loading: profilesLoading } = useQuery(
+    GET_PROFILES_IN_OUTING,
+    {
+      variables: {
+        id: Number(outingId),
+      },
+    }
+  );
 
-  const sentRequests = useMemo(() => {
-    if (!sentRequestData || !sentRequestData.getSentFriendRequests) return [];
-    return sentRequestData.getSentFriendRequests;
-  }, [sentRequestData]);
+  const hasSentRequest =
+    sentRequestData && sentRequestData.getSentFriendRequests;
+  const sentRequests = hasSentRequest
+    ? sentRequestData.getSentFriendRequests
+    : [];
 
-  const recievedRequests = useMemo(() => {
-    if (!friendRequestData || !friendRequestData.getFriendRequests) return [];
-    return friendRequestData.getFriendRequests;
-  }, [friendRequestData]);
+  const hasRecievedRequests =
+    friendRequestData && friendRequestData.getFriendRequests;
+  const recievedRequests = hasRecievedRequests
+    ? friendRequestData.getFriendRequests
+    : [];
 
-  const { outing, profiles, currentUserProfile } = useLoaderData();
   const { getOuting } = outing.data;
-  const { accepted_profiles, pending_profiles, declined_profiles } =
-    profiles.data.getProfilesInOuting;
 
-  const currentAcceptedProfiles = useMemo(() => {
-    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
-      return accepted_profiles;
-    if (disconnectData && disconnectData.DisconnectUserWithOuting)
-      return disconnectData.DisconnectUserWithOuting.accepted_profiles;
-  }, [accepted_profiles, disconnectData]);
+  const accepted_profiles = useMemo(() => {
+    if (profilesLoading) return [];
+    return profilesInOutingData.getProfilesInOuting.accepted_profiles;
+  }, [profilesLoading, profilesInOutingData]);
 
-  const currentPendingProfiles = useMemo(() => {
-    if (!disconnectData || !disconnectData.DisconnectUserWithOuting)
-      return pending_profiles;
-    if (disconnectData && disconnectData.DisconnectUserWithOuting)
-      return disconnectData.DisconnectUserWithOuting.pending_profiles;
-  }, [pending_profiles, disconnectData]);
+  const pending_profiles = useMemo(() => {
+    if (profilesLoading) return [];
+    return profilesInOutingData.getProfilesInOuting.pending_profiles;
+  }, [profilesLoading, profilesInOutingData]);
 
   const { getProfile } = currentUserProfile.data;
 
-  const isOutingCreator = accepted_profiles[0].id === getProfile.id;
+  // when a user is connected to the outing, prisma 'unshifts' the user to the front of the accepted_profiles array
+  // I was able to determine this when an invited user accepted the invitation and was added, they're name appeared at the top of the list
+  // meaning they were the first index in accepted_profiles
+  // so we'll need to account for this when dealing with relational data collections
+  const sortedAcceptedProfiles = [...accepted_profiles];
+  accepted_profiles.reverse();
+
+  const sortedPendingProfiles = [...pending_profiles];
+  pending_profiles.reverse();
+
+  const isOutingCreator = sortedAcceptedProfiles.length
+    ? sortedAcceptedProfiles[0].id == getOuting.creator_profile_id &&
+      sortedAcceptedProfiles[0].id == getProfile.id
+    : false;
+
   const EMAIL_MIN_LENGTH = 7;
 
   const currentDay = new Date();
@@ -328,33 +341,54 @@ export default function OutingDetails() {
               ) : null}
             </>
             <h4>Profiles in Outing</h4>
-            {currentAcceptedProfiles.length ? (
+            {sortedAcceptedProfiles.length ? (
               <>
-                {currentAcceptedProfiles.map((profile: any) => {
+                {sortedAcceptedProfiles.map((profile: any, index: number) => {
+                  const outingCreator =
+                    profile.id == getOuting.creator_profile_id;
+
+                  return (
+                    <div
+                      key={profile.id}
+                      style={{ display: 'flex', alignContent: 'center' }}
+                    >
+                      {outingCreator ? (
+                        <img
+                          src={Crown32px}
+                          alt="small animated gold crown"
+                          style={{
+                            height: '20px',
+                            width: '20px',
+                            marginRight: 10,
+                            alignSelf: 'center',
+                          }}
+                        />
+                      ) : null}
+
+                      <ProfileInOuting
+                        profile={profile}
+                        sendFriendRequest={sendFriendRequest}
+                        attendanceStatus="Accepted"
+                        currentUserId={getProfile.id}
+                        sentRequests={sentRequests}
+                        recievedRequests={recievedRequests}
+                        disconnectUser={disconnectUser}
+                        outingId={getOuting.id}
+                        isOutingCreator={isOutingCreator}
+                      />
+                    </div>
+                  );
+                })}
+              </>
+            ) : null}
+            {sortedPendingProfiles.length ? (
+              <>
+                {sortedPendingProfiles.map((profile: any) => {
                   return (
                     <ProfileInOuting
                       key={profile.id}
                       profile={profile}
                       sendFriendRequest={sendFriendRequest}
-                      attendanceStatus="Accepted"
-                      currentUserId={getProfile.id}
-                      sentRequests={sentRequests}
-                      recievedRequests={recievedRequests}
-                      disconnectUser={disconnectUser}
-                      outingId={getOuting.id}
-                      isOutingCreator={isOutingCreator}
-                    />
-                  );
-                })}
-              </>
-            ) : null}
-            {currentPendingProfiles.length ? (
-              <>
-                {currentPendingProfiles.map((profile: any) => {
-                  return (
-                    <ProfileInOuting
-                      key={profile.id}
-                      profile={profile}
                       attendanceStatus="Pending"
                       currentUserId={getProfile.id}
                       sentRequests={sentRequests}
@@ -383,12 +417,16 @@ export default function OutingDetails() {
               </div>
             ) : null}
           </div>
-          <FriendsTable
-            userId={getProfile.id}
-            outingId={getOuting.id}
-            outingName={getOuting.name}
-            startDateAndTime={getOuting.start_date_and_time}
-          />
+          {isOutingCreator ? (
+            <FriendsTable
+              userId={getProfile.id}
+              outingId={getOuting.id}
+              outingName={getOuting.name}
+              startDateAndTime={getOuting.start_date_and_time}
+              pendingProfiles={sortedPendingProfiles}
+              acceptedProfiles={sortedAcceptedProfiles}
+            />
+          ) : null}
         </div>
       ) : (
         <p>Outing not found</p>

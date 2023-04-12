@@ -10,6 +10,7 @@ import {
   GetPendingProfilesInOuting,
   GetDeclinedProfilesInOuting,
   GetBlockedProfiles,
+  GetProfileBySocialPin,
 } from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
@@ -54,6 +55,7 @@ import {
   SendFriendRequestAndEmail,
 } from './prisma/mutations/friendsMutations';
 import {
+  CheckFriendShipStatus,
   GetAllFriendships,
   GetRecievedFriendRequestCount,
   GetRecievedFriendRequests,
@@ -776,6 +778,7 @@ const resolvers: Resolvers = {
       }
       const { name, picture, email, verified } = args;
 
+      // TODO make this a transaction, so if the profile creation fails, the account is rolled back
       const account = await CreateAccount(email, verified);
       if (account.status === 'Failure') {
         throw new GraphQLError('Cannot create user account', {
@@ -811,8 +814,63 @@ const resolvers: Resolvers = {
       }
       const { addressee_profile_id } = args;
 
+      const friendStatus = await CheckFriendShipStatus(
+        addressee_profile_id,
+        sender_profile.data.id
+      );
+      if (friendStatus.data == 1) {
+        throw new GraphQLError('Already friends');
+      }
+
       const emailResponse = await SendFriendRequestAndEmail(
         addressee_profile_id,
+        sender_profile.data.id
+      );
+      if (emailResponse.status === 'Failure') {
+        throw new GraphQLError('Cannot generate friend request', {
+          extensions: {
+            code: emailResponse.error?.name,
+            message: emailResponse.error?.message,
+            prismaMeta: emailResponse.error?.meta,
+            prismaErrorCode: emailResponse.error?.errorCode,
+          },
+        });
+      } else {
+        return emailResponse.data;
+      }
+    },
+    sendFriendRequestFromSocialPin: async (parent, args, context, info) => {
+      const { authError, profile: sender_profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+      const { social_pin } = args;
+
+      const addressee_profile = await GetProfileBySocialPin(social_pin);
+
+      if (addressee_profile.data === null) {
+        throw new GraphQLError('Cannot find profile with that social pin', {
+          extensions: {
+            code: addressee_profile.error?.name,
+            message: addressee_profile.error?.message,
+            prismaMeta: addressee_profile.error?.meta,
+            prismaErrorCode: addressee_profile.error?.errorCode,
+          },
+        });
+      }
+
+      const friendStatus = await CheckFriendShipStatus(
+        addressee_profile.data.id,
+        sender_profile.data.id
+      );
+      if (friendStatus.data == 1) {
+        throw new GraphQLError('Already friends');
+      }
+
+      const emailResponse = await SendFriendRequestAndEmail(
+        addressee_profile.data.id,
         sender_profile.data.id
       );
       if (emailResponse.status === 'Failure') {

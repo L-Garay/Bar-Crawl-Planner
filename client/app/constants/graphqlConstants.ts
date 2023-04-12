@@ -85,16 +85,17 @@ export const GET_PROFILES_IN_OUTING = gql`
         id
         name
         social_pin
+        account {
+          email_verified
+        }
       }
       pending_profiles {
         id
         name
         social_pin
-      }
-      declined_profiles {
-        id
-        name
-        social_pin
+        account {
+          email_verified
+        }
       }
     }
   }
@@ -129,6 +130,7 @@ export const GET_PROFILE = gql`
       name
       account_Id
       blocked_profile_ids
+      social_pin
     }
   }
 `;
@@ -394,6 +396,12 @@ export const SEND_OUTING_JOINED_EMAIL = gql`
 export const SEND_FRIEND_REQUEST = gql`
   mutation sendFriendRequestEmail($addressee_profile_id: Int!) {
     sendFriendRequestEmail(addressee_profile_id: $addressee_profile_id)
+  }
+`;
+
+export const SEND_FRIEND_REQUEST_SOCIAL_PIN = gql`
+  mutation sendFriendRequestFromSocialPin($social_pin: String!) {
+    sendFriendRequestFromSocialPin(social_pin: $social_pin)
   }
 `;
 

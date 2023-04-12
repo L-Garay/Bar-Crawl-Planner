@@ -1,7 +1,7 @@
 import { Profile } from '@prisma/client';
 import prismaClient from '../../index';
 import { PrismaError, PrismaData } from '../../types/sharedTypes';
-import short from 'short-uuid';
+import { nanoid } from 'nanoid';
 
 export async function CreateProfile(
   name: string = 'New User',
@@ -15,7 +15,7 @@ export async function CreateProfile(
         profile_img,
         updated_at: new Date().toISOString(),
         account_Id: account_Id,
-        social_pin: short.generate(),
+        social_pin: nanoid(8), // with 8 characters at 10 profiles created an hour would ~= 27years until a 1% chance of collision
       },
     });
     return { status: 'Success', data: profile, error: null };

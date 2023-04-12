@@ -85,6 +85,7 @@ export type Mutation = {
   deactivateUserAccount?: Maybe<Account>;
   deleteOuting?: Maybe<Scalars['String']>;
   sendFriendRequestEmail?: Maybe<Scalars['String']>;
+  sendFriendRequestFromSocialPin?: Maybe<Scalars['String']>;
   sendOutingInvites?: Maybe<Scalars['String']>;
   sendOutingInvitesAndCreate?: Maybe<Scalars['String']>;
   sendOutingJoinedEmail?: Maybe<Scalars['String']>;
@@ -160,6 +161,11 @@ export type MutationDeleteOutingArgs = {
 
 export type MutationSendFriendRequestEmailArgs = {
   addressee_profile_id: Scalars['Int'];
+};
+
+
+export type MutationSendFriendRequestFromSocialPinArgs = {
+  social_pin: Scalars['String'];
 };
 
 
@@ -460,6 +466,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   deactivateUserAccount?: Resolver<Maybe<ResolversTypes['Account']>, ParentType, ContextType, RequireFields<MutationDeactivateUserAccountArgs, 'id'>>;
   deleteOuting?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationDeleteOutingArgs, 'id'>>;
   sendFriendRequestEmail?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendFriendRequestEmailArgs, 'addressee_profile_id'>>;
+  sendFriendRequestFromSocialPin?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendFriendRequestFromSocialPinArgs, 'social_pin'>>;
   sendOutingInvites?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesArgs, 'account_Ids' | 'outing_id' | 'outing_name' | 'start_date_and_time'>>;
   sendOutingInvitesAndCreate?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingInvitesAndCreateArgs, 'emails' | 'outing_id' | 'start_date_and_time'>>;
   sendOutingJoinedEmail?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType, RequireFields<MutationSendOutingJoinedEmailArgs, 'outing_id'>>;
