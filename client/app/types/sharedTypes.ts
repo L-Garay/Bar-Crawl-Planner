@@ -81,3 +81,37 @@ export type LocationDetails = {
   price_level?: number;
   expiration_date: string;
 };
+
+export type FriendRequestData = {
+  id: number;
+  addressee_profile_id: number;
+  requestor_profile_id: number;
+  created_at: string;
+};
+
+export type FriendshipData = {
+  id: number;
+  requestor_profile_id: number;
+  addressee_profile_id: number;
+  status_code: string;
+  created_at: string;
+  requestor_profile_relation: {
+    id: number;
+    name: string;
+    account_Id: number;
+  };
+  addressee_profile_relation: {
+    id: number;
+    name: string;
+    account_Id: number;
+  };
+};
+
+export type PartialProfilesInOuting = {
+  id: number;
+  name: string;
+  social_pin: string;
+  account: {
+    email_verified: boolean;
+  };
+};
