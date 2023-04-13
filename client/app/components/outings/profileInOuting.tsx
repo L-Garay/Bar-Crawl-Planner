@@ -1,7 +1,6 @@
-import { useLazyQuery } from '@apollo/client';
-import { useEffect, useMemo, useState } from 'react';
-import { GET_ALL_FRIENDSHIPS } from '~/constants/graphqlConstants';
+import { useMemo, useState } from 'react';
 import { CloseX } from '~/components/svgs/closeX';
+import type { FriendshipData } from '~/types/sharedTypes';
 
 export type ProfileInOutingProps = {
   profile: Record<string, any>;
@@ -9,37 +8,29 @@ export type ProfileInOutingProps = {
   currentUserId: number;
   sentRequests: Record<string, any>[];
   recievedRequests: Record<string, any>[];
+  friends: FriendshipData[];
   disconnectUser: ({ variables }: { variables: any }) => void;
   outingId: number;
   isOutingCreator: boolean;
   sendFriendRequest?: ({ variables }: { variables: any }) => void;
+  friendsError?: boolean;
 };
 
 export const ProfileInOuting = ({
   profile,
-  sendFriendRequest,
   attendanceStatus,
   currentUserId,
   sentRequests,
   recievedRequests,
+  friends,
   disconnectUser,
   outingId,
   isOutingCreator,
+  sendFriendRequest,
+  friendsError,
 }: ProfileInOutingProps) => {
   const [isHoveringKickIcon, setIsHoveringKickIcon] = useState<boolean>(false);
-
-  const [getAllFriendships, { data: friendsData }] =
-    useLazyQuery(GET_ALL_FRIENDSHIPS);
-
-  useEffect(() => {
-    if (profile) {
-      getAllFriendships({
-        variables: {
-          target_id: Number(profile.id),
-        },
-      });
-    }
-  }, [getAllFriendships, profile]);
+  const sameProfile = profile.id === currentUserId;
 
   const color = useMemo(() => {
     if (attendanceStatus === 'Accepted') return 'green';
@@ -47,8 +38,6 @@ export const ProfileInOuting = ({
     if (attendanceStatus === 'Declined') return 'red';
     else return 'black';
   }, [attendanceStatus]);
-
-  const sameProfile = profile.id === currentUserId;
 
   const alreadyRequested = useMemo(() => {
     if (!sentRequests) return false;
@@ -65,19 +54,14 @@ export const ProfileInOuting = ({
   }, [profile.id, recievedRequests]);
 
   const alreadyFriends = useMemo(() => {
-    const noFriendsCondition =
-      !friendsData ||
-      friendsData.getAllFriendships === undefined ||
-      friendsData.getAllFriendships.length === 0;
-    // this indicates that we are unable to get the friendship data OR that the user has no friendships
-    if (noFriendsCondition) {
+    if (friendsError || friends.length === 0 || sameProfile) {
       return false;
     }
     // if the user has friendships, we first check to see if any of them are with the current profile in the list
     // also check to make sure that the status is accepted and not just requested
     // then a final check to make sure it's not the same profile as the current user's
     if (
-      friendsData.getAllFriendships.some((friendship: any) => {
+      friends.some((friendship: FriendshipData) => {
         const hasRequested =
           friendship.addressee_profile_id === profile.id ||
           friendship.requestor_profile_id === profile.id;
@@ -86,23 +70,28 @@ export const ProfileInOuting = ({
         } else {
           return false;
         }
-      }) &&
-      !sameProfile
+      })
     ) {
       return true;
+    } else {
+      return false;
     }
-  }, [friendsData, profile.id, sameProfile]);
+  }, [friends, friendsError, profile.id, sameProfile]);
 
+  // by early returning 'false' if there is an error getting friends, that could potentially cause the friend request button to be rendered icnorrectly
+  // since the check for '!alreadyFriends' will return true
+  // so we need to also check if there is an error getting friends
+  // which should then ensure that if there is an error getting friends, that we just don't render anything friend related (no button, no friend text on lines 120-137)
   const showFriendRequestButton =
-    !sameProfile && profile.account.email_verified == true && !alreadyFriends;
+    !sameProfile &&
+    profile.account.email_verified == true &&
+    !alreadyFriends &&
+    !friendsError;
 
   return (
     <div className="profile-in-outing-container">
-      <div
-        className="profile-in-outing"
-        style={{ display: 'flex', alignItems: 'center' }}
-      >
-        <p style={{ color, paddingRight: 10 }}>
+      <div className="profile-in-outing flex">
+        <p className="profile-name" style={{ color }}>
           {sameProfile ? 'You' : `${profile.name} with id ${profile.id}`}
         </p>
         <p>({attendanceStatus})</p>
@@ -128,7 +117,7 @@ export const ProfileInOuting = ({
           <div
             onMouseEnter={() => setIsHoveringKickIcon(true)}
             onMouseLeave={() => setIsHoveringKickIcon(false)}
-            style={{ marginLeft: 10 }}
+            className="remove-user"
             onClick={() =>
               disconnectUser({
                 variables: {

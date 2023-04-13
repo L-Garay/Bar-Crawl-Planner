@@ -1,12 +1,6 @@
-import type {
-  ActionFunction,
-  LinksFunction,
-  LoaderFunction,
-} from '@remix-run/node';
-import { redirect } from '@remix-run/node';
-import { Form, useLoaderData, useTransition } from '@remix-run/react';
-import { useEffect, useMemo, useState } from 'react';
-import { getNewClient } from '~/apollo/getClient';
+import type { LoaderFunction } from '@remix-run/node';
+import { useLoaderData, useNavigate } from '@remix-run/react';
+import { useEffect, useState } from 'react';
 import {
   DELETE_OUTING,
   SEND_FRIEND_REQUEST,
@@ -17,9 +11,10 @@ import {
   SEND_OUTING_INVITES_AND_CREATE,
   UPDATE_OUTING,
   DISCONNECT_PROFILE,
-  GET_PROFILE,
+  GET_ALL_FRIENDSHIPS,
+  GET_PROFILE_ID,
 } from '~/constants/graphqlConstants';
-// import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
+import { VALID_EMAIL_REGEX } from '~/constants/inputValidationConstants';
 import logApolloError from '~/utils/getApolloError';
 import EditIcon from '~/components/svgs/editIcon';
 import moment from 'moment';
@@ -27,233 +22,248 @@ import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
 import FriendsTable from '~/components/friends/friendsTable';
 import Crown32px from '~/assets/crown32px.png';
-import friendsStyles from '~/generatedStyles/friends.css';
-import outingDetailStyles from '~/generatedStyles/outingDetailsPage.css';
-import type { PartialProfilesInOuting } from '~/types/sharedTypes';
-
-export const links: LinksFunction = () => {
-  return [
-    {
-      rel: 'stylesheet',
-      href: friendsStyles,
-      as: 'style',
-    },
-    {
-      rel: 'stylesheet',
-      href: outingDetailStyles,
-      as: 'style',
-    },
-  ];
-};
-
-export const action: ActionFunction = async ({ request, params }) => {
-  const client = await getNewClient(request);
-  const formData = await request.formData();
-  const intent = formData.get('intent');
-
-  switch (intent) {
-    case 'post':
-      const emails = formData.get('profile-email') as string;
-      const emailsArray = emails.split(',');
-
-      const start_date_and_time = formData.get('start-date-and-time') as string;
-      const outingId = Number(params.outingId);
-
-      try {
-        const data = await client.mutate({
-          mutation: SEND_OUTING_INVITES_AND_CREATE,
-          variables: {
-            emails: emailsArray,
-            start_date_and_time,
-            outing_id: outingId,
-          },
-        });
-        return data.data;
-      } catch (error) {
-        logApolloError(error);
-        // Don't throw an error here, because if the email fails they should still be able to interact with the rest of the page
-        // throw new Response(JSON.stringify(error), { status: 500 });
-      }
-      break;
-    case 'put':
-      const outingName = formData.get('outing-name') as string;
-      const outingDate = formData.get('outing-date') as string;
-      const outing_id = Number(params.outingId);
-
-      try {
-        const data = await client.mutate({
-          mutation: UPDATE_OUTING,
-          variables: {
-            id: outing_id,
-            name: outingName,
-            start_date_and_time: outingDate,
-          },
-        });
-        return data.data;
-      } catch (error) {
-        logApolloError(error);
-      }
-
-      break;
-    case 'delete':
-      const outingid = Number(params.outingId);
-      try {
-        await client.mutate({
-          mutation: DELETE_OUTING,
-          variables: {
-            id: outingid,
-          },
-        });
-        return redirect('/outings/my-outings/');
-      } catch (error) {
-        logApolloError(error);
-        // Don't throw an error here, because if they can't delete an outing they should still be able to interact with the rest of the page
-      }
-      break;
-
-    default:
-      return 'test';
-  }
-};
+import type {
+  BasicOutingData,
+  FriendRequestData,
+  FriendshipData,
+  PartialProfilesInOuting,
+} from '~/types/sharedTypes';
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-  const client = await getNewClient(request);
-  // should never not be authenticated at this point
-
-  let outing: any;
-  let currentUserProfile: any;
-  // TODO 1. add a query to get the friends of the user
-  // TODO 2. once that is working, combine the 4 querries into one large one that calls the 4 sub queries
-  //  since GET_PROFILES_IN_OUTING is also a parent query of 3 sub querries itself, there will actually be 6 total sub querries
-  try {
-    outing = await client.query({
-      query: GET_OUTING,
-      variables: {
-        id: Number(params.outingId),
-      },
-    });
-    currentUserProfile = await client.query({
-      query: GET_PROFILE,
-    });
-  } catch (error) {
-    logApolloError(error);
-    throw new Response(JSON.stringify(error), { status: 500 });
-  }
-  return {
-    outing,
-    currentUserProfile,
-    outingId: params.outingId,
-  };
+  return { outingId: params.outingId };
 };
 
 export default function OutingDetails() {
-  const [shouldDisableSend, setShouldDisableSend] = useState(true);
+  const { outingId } = useLoaderData();
+  const navigate = useNavigate();
+  // UI states for hovering icons and showing edit forms
   const [isHoveringNameIcon, setIsHoveringNameIcon] = useState(false);
   const [showEditName, setShowEditName] = useState(false);
   const [isHoveringDateIcon, setIsHoveringDateIcon] = useState(false);
   const [showEditDate, setShowEditDate] = useState(false);
+  // Dynamic data from GQL
+  const [friends, setFriends] = useState<FriendshipData[]>([]);
+  const [outing, setOuting] = useState<BasicOutingData | null>(null);
+  const [profileId, setProfileId] = useState<number>(0);
+  const [sentRequests, setSentRequests] = useState<FriendRequestData[]>([]);
+  const [recievedRequests, setRecievedRequests] = useState<FriendRequestData[]>(
+    []
+  );
+  const [acceptedProfiles, setAcceptedProfiles] = useState<
+    PartialProfilesInOuting[]
+  >([]);
+  const [pendingProfiles, setPendingProfiles] = useState<
+    PartialProfilesInOuting[]
+  >([]);
+  const [showError, setShowError] = useState<boolean>(false);
+  const [hasBreakingError, setHasBreakingError] = useState<boolean>(false);
+  const [hasFriendsError, setHasFriendsError] = useState<boolean>(false);
+  // Different inputs
+  const [emailInput, setEmailInput] = useState<string>('');
+  const [hasEmailInputError, setHasEmailInputError] = useState<boolean>(false);
+  const [outingNameInput, setOutingNameInput] = useState<string>('');
+  const [outingStartInput, setOutingStartInput] = useState<string>('');
 
-  const { outing, currentUserProfile, outingId } = useLoaderData();
-  const transition = useTransition();
-
-  const [sendFriendRequest] = useMutation(SEND_FRIEND_REQUEST, {
-    refetchQueries: [GET_SENT_FRIEND_REQUESTS],
+  // GQL queries
+  // BREAKING
+  useQuery(GET_OUTING, {
+    variables: {
+      id: Number(outingId),
+    },
+    onCompleted(data) {
+      setOuting(data.getOuting);
+    },
+    onError(error) {
+      logApolloError(error);
+      setShowError(true);
+      setHasBreakingError(true);
+    },
   });
-  const [disconnectUser] = useMutation(DISCONNECT_PROFILE, {
-    refetchQueries: [GET_PROFILES_IN_OUTING],
+  // BREAKING (IF WE CAN'T GET THIS THEN THERE IS A LARGER PROBLEM IN THE APP)
+  useQuery(GET_PROFILE_ID, {
+    onCompleted(data) {
+      setProfileId(data.getProfile.id);
+    },
+    onError(error) {
+      logApolloError(error);
+      setShowError(true);
+      setHasBreakingError(true);
+    },
+  });
+  // TODO turn this into a single GET_FRIEND_REQUESTS query that returns two separate arrays (just like GET_PROFILES_IN_OUTING)
+  // NONBREAKING
+  useQuery(GET_SENT_FRIEND_REQUESTS, {
+    onCompleted(data) {
+      setSentRequests(data.getSentFriendRequests);
+    },
+    onError(error) {
+      logApolloError(error);
+      setShowError(true);
+      setHasFriendsError(true);
+    },
+  });
+  // NONBREAKING
+  useQuery(GET_RECIEVED_FRIEND_REQUESTS, {
+    onCompleted(data) {
+      setRecievedRequests(data.getRecievedFriendRequests);
+    },
+    onError(error) {
+      logApolloError(error);
+      setShowError(true);
+      setHasFriendsError(true);
+    },
+  });
+  // BREAKING
+  useQuery(GET_PROFILES_IN_OUTING, {
+    variables: {
+      id: Number(outingId),
+    },
+    onCompleted(data) {
+      setAcceptedProfiles(data.getProfilesInOuting.accepted_profiles);
+      setPendingProfiles(data.getProfilesInOuting.pending_profiles);
+    },
+    onError(error) {
+      logApolloError(error);
+      setShowError(true);
+      setHasBreakingError(true);
+    },
+  });
+  // NONBREAKING
+  useQuery(GET_ALL_FRIENDSHIPS, {
+    onCompleted: (data) => {
+      setFriends(data.getAllFriendships);
+    },
+    onError: (error) => {
+      logApolloError(error);
+      setShowError(true);
+      setHasFriendsError(true);
+    },
   });
 
-  const { data: sentRequestData } = useQuery(GET_SENT_FRIEND_REQUESTS);
-  const { data: friendRequestData } = useQuery(GET_RECIEVED_FRIEND_REQUESTS);
-  const { data: profilesInOutingData, loading: profilesLoading } = useQuery(
-    GET_PROFILES_IN_OUTING,
+  // GQL mutations
+  const [sendOutingInvite, { error: sendInviteError }] = useMutation(
+    SEND_OUTING_INVITES_AND_CREATE,
     {
-      variables: {
-        id: Number(outingId),
+      refetchQueries: [GET_PROFILES_IN_OUTING],
+      onCompleted: (data) => {
+        // setInivteSent(true);
+        setEmailInput('');
+      },
+      onError: (error) => {
+        logApolloError(error);
+        setShowError(true);
+      },
+    }
+  );
+  const [updateOuting, { data: outingUpdateData, error: updateOutingError }] =
+    useMutation(UPDATE_OUTING, {
+      onCompleted: (data) => {
+        // setOutingUpdated(true);
+        setShowEditName(false);
+        setShowEditDate(false);
+      },
+      onError: (error) => {
+        logApolloError(error);
+        setShowError(true);
+      },
+    });
+  const [deleteOuting, { error: deleteOutingError }] = useMutation(
+    DELETE_OUTING,
+    {
+      onCompleted: (data) => {
+        navigate('/outings/my-outings');
+      },
+      onError: (error) => {
+        logApolloError(error);
+        setShowError(true);
+      },
+    }
+  );
+  const [sendFriendRequest, { error: sendRequestError }] = useMutation(
+    SEND_FRIEND_REQUEST,
+    {
+      refetchQueries: [GET_SENT_FRIEND_REQUESTS],
+      onCompleted: (data) => {
+        // setRequestSent(true);
+      },
+      onError: (error) => {
+        logApolloError(error);
+        setShowError(true);
+      },
+    }
+  );
+  const [disconnectUser, { error: disconnectError }] = useMutation(
+    DISCONNECT_PROFILE,
+    {
+      refetchQueries: [GET_PROFILES_IN_OUTING],
+      onError: (error) => {
+        logApolloError(error);
+        setShowError(true);
       },
     }
   );
 
-  const hasSentRequest =
-    sentRequestData && sentRequestData.getSentFriendRequests;
-  const sentRequests = hasSentRequest
-    ? sentRequestData.getSentFriendRequests
-    : [];
-
-  const hasRecievedRequests =
-    friendRequestData && friendRequestData.getFriendRequests;
-  const recievedRequests = hasRecievedRequests
-    ? friendRequestData.getFriendRequests
-    : [];
-
-  const { getOuting } = outing.data;
-
-  const accepted_profiles = useMemo(() => {
-    if (profilesLoading) return [];
-    return profilesInOutingData.getProfilesInOuting.accepted_profiles;
-  }, [profilesLoading, profilesInOutingData]);
-
-  const pending_profiles = useMemo(() => {
-    if (profilesLoading) return [];
-    return profilesInOutingData.getProfilesInOuting.pending_profiles;
-  }, [profilesLoading, profilesInOutingData]);
-
-  const { getProfile } = currentUserProfile.data;
-
   // when a user is connected to the outing, prisma 'unshifts' the user to the front of the accepted_profiles array
-  // I was able to determine this when an invited user accepted the invitation and was added, they're name appeared at the top of the list
-  // meaning they were the first index in accepted_profiles
-  // so we'll need to account for this when dealing with relational data collections
+  // however we want the first people who joined to be at the top, so we reverse the array
+
+  // NOTE WHAT'S CRAZY IS THAT THE ORDER IS SOMETIMES 'RANDOM'
+  // I'VE OBSERVED THE THIRD USER TO JOIN, LISTED AS THE FIRST USER IN THE ARRAY (I.E. THEY CREATED THE OUTING)
+  // IF YOU NAVIGATE TO A DIFFERENT TAB AND THEN COME BACK (QUERRIES ARE FIRED AGAIN), THE ORDER CHANGES TO THE CORRECT ORDER
+  // TODO look into why that is and if there's a way to fix it
+
   let sortedAcceptedProfiles: PartialProfilesInOuting[] = [];
-  accepted_profiles.forEach((profile: PartialProfilesInOuting) =>
+  acceptedProfiles.forEach((profile: PartialProfilesInOuting) =>
     sortedAcceptedProfiles.unshift(profile)
   );
+  // console.log(
+  //   'accepted: ',
+  //   acceptedProfiles,
+  //   'sorted: ',
+  //   sortedAcceptedProfiles
+  // );
   // TODO figure out why all of a sudden this produces this error: "Uncaught TypeError: 0 is read-only"
-  // accepted_profiles.reverse();
-
+  // acceptedProfiles.reverse();
   let sortedPendingProfiles: PartialProfilesInOuting[] = [];
-  pending_profiles.forEach((profile: PartialProfilesInOuting) =>
+  pendingProfiles.forEach((profile: PartialProfilesInOuting) =>
     sortedPendingProfiles.unshift(profile)
   );
-  // pending_profiles.reverse();
+  // pendingProfiles.reverse();
 
-  const isOutingCreator = sortedAcceptedProfiles.length
-    ? sortedAcceptedProfiles[0].id == getOuting.creator_profile_id &&
-      sortedAcceptedProfiles[0].id == getProfile.id
-    : false;
+  const isOutingCreator = outing?.creator_profile_id == profileId;
 
+  // input validations
   const EMAIL_MIN_LENGTH = 7;
-
   const currentDay = new Date();
   const currentDayInputValue = moment(currentDay).format('YYYY-MM-DDTHH:mm');
   const maxDate = currentDay.setFullYear(currentDay.getFullYear() + 1);
   const maxDateValue = moment(maxDate).format('YYYY-MM-DDTHH:mm');
 
+  // live updated outing name and date
+  const nameToShow: string = outingUpdateData
+    ? outingUpdateData.updateOuting.name
+    : outing?.name;
+  const dateToShow: string = outingUpdateData
+    ? outingUpdateData.updateOuting.start_date_and_time
+    : outing?.start_date_and_time;
+
   useEffect(() => {
-    if (transition.state === 'loading') {
-      setShowEditDate(false);
-      setShowEditName(false);
+    const errorTimeout = setTimeout(() => {
+      setShowError(false);
+      setHasEmailInputError(false);
+    }, 5000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [showError]);
+
+  useEffect(() => {
+    if (hasBreakingError) {
+      throw new Error('Breaking error in OutingDetails.tsx'); // need to think about what this should be
     }
-  }, [transition.state]);
-
-  const transitionName = useMemo(
-    () => transition.submission?.formData.get('outing-name'),
-    [transition.submission]
-  );
-  const transitionDate = useMemo(
-    () => transition.submission?.formData.get('outing-date'),
-    [transition.submission]
-  );
-
-  const nameToShow = transitionName ? transitionName : getOuting.name;
-
-  const dateToShow = transitionDate
-    ? transitionDate
-    : getOuting.start_date_and_time;
+  }, [hasBreakingError]);
 
   return (
     <div>
-      {getOuting ? (
+      {outing ? (
         <div className="outing-details-container">
           <div className="outing-detials">
             {showEditName === false ? (
@@ -270,7 +280,7 @@ export default function OutingDetails() {
                     }}
                   >
                     <EditIcon
-                      pathId={getOuting.name}
+                      pathId={outing.name}
                       fill={isHoveringNameIcon ? '#20b2aa' : undefined}
                       size="medium"
                     />
@@ -278,18 +288,42 @@ export default function OutingDetails() {
                 ) : null}
               </span>
             ) : (
-              <Form method="post" className="form">
+              <div>
                 <input
                   type="text"
                   name="outing-name"
                   id="outing-name"
                   spellCheck
-                  defaultValue={getOuting.name}
+                  onChange={(e) => setOutingNameInput(e.target.value)}
+                  value={outingNameInput}
                 />
-                <button type="submit" name="intent" value="put">
+                <button
+                  onClick={() => {
+                    updateOuting({
+                      variables: {
+                        id: outing.id,
+                        name: outingNameInput ? outingNameInput : outing.name,
+                        start_date_and_time: outing.start_date_and_time,
+                      },
+                    });
+                  }}
+                >
                   Save Change
                 </button>
-              </Form>
+                <button
+                  onClick={() => {
+                    setShowEditName(false);
+                    setOutingNameInput('');
+                  }}
+                >
+                  Cancel edit
+                </button>
+                {showError && updateOutingError && (
+                  <div className="error-message">
+                    <p>We are unable to save your change at this time.</p>
+                  </div>
+                )}
+              </div>
             )}
             {showEditDate === false ? (
               <span className="input-group">
@@ -305,7 +339,7 @@ export default function OutingDetails() {
                     }}
                   >
                     <EditIcon
-                      pathId={getOuting.start_date_and_time}
+                      pathId={outing.start_date_and_time}
                       fill={isHoveringDateIcon ? '#20b2aa' : undefined}
                       size="small"
                     />
@@ -313,59 +347,97 @@ export default function OutingDetails() {
                 ) : null}
               </span>
             ) : (
-              <Form method="post" className="form">
+              <div>
                 <input
                   type="datetime-local"
                   name="outing-date"
                   id="outing-date"
                   min={currentDayInputValue}
                   max={maxDateValue}
-                  defaultValue={getOuting.start_date_and_time}
+                  defaultValue={outing.start_date_and_time}
+                  onChange={(e) => setOutingStartInput(e.target.value)}
                 />
-                <button type="submit" name="intent" value="put">
+                <button
+                  onClick={() => {
+                    updateOuting({
+                      variables: {
+                        id: outing.id,
+                        name: outing.name,
+                        start_date_and_time: outingStartInput
+                          ? outingStartInput
+                          : outing.start_date_and_time,
+                      },
+                    });
+                  }}
+                >
                   Save Change
                 </button>
-              </Form>
+                <button
+                  onClick={() => {
+                    setShowEditDate(false);
+                    setOutingStartInput('');
+                  }}
+                >
+                  Cancel edit
+                </button>
+                {showError && updateOutingError && (
+                  <div className="error-message">
+                    <p>We are unable to save your change at this time.</p>
+                  </div>
+                )}
+              </div>
             )}
 
             <br />
             <>
               {isOutingCreator ? (
                 <div className="add-profiles">
-                  <form method="post">
-                    {/* TODO: add validation to make sure emails are valid */}
-                    {/* NOTE if we want users to be able to submit multiple emails at the same time, we will need to change the input type to be textfield or something else that just takes strings, but email input and it's default validation rules won't allow mutliple emails */}
+                  <div className="add-profiles-input">
                     <label htmlFor="profile-email">
                       Send invitation email to:{' '}
                     </label>
                     <input
-                      type="email"
+                      type="text"
                       name="profile-email"
                       id="profile-email"
-                      // TODO figure out why this regex is causing 'garay.logan+test1@gmail.com' to fail in the app, but passes at https://regexr.com
-                      // pattern={`${VALID_EMAIL_REGEX}`}
                       title="figure out what pattern(s) to show here"
                       minLength={EMAIL_MIN_LENGTH} // what should this be?
-                      onChange={(e) => {
-                        setShouldDisableSend(
-                          e.target.value.length < EMAIL_MIN_LENGTH
-                        );
-                      }}
-                    />
-                    <input
-                      type="hidden"
-                      name="start-date-and-time"
-                      value={getOuting.start_date_and_time}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      value={emailInput}
                     />
                     <button
-                      type="submit"
-                      name="intent"
-                      value="post"
-                      disabled={shouldDisableSend}
+                      onClick={() => {
+                        const regex = new RegExp(VALID_EMAIL_REGEX);
+                        const match = regex.test(emailInput);
+                        if (match) {
+                          sendOutingInvite({
+                            variables: {
+                              emails: [emailInput],
+                              start_date_and_time: outing.start_date_and_time,
+                              outing_id: outing.id,
+                            },
+                          });
+                        } else {
+                          setShowError(true);
+                          setHasEmailInputError(true);
+                        }
+                      }}
+                      disabled={emailInput.length < EMAIL_MIN_LENGTH}
                     >
                       Send Invite
                     </button>
-                  </form>
+                  </div>
+                  {showError && hasEmailInputError ? (
+                    <div className="error-message">
+                      <p>
+                        The email format is invalid, please check and try again.
+                      </p>
+                    </div>
+                  ) : showError && sendInviteError ? (
+                    <div className="error-message">
+                      <p>We are unable to send the invitation at this time.</p>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </>
@@ -373,8 +445,7 @@ export default function OutingDetails() {
             {sortedAcceptedProfiles.length ? (
               <>
                 {sortedAcceptedProfiles.map((profile: any, index: number) => {
-                  const outingCreator =
-                    profile.id == getOuting.creator_profile_id;
+                  const outingCreator = profile.id == outing.creator_profile_id;
 
                   return (
                     <div key={profile.id} className="user-group">
@@ -390,12 +461,14 @@ export default function OutingDetails() {
                         profile={profile}
                         sendFriendRequest={sendFriendRequest}
                         attendanceStatus="Accepted"
-                        currentUserId={getProfile.id}
+                        currentUserId={profileId}
                         sentRequests={sentRequests}
                         recievedRequests={recievedRequests}
+                        friends={friends}
                         disconnectUser={disconnectUser}
-                        outingId={getOuting.id}
+                        outingId={outing.id}
                         isOutingCreator={isOutingCreator}
+                        friendsError={hasFriendsError}
                       />
                     </div>
                   );
@@ -411,12 +484,14 @@ export default function OutingDetails() {
                       profile={profile}
                       sendFriendRequest={sendFriendRequest}
                       attendanceStatus="Pending"
-                      currentUserId={getProfile.id}
+                      currentUserId={profileId}
                       sentRequests={sentRequests}
                       recievedRequests={recievedRequests}
+                      friends={friends}
                       disconnectUser={disconnectUser}
-                      outingId={getOuting.id}
+                      outingId={outing.id}
                       isOutingCreator={isOutingCreator}
+                      friendsError={hasFriendsError}
                     />
                   );
                 })}
@@ -425,25 +500,41 @@ export default function OutingDetails() {
             <br />
             {isOutingCreator ? (
               <div className="delete-outing-container">
-                <form method="post">
-                  <button
-                    className="delete-outing"
-                    name="intent"
-                    value="delete"
-                    type="submit"
-                  >
-                    Delete Outing
-                  </button>
-                </form>
+                <button
+                  className="delete-outing"
+                  onClick={() => {
+                    deleteOuting({
+                      variables: {
+                        id: outing.id,
+                      },
+                    });
+                  }}
+                >
+                  Delete Outing
+                </button>
+                {showError && deleteOutingError && (
+                  <div className="error-message">
+                    <p>We are unable to delete the outing at this time.</p>
+                  </div>
+                )}
+              </div>
+            ) : null}
+            {showError && disconnectError ? (
+              <div className="error-message">
+                <p>We are unable to remove the user at this time.</p>
+              </div>
+            ) : showError && sendRequestError ? (
+              <div className="error-message">
+                <p>We are unable to send the friend request at this time.</p>
               </div>
             ) : null}
           </div>
           {isOutingCreator ? (
             <FriendsTable
-              userId={getProfile.id}
-              outingId={getOuting.id}
-              outingName={getOuting.name}
-              startDateAndTime={getOuting.start_date_and_time}
+              userId={profileId}
+              outingId={outing.id}
+              outingName={outing.name}
+              startDateAndTime={outing.start_date_and_time}
               pendingProfiles={sortedPendingProfiles}
               acceptedProfiles={sortedAcceptedProfiles}
             />

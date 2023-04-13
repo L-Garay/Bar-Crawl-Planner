@@ -1,5 +1,8 @@
 import type { LinksFunction } from '@remix-run/node';
-import outingsStyles from '~/generatedStyles/outingspage.css';
+import mapsStyles from '~/generatedStyles/maps.css';
+import globalStyles from '~/generatedStyles/global.css';
+import friendsStyles from '~/generatedStyles/friends.css';
+import outingStyles from '~/generatedStyles/outings.css';
 import { Outlet } from '@remix-run/react';
 import SimpleNav from '~/components/molecules/simpleNav';
 import { useIsDomLoaded } from '~/utils/useIsDomLoaded';
@@ -11,7 +14,22 @@ export const links: LinksFunction = () => {
   return [
     {
       rel: 'stylesheet',
-      href: outingsStyles,
+      href: globalStyles,
+      as: 'style',
+    },
+    {
+      rel: 'stylesheet',
+      href: mapsStyles,
+      as: 'style',
+    },
+    {
+      rel: 'stylesheet',
+      href: friendsStyles,
+      as: 'style',
+    },
+    {
+      rel: 'stylesheet',
+      href: outingStyles,
       as: 'style',
     },
   ];

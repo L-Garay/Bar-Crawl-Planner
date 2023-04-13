@@ -41,12 +41,12 @@ export default function MyOutings() {
       {noOutings ? (
         <p>No outings yet</p>
       ) : (
-        <div className="outing-tables" style={{ display: 'flex' }}>
-          <div className="created-outings" style={{ minWidth: 300 }}>
+        <div className="outing-tables flex">
+          <div className="outing-table">
             <h4>Created</h4>
             <>
               {getCreatedOutings.length === 0 ? (
-                <div style={{ display: 'flex' }}>
+                <div className="flex">
                   <p>You have not created any yet</p>
                 </div>
               ) : (
@@ -55,16 +55,12 @@ export default function MyOutings() {
                     return (
                       <div
                         key={outing.id}
-                        style={{
-                          display: 'flex',
-                          cursor: 'pointer',
-                          marginRight: 20,
-                        }}
+                        className="outing-info flex"
                         onClick={() =>
                           navigate(`/outings/my-outings/${outing.id}`)
                         }
                       >
-                        <p style={{ paddingRight: 10 }}>{outing.name}</p>
+                        <p className="outing-table-name">{outing.name}</p>
                         <p>{outing.start_date_and_time}</p>
                       </div>
                     );
@@ -73,16 +69,16 @@ export default function MyOutings() {
               )}
             </>
           </div>
-          <div className="joined-outings" style={{ minWidth: 300 }}>
+          <div className="outing-table">
             <h4>Joined</h4>
             {getJoinedOutings.map((outing: any) => {
               return (
                 <div
                   key={outing.id}
-                  style={{ display: 'flex', cursor: 'pointer' }}
+                  className="outing-info flex"
                   onClick={() => navigate(`/outings/my-outings/${outing.id}`)}
                 >
-                  <p style={{ paddingRight: 10 }}>{outing.name}</p>
+                  <p className="outing-table-name">{outing.name}</p>
                   <p>{outing.start_date_and_time}</p>
                 </div>
               );
