@@ -400,6 +400,9 @@ export const GET_SENT_FRIEND_REQUESTS = gql`
       addressee_profile_id
       requestor_profile_id
       created_at
+      addressee_profile_relation {
+        name
+      }
     }
   }
 `;
@@ -411,6 +414,9 @@ export const GET_RECIEVED_FRIEND_REQUESTS = gql`
       addressee_profile_id
       requestor_profile_id
       created_at
+      requestor_profile_relation {
+        name
+      }
     }
   }
 `;

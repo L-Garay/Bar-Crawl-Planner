@@ -4,15 +4,17 @@ import {
   GET_ALL_FRIENDSHIPS,
   GET_RECIEVED_FRIEND_REQUESTS,
   GET_SENT_FRIEND_REQUESTS,
-  GET_PROFILE,
   BLOCK_PROFILE,
   GET_RECIEVED_FRIEND_REQUEST_COUNT,
   SEND_FRIEND_REQUEST_SOCIAL_PIN,
+  GET_PROFILE_ID,
 } from '~/constants/graphqlConstants';
 import friendsStyles from '~/generatedStyles/friends.css';
 import { useMutation, useQuery } from '@apollo/client';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import logApolloError from '~/utils/getApolloError';
+import type { FriendRequestData, FriendshipData } from '~/types/sharedTypes';
+import moment from 'moment';
 
 export const links: LinksFunction = () => {
   return [
@@ -25,32 +27,54 @@ export const links: LinksFunction = () => {
 };
 
 export default function FriendsIndex() {
+  const [profileId, setProfileId] = useState<number>(0);
+  const [friends, setFriends] = useState<FriendshipData[]>([]);
+  const [sentRequests, setSentRequests] = useState<FriendRequestData[]>([]);
+  const [recievedRequests, setRecievedRequests] = useState<FriendRequestData[]>(
+    []
+  );
   const [addFriendInputValue, setAddFriendInputValue] = useState<string>('');
   const [showErrorMessage, setShowErrorMessage] = useState<boolean>(false);
-  const { data: profileData } = useQuery(GET_PROFILE);
-  const { data: friendsData, error: friendsError } =
-    useQuery(GET_ALL_FRIENDSHIPS);
-  const { data: sentData, error: sentError } = useQuery(
-    GET_SENT_FRIEND_REQUESTS,
-    {
-      onError: (error) => {
-        logApolloError(error);
-        setShowErrorMessage(true);
-      },
-    }
-  );
+  const [invalidFriendInput, setInvalidFriendInput] = useState<boolean>(false);
 
-  const { data: recievedData, error: recievedError } = useQuery(
-    GET_RECIEVED_FRIEND_REQUESTS,
-    {
-      onError: (error) => {
-        logApolloError(error);
-        setShowErrorMessage(true);
-      },
-    }
-  );
+  // NOTE this is used in blocking a profile, not sure what to do if we can't get the id
+  const { data: profileData } = useQuery(GET_PROFILE_ID, {
+    onCompleted: (data) => {
+      setProfileId(data.getProfile.id);
+    },
+  });
 
-  const [sendRequest, { data: requestData, error: requestError }] = useMutation(
+  const { error: friendsError } = useQuery(GET_ALL_FRIENDSHIPS, {
+    onCompleted: (data) => {
+      setFriends(data.getAllFriendships);
+    },
+    onError: (err) => {
+      logApolloError(err);
+      setShowErrorMessage(true);
+    },
+  });
+
+  const { error: sentError } = useQuery(GET_SENT_FRIEND_REQUESTS, {
+    onCompleted: (data) => {
+      setSentRequests(data.getSentFriendRequests);
+    },
+    onError: (error) => {
+      logApolloError(error);
+      setShowErrorMessage(true);
+    },
+  });
+
+  const { error: recievedError } = useQuery(GET_RECIEVED_FRIEND_REQUESTS, {
+    onCompleted: (data) => {
+      setRecievedRequests(data.getRecievedFriendRequests);
+    },
+    onError: (error) => {
+      logApolloError(error);
+      setShowErrorMessage(true);
+    },
+  });
+
+  const [sendRequest, { error: requestError }] = useMutation(
     SEND_FRIEND_REQUEST_SOCIAL_PIN,
     {
       refetchQueries: [GET_SENT_FRIEND_REQUESTS],
@@ -61,45 +85,24 @@ export default function FriendsIndex() {
     }
   );
 
-  const [updateFriend, { data: updateData, error: updateError }] = useMutation(
-    UPDATE_FRIEND,
-    {
-      refetchQueries: [
-        GET_ALL_FRIENDSHIPS,
-        GET_RECIEVED_FRIEND_REQUESTS,
-        GET_SENT_FRIEND_REQUESTS,
-        GET_RECIEVED_FRIEND_REQUEST_COUNT,
-      ],
-      onError: (error) => {
-        logApolloError(error);
-        setShowErrorMessage(true);
-      },
-    }
-  );
-  const [blockProfile, { data: blockData, error: blockError }] = useMutation(
-    BLOCK_PROFILE,
-    {
-      onError: (error) => {
-        logApolloError(error);
-        setShowErrorMessage(true);
-      },
-    }
-  );
-
-  const friends = useMemo(() => {
-    if (!friendsData || !friendsData.getAllFriendships) return [];
-    return friendsData.getAllFriendships;
-  }, [friendsData]);
-
-  const sentRequests = useMemo(() => {
-    if (!sentData || !sentData.getSentFriendRequests) return [];
-    return sentData.getSentFriendRequests;
-  }, [sentData]);
-
-  const recievedRequests = useMemo(() => {
-    if (!recievedData || !recievedData.getRecievedFriendRequests) return [];
-    return recievedData.getRecievedFriendRequests;
-  }, [recievedData]);
+  const [updateFriend, { error: updateError }] = useMutation(UPDATE_FRIEND, {
+    refetchQueries: [
+      GET_ALL_FRIENDSHIPS,
+      GET_RECIEVED_FRIEND_REQUESTS,
+      GET_SENT_FRIEND_REQUESTS,
+      GET_RECIEVED_FRIEND_REQUEST_COUNT,
+    ],
+    onError: (error) => {
+      logApolloError(error);
+      setShowErrorMessage(true);
+    },
+  });
+  const [blockProfile, { error: blockError }] = useMutation(BLOCK_PROFILE, {
+    onError: (error) => {
+      logApolloError(error);
+      setShowErrorMessage(true);
+    },
+  });
 
   useEffect(() => {
     const errorTimeout = setTimeout(() => {
@@ -119,30 +122,48 @@ export default function FriendsIndex() {
       >
         <h1>This will be the friends page</h1>
         <div className="add-friend">
-          <div className="add-friend-form" style={{ display: 'flex' }}>
+          <div className="add-friend-form">
+            <h5>
+              Add a friend using their social pin (found on profile page ex:
+              3jF43V_9)
+            </h5>
             <label htmlFor="addFriend">Add a friend: </label>
             <input
               type="text"
               name="addFriend"
               id="addFriend"
+              title="Please enter a valid 8 character social pin (alphanumeric and dashes only)"
               onChange={(event) => setAddFriendInputValue(event.target.value)}
               value={addFriendInputValue}
+              maxLength={8} // since we know the social pin is 8 characters
             />
             <button
-              disabled={addFriendInputValue.length == 0}
+              disabled={addFriendInputValue.length != 8}
               onClick={() => {
-                sendRequest({
-                  variables: {
-                    social_pin: addFriendInputValue,
-                  },
-                });
-                setAddFriendInputValue('');
+                const regex = new RegExp('^[A-Za-z0-9-]+$');
+                const match = regex.test(addFriendInputValue);
+                if (match) {
+                  sendRequest({
+                    variables: {
+                      social_pin: addFriendInputValue,
+                    },
+                  });
+                  setAddFriendInputValue('');
+                  setInvalidFriendInput(false);
+                } else {
+                  setInvalidFriendInput(true);
+                  setShowErrorMessage(true);
+                }
               }}
             >
               Send Request
             </button>
           </div>
-          <div className="add-friend-status" style={{ height: 50 }}>
+          <small className="add-friend-tip">
+            Social pin is 8 character alphanumeric combination of letters and
+            numbers that may include "-" and "_"
+          </small>
+          <div className="add-friend-status">
             {requestError && showErrorMessage && (
               <p>
                 {requestError.graphQLErrors[0].message == 'Already friends'
@@ -150,56 +171,137 @@ export default function FriendsIndex() {
                   : 'Error trying to add friend. If problem continues contact support.'}
               </p>
             )}
+            {invalidFriendInput && showErrorMessage && (
+              <p>The input you provided is invalid, please see example.</p>
+            )}
           </div>
         </div>
         <div className="friends-lists">
           <div className="friend-requests list">
             <h5>Your recieved friend requests</h5>
-            <div>
+            {recievedError && recievedRequests.length == 0 && (
+              <p>Unable to get your friend requests at this time.</p>
+            )}
+            {!recievedError && recievedRequests.length == 0 && (
+              <p>No new requests at this time.</p>
+            )}
+            {!recievedError && recievedRequests.length ? (
               <ul>
                 {/* we need to get the friend's profile data to display here */}
                 {recievedRequests.map((request: any) => {
                   return (
-                    <li key={request.id}>
-                      From: {request.requestor_profile_id} created at:{' '}
-                      {request.created_at}{' '}
-                      <span style={{ display: 'block' }}>
+                    <div className="request" key={request.id}>
+                      <li>
+                        <div>
+                          From: {request.requestor_profile_relation.name}
+                        </div>
+                        <div>
+                          Recieved: {moment(request.created_at).fromNow()}
+                        </div>
+                        <span className="friend-buttons">
+                          <button
+                            onClick={() =>
+                              updateFriend({
+                                variables: {
+                                  friendship_id: request.id,
+                                  status_code: 'A',
+                                },
+                              })
+                            }
+                          >
+                            Accept
+                          </button>
+                          <button
+                            onClick={() =>
+                              updateFriend({
+                                variables: {
+                                  friendship_id: request.id,
+                                  status_code: 'D',
+                                },
+                              })
+                            }
+                          >
+                            Decline
+                          </button>
+                          <button
+                            onClick={() => {
+                              // TODO make these two mutations a single transaction
+                              updateFriend({
+                                variables: {
+                                  friendship_id: request.id,
+                                  status_code: 'B',
+                                },
+                              });
+                              blockProfile({
+                                variables: {
+                                  blocked_profile_id:
+                                    request.requestor_profile_id,
+                                },
+                              });
+                            }}
+                          >
+                            Block
+                          </button>
+                        </span>
+                      </li>
+                      {(updateError || blockError) && showErrorMessage && (
+                        <p>We are unable to perform that action at this time</p>
+                      )}
+                    </div>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </div>
+          <div className="friends list">
+            <h5>Your friends</h5>
+            {friendsError && friends.length == 0 && (
+              <p>We are unable to get your friends at this time.</p>
+            )}
+            {!friendsError && friends.length == 0 && (
+              <p>Send out your first request now!</p>
+            )}
+            {!friendsError && friends.length ? (
+              <ul>
+                {/* we need to get the friend's profile data to display here */}
+
+                {friends.map((friend: any) => {
+                  const isRequestor = friend.requestor_profile_id === profileId;
+                  const name = isRequestor
+                    ? friend.addressee_profile_relation.name
+                    : friend.requestor_profile_relation.name;
+                  return (
+                    <li key={friend.id}>
+                      <div>(profile img here) {name}</div>
+                      <span className="friend-buttons">
                         <button
                           onClick={() =>
                             updateFriend({
                               variables: {
-                                friendship_id: request.id,
-                                status_code: 'A',
+                                friendship_id: friend.id,
+                                status_code: 'R',
                               },
                             })
                           }
                         >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() =>
-                            updateFriend({
-                              variables: {
-                                friendship_id: request.id,
-                                status_code: 'D',
-                              },
-                            })
-                          }
-                        >
-                          Decline
+                          Remove
                         </button>
                         <button
                           onClick={() => {
+                            // TODO make these two mutations a single transaction
                             updateFriend({
                               variables: {
-                                friendship_id: request.id,
+                                friendship_id: friend.id,
                                 status_code: 'B',
                               },
                             });
+                            const blocked_profile_id =
+                              friend.requestor_profile_id === profileId
+                                ? friend.addressee_profile_id
+                                : friend.requestor_profile_id;
                             blockProfile({
                               variables: {
-                                blocked_profile_id:
-                                  request.requestor_profile_id,
+                                blocked_profile_id,
                               },
                             });
                           }}
@@ -211,85 +313,31 @@ export default function FriendsIndex() {
                   );
                 })}
               </ul>
-            </div>
-          </div>
-          <div className="friends list">
-            <h5>Your friends</h5>
-            <div>
-              <ul>
-                {/* we need to get the friend's profile data to display here */}
-                {friends.length ? (
-                  <>
-                    {friends.map((friend: any) => {
-                      return (
-                        <li key={friend.id}>
-                          Friend: {friend.id} created at: {friend.created_at}{' '}
-                          <span style={{ display: 'block' }}>
-                            <button
-                              onClick={() =>
-                                updateFriend({
-                                  variables: {
-                                    friendship_id: friend.id,
-                                    status_code: 'R',
-                                  },
-                                })
-                              }
-                            >
-                              Remove
-                            </button>
-                            <button
-                              onClick={() => {
-                                updateFriend({
-                                  variables: {
-                                    friendship_id: friend.id,
-                                    status_code: 'B',
-                                  },
-                                });
-                                const blocked_profile_id =
-                                  friend.requestor_profile_id === profileData.id
-                                    ? friend.addressee_profile_id
-                                    : friend.requestor_profile_id;
-                                blockProfile({
-                                  variables: {
-                                    blocked_profile_id,
-                                  },
-                                });
-                              }}
-                            >
-                              Block
-                            </button>
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <li>No friends</li>
-                )}
-              </ul>
-            </div>
+            ) : null}
           </div>
           <div className="sent-requests list">
             <h5>Pending sent requests</h5>
-            <div>
+            {sentError && sentRequests.length == 0 && (
+              <p>We are unable to get your pending requests at this time</p>
+            )}
+            {!sentError && sentRequests.length == 0 && (
+              <p>You haven't sent a request out recently.</p>
+            )}
+            {!sentError && sentRequests.length ? (
               <ul>
                 {/* we need to get the friend's profile data to display here */}
-                {sentRequests.length ? (
-                  <>
-                    {sentRequests.map((request: any) => {
-                      return (
-                        <li key={request.id}>
-                          To: {request.addressee_profile_id} created at:{' '}
-                          {request.created_at}
-                        </li>
-                      );
-                    })}
-                  </>
-                ) : (
-                  <li>No pending requests</li>
-                )}
+                <>
+                  {sentRequests.map((request: any) => {
+                    return (
+                      <li key={request.id}>
+                        <div>To: {request.addressee_profile_relation.name}</div>
+                        <div>Sent: {moment(request.created_at).fromNow()}</div>
+                      </li>
+                    );
+                  })}
+                </>
               </ul>
-            </div>
+            ) : null}
           </div>
         </div>
 

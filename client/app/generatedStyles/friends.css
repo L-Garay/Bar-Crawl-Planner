@@ -9,4 +9,46 @@
   outline: 1px solid black;
 }
 
+.friends-table-container {
+  width: 250px;
+  margin-left: 100px;
+}
+.friends-table-container .box {
+  padding: 10px;
+  border: 1px solid black;
+}
+.friends-table-container .friends-table-header {
+  display: flex;
+  align-items: center;
+}
+.friends-table-container .friends-table-header h4 {
+  margin-right: 10px;
+}
+.friends-table-container .friends-table {
+  min-height: 100px;
+}
+.friends-table-container .invite-error {
+  margin-top: 10px;
+  color: red;
+  font-size: 1rem;
+}
+
+.friend-list-item-container {
+  display: flex;
+  align-items: center;
+  background: none;
+}
+.friend-list-item-container p.friend-name {
+  padding-right: 10px;
+  margin: 5px 0;
+}
+
+.add-friend-status {
+  height: 50px;
+}
+
+span.friend-buttons {
+  display: block;
+}
+
 /*# sourceMappingURL=friends.css.map */

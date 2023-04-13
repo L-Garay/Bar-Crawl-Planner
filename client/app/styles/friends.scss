@@ -10,3 +10,51 @@
     outline: 1px solid black;
   }
 }
+
+.friends-table-container {
+  width: 250px;
+  margin-left: 100px;
+
+  .box {
+    padding: 10px;
+    border: 1px solid black;
+  }
+
+  .friends-table-header {
+    display: flex;
+    align-items: center;
+
+    h4 {
+      margin-right: 10px;
+    }
+  }
+
+  .friends-table {
+    min-height: 100px;
+  }
+
+  .invite-error {
+    margin-top: 10px;
+    color: red;
+    font-size: 1rem;
+  }
+}
+
+.friend-list-item-container {
+  display: flex;
+  align-items: center;
+  background: none; // this will need to be dynamically changed on user interaction
+
+  p.friend-name {
+    padding-right: 10px;
+    margin: 5px 0;
+  }
+}
+
+.add-friend-status {
+  height: 50px;
+}
+
+span.friend-buttons {
+  display: block;
+}
