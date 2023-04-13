@@ -1,8 +1,4 @@
-import type {
-  ActionFunction,
-  LinksFunction,
-  LoaderFunction,
-} from '@remix-run/node';
+import type { ActionFunction, LoaderFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Form, useLoaderData, useTransition } from '@remix-run/react';
 import { useEffect, useMemo, useState } from 'react';
@@ -27,24 +23,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
 import FriendsTable from '~/components/friends/friendsTable';
 import Crown32px from '~/assets/crown32px.png';
-import friendsStyles from '~/generatedStyles/friends.css';
-import outingDetailStyles from '~/generatedStyles/outingDetailsPage.css';
 import type { PartialProfilesInOuting } from '~/types/sharedTypes';
-
-export const links: LinksFunction = () => {
-  return [
-    {
-      rel: 'stylesheet',
-      href: friendsStyles,
-      as: 'style',
-    },
-    {
-      rel: 'stylesheet',
-      href: outingDetailStyles,
-      as: 'style',
-    },
-  ];
-};
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);

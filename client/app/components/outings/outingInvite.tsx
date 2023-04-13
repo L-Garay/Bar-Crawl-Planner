@@ -1,5 +1,7 @@
 import { useMutation } from '@apollo/client';
 import { useNavigate } from '@remix-run/react';
+import moment from 'moment';
+import { useEffect, useState } from 'react';
 import {
   CONNECT_PROFILE,
   DISCONNECT_PROFILE,
@@ -24,13 +26,13 @@ const OutingInvite = ({
   profileId,
 }: OutingInviteProps) => {
   const navigate = useNavigate();
+  const [showError, setShowError] = useState<boolean>(false);
   const [connectUserToOuting] = useMutation(CONNECT_PROFILE, {
     onError: (error) => {
       logApolloError(error);
-      // TODO create some little popup in UI that says there was an error
+      setShowError(true);
     },
     onCompleted: (data) => {
-      console.log('data', data);
       navigate(`/outings/my-outings/${data.ConnectUserWithOuting.id}`);
     },
   });
@@ -39,8 +41,17 @@ const OutingInvite = ({
     refetchQueries: [GET_PENDING_OUTINGS, GET_PENDING_OUTINGS_COUNT],
     onError: (error) => {
       logApolloError(error);
+      setShowError(true);
     },
   });
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => {
+      setShowError(false);
+    }, 5000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [showError]);
 
   return (
     <div
@@ -50,9 +61,9 @@ const OutingInvite = ({
       <p>
         {creatorName} has invited you the outing: {outingName}.
       </p>
-      <p>It is scheduled to start at: {startDateAndTime}. </p>
-      <div style={{ display: 'flex' }}>
-        <p style={{ margin: '0 10px 0 0' }}>Do you accept?</p>
+      <p>It is scheduled to start: {moment().to(startDateAndTime)}. </p>
+      <div className="flex">
+        <p className="label">Do you accept?</p>
         <button
           onClick={() =>
             connectUserToOuting({
@@ -77,6 +88,9 @@ const OutingInvite = ({
         >
           Decline
         </button>
+      </div>
+      <div className="error-message">
+        {showError && <p>We are unable to record your answer at this time.</p>}
       </div>
     </div>
   );

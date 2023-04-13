@@ -1,0 +1,45 @@
+.outing-details-container {
+  display: flex;
+
+  .input-group,
+  .user-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .form {
+    padding-top: 15px;
+  }
+
+  .creator-crown {
+    height: 20px;
+    width: 20px;
+    margin-right: 10px;
+    align-self: center;
+  }
+}
+
+.outing-invite {
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid black;
+
+
+  .label {
+    margin-right: 10px;
+  }
+
+  .error-message {
+   color: red;
+   height: 25px;
+   padding: 10px 0 0 0;
+  
+   p {
+      margin: 0;
+   }
+  }
+
+  .flex {
+    align-items: center;
+  }
+}
