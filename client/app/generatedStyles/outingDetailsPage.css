@@ -1,0 +1,19 @@
+.outing-details-container {
+  display: flex;
+}
+.outing-details-container .input-group,
+.outing-details-container .user-group {
+  display: flex;
+  align-items: center;
+}
+.outing-details-container .form {
+  padding-top: 15px;
+}
+.outing-details-container .creator-crown {
+  height: 20px;
+  width: 20px;
+  margin-right: 10px;
+  align-self: center;
+}
+
+/*# sourceMappingURL=outingDetailsPage.css.map */

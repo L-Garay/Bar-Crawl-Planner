@@ -1,0 +1,20 @@
+.outing-details-container {
+  display: flex;
+
+  .input-group,
+  .user-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .form {
+    padding-top: 15px;
+  }
+
+  .creator-crown {
+    height: 20px;
+    width: 20px;
+    margin-right: 10px;
+    align-self: center;
+  }
+}
