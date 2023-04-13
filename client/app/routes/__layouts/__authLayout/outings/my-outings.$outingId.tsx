@@ -1,4 +1,8 @@
-import type { ActionFunction, LoaderFunction } from '@remix-run/node';
+import type {
+  ActionFunction,
+  LinksFunction,
+  LoaderFunction,
+} from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { Form, useLoaderData, useTransition } from '@remix-run/react';
 import { useEffect, useMemo, useState } from 'react';
@@ -23,6 +27,24 @@ import { useMutation, useQuery } from '@apollo/client';
 import ProfileInOuting from '~/components/outings/profileInOuting';
 import FriendsTable from '~/components/friends/friendsTable';
 import Crown32px from '~/assets/crown32px.png';
+import friendsStyles from '~/generatedStyles/friends.css';
+import outingDetailStyles from '~/generatedStyles/outingDetailsPage.css';
+import type { PartialProfilesInOuting } from '~/types/sharedTypes';
+
+export const links: LinksFunction = () => {
+  return [
+    {
+      rel: 'stylesheet',
+      href: friendsStyles,
+      as: 'style',
+    },
+    {
+      rel: 'stylesheet',
+      href: outingDetailStyles,
+      as: 'style',
+    },
+  ];
+};
 
 export const action: ActionFunction = async ({ request, params }) => {
   const client = await getNewClient(request);
@@ -182,15 +204,15 @@ export default function OutingDetails() {
   // I was able to determine this when an invited user accepted the invitation and was added, they're name appeared at the top of the list
   // meaning they were the first index in accepted_profiles
   // so we'll need to account for this when dealing with relational data collections
-  let sortedAcceptedProfiles: any[] = [];
-  accepted_profiles.forEach((profile: any) =>
+  let sortedAcceptedProfiles: PartialProfilesInOuting[] = [];
+  accepted_profiles.forEach((profile: PartialProfilesInOuting) =>
     sortedAcceptedProfiles.unshift(profile)
   );
   // TODO figure out why all of a sudden this produces this error: "Uncaught TypeError: 0 is read-only"
   // accepted_profiles.reverse();
 
-  let sortedPendingProfiles: any[] = [];
-  pending_profiles.forEach((profile: any) =>
+  let sortedPendingProfiles: PartialProfilesInOuting[] = [];
+  pending_profiles.forEach((profile: PartialProfilesInOuting) =>
     sortedPendingProfiles.unshift(profile)
   );
   // pending_profiles.reverse();
@@ -232,10 +254,10 @@ export default function OutingDetails() {
   return (
     <div>
       {getOuting ? (
-        <div className="outing-details-container" style={{ display: 'flex' }}>
+        <div className="outing-details-container">
           <div className="outing-detials">
             {showEditName === false ? (
-              <span style={{ display: 'flex', alignItems: 'center' }}>
+              <span className="input-group">
                 <h1>{nameToShow}</h1>
                 {isOutingCreator ? (
                   <span
@@ -256,7 +278,7 @@ export default function OutingDetails() {
                 ) : null}
               </span>
             ) : (
-              <Form method="post" style={{ paddingTop: 15 }}>
+              <Form method="post" className="form">
                 <input
                   type="text"
                   name="outing-name"
@@ -270,7 +292,7 @@ export default function OutingDetails() {
               </Form>
             )}
             {showEditDate === false ? (
-              <span style={{ display: 'flex', alignItems: 'center' }}>
+              <span className="input-group">
                 <p>{dateToShow}</p>
                 {isOutingCreator ? (
                   <span
@@ -291,7 +313,7 @@ export default function OutingDetails() {
                 ) : null}
               </span>
             ) : (
-              <Form method="post" style={{ paddingTop: 15 }}>
+              <Form method="post" className="form">
                 <input
                   type="datetime-local"
                   name="outing-date"
@@ -355,20 +377,12 @@ export default function OutingDetails() {
                     profile.id == getOuting.creator_profile_id;
 
                   return (
-                    <div
-                      key={profile.id}
-                      style={{ display: 'flex', alignContent: 'center' }}
-                    >
+                    <div key={profile.id} className="user-group">
                       {outingCreator ? (
                         <img
                           src={Crown32px}
                           alt="small animated gold crown"
-                          style={{
-                            height: '20px',
-                            width: '20px',
-                            marginRight: 10,
-                            alignSelf: 'center',
-                          }}
+                          className="creator-crown"
                         />
                       ) : null}
 
