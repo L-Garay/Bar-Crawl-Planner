@@ -45,4 +45,12 @@
   margin-right: 20px;
 }
 
+.profile-in-outing-container p.profile-name {
+  padding-right: 10px;
+}
+.profile-in-outing-container .remove-user {
+  cursor: pointer;
+  margin-left: 10px;
+}
+
 /*# sourceMappingURL=outings.css.map */

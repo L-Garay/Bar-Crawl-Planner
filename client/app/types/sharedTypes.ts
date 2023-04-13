@@ -115,3 +115,12 @@ export type PartialProfilesInOuting = {
     email_verified: boolean;
   };
 };
+
+export type BasicOutingData = {
+  id: number;
+  name: string;
+  creator_profile_id: number;
+  created_at: string;
+  start_date_and_time: string;
+  place_ids: string[];
+};
