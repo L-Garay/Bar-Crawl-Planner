@@ -21,6 +21,7 @@
 }
 
 .link {
+  position: relative;
   padding: 0 10px;
   text-decoration: none;
   font-size: 1.2rem;
@@ -31,14 +32,6 @@
     color: lightseagreen;
     cursor: pointer;
   }
-}
-
-.link.friends-link {
-  position: relative;
-}
-
-.menuToggle {
-  position: relative;
 }
 
 .menu-container {

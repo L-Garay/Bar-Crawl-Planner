@@ -135,6 +135,14 @@ export const GET_PROFILE = gql`
   }
 `;
 
+export const GET_PROFILE_ID = gql`
+  query getProfile {
+    getProfile {
+      id
+    }
+  }
+`;
+
 export const BLOCK_PROFILE = gql`
   mutation blockProfile($blocked_profile_id: Int!) {
     blockProfile(blocked_profile_id: $blocked_profile_id) {
@@ -292,6 +300,32 @@ export const GET_OUTING = gql`
       start_date_and_time
       place_ids
     }
+  }
+`;
+
+export const GET_PENDING_OUTINGS = gql`
+  query getPendingOutings {
+    getPendingOutings {
+      pending_outings {
+        id
+        name
+        creator_profile_id
+        start_date_and_time
+        place_ids
+      }
+      outing_creator_profiles {
+        id
+        name
+        account_Id
+        social_pin
+      }
+    }
+  }
+`;
+
+export const GET_PENDING_OUTINGS_COUNT = gql`
+  query getPendingOutingsCount {
+    getPendingOutingsCount
   }
 `;
 

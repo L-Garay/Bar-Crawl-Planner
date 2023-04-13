@@ -51,6 +51,11 @@ const typeDefs = `#graphql
     declined_profiles: [Profile]
   }
 
+  type OutingInviteData {
+    pending_outings: [Outing]
+    outing_creator_profiles: [Profile]
+  }
+
   type LocationDetails {
     id: Int
     business_status: String
@@ -123,6 +128,8 @@ const typeDefs = `#graphql
     getAllOutings: [Outing]
     getCreatedOutings: [Outing]
     getJoinedOutings: [Outing]
+    getPendingOutings: OutingInviteData
+    getPendingOutingsCount: Int
     searchCity(city: String!, locationType: String!): [LocationDetails]
     getAccountWithProfileData(email: String!): Account
     getAllFriendships: [Friendship]

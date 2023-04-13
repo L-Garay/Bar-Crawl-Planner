@@ -225,6 +225,12 @@ export type Outing = {
   start_date_and_time?: Maybe<Scalars['String']>;
 };
 
+export type OutingInviteData = {
+  __typename?: 'OutingInviteData';
+  outing_creator_profiles?: Maybe<Array<Maybe<Profile>>>;
+  pending_outings?: Maybe<Array<Maybe<Outing>>>;
+};
+
 export type OutingProfileStates = {
   __typename?: 'OutingProfileStates';
   accepted_profiles?: Maybe<Array<Maybe<Profile>>>;
@@ -260,6 +266,8 @@ export type Query = {
   getCreatedOutings?: Maybe<Array<Maybe<Outing>>>;
   getJoinedOutings?: Maybe<Array<Maybe<Outing>>>;
   getOuting?: Maybe<Outing>;
+  getPendingOutings?: Maybe<OutingInviteData>;
+  getPendingOutingsCount?: Maybe<Scalars['Int']>;
   getProfile?: Maybe<Profile>;
   getProfilesInOuting?: Maybe<OutingProfileStates>;
   getRecievedFriendRequestCount?: Maybe<Scalars['Int']>;
@@ -374,6 +382,7 @@ export type ResolversTypes = ResolversObject<{
   LocationDetails: ResolverTypeWrapper<LocationDetails>;
   Mutation: ResolverTypeWrapper<{}>;
   Outing: ResolverTypeWrapper<Outing>;
+  OutingInviteData: ResolverTypeWrapper<OutingInviteData>;
   OutingProfileStates: ResolverTypeWrapper<OutingProfileStates>;
   Profile: ResolverTypeWrapper<Profile>;
   Query: ResolverTypeWrapper<{}>;
@@ -390,6 +399,7 @@ export type ResolversParentTypes = ResolversObject<{
   LocationDetails: LocationDetails;
   Mutation: {};
   Outing: Outing;
+  OutingInviteData: OutingInviteData;
   OutingProfileStates: OutingProfileStates;
   Profile: Profile;
   Query: {};
@@ -489,6 +499,12 @@ export type OutingResolvers<ContextType = any, ParentType extends ResolversParen
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type OutingInviteDataResolvers<ContextType = any, ParentType extends ResolversParentTypes['OutingInviteData'] = ResolversParentTypes['OutingInviteData']> = ResolversObject<{
+  outing_creator_profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
+  pending_outings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type OutingProfileStatesResolvers<ContextType = any, ParentType extends ResolversParentTypes['OutingProfileStates'] = ResolversParentTypes['OutingProfileStates']> = ResolversObject<{
   accepted_profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
   declined_profiles?: Resolver<Maybe<Array<Maybe<ResolversTypes['Profile']>>>, ParentType, ContextType>;
@@ -523,6 +539,8 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getCreatedOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getJoinedOutings?: Resolver<Maybe<Array<Maybe<ResolversTypes['Outing']>>>, ParentType, ContextType>;
   getOuting?: Resolver<Maybe<ResolversTypes['Outing']>, ParentType, ContextType, RequireFields<QueryGetOutingArgs, 'id'>>;
+  getPendingOutings?: Resolver<Maybe<ResolversTypes['OutingInviteData']>, ParentType, ContextType>;
+  getPendingOutingsCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   getProfile?: Resolver<Maybe<ResolversTypes['Profile']>, ParentType, ContextType>;
   getProfilesInOuting?: Resolver<Maybe<ResolversTypes['OutingProfileStates']>, ParentType, ContextType, RequireFields<QueryGetProfilesInOutingArgs, 'id'>>;
   getRecievedFriendRequestCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
@@ -539,6 +557,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   LocationDetails?: LocationDetailsResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Outing?: OutingResolvers<ContextType>;
+  OutingInviteData?: OutingInviteDataResolvers<ContextType>;
   OutingProfileStates?: OutingProfileStatesResolvers<ContextType>;
   Profile?: ProfileResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;

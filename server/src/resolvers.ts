@@ -3,6 +3,8 @@ import {
   GetCreatedOutings,
   GetJoinedOutings,
   GetOutingByOutingId,
+  GetPendingOutings,
+  GetPendingOutingsCount,
 } from './prisma/querries/outingsQuerries';
 import {
   GetAllProfiles,
@@ -11,6 +13,7 @@ import {
   GetDeclinedProfilesInOuting,
   GetBlockedProfiles,
   GetProfileBySocialPin,
+  GetProfileByProfileId,
 } from './prisma/querries/profileQuerries';
 import { Resolvers } from './types/generated/graphqlTypes';
 import { GraphQLError } from 'graphql';
@@ -307,6 +310,83 @@ const resolvers: Resolvers = {
       } else {
         return outing.data;
       }
+    },
+    getPendingOutings: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id } = profile.data;
+      const outings = await GetPendingOutings(id);
+
+      if (outings.status === 'Failure') {
+        throw new GraphQLError('Cannot get pending outings', {
+          extensions: {
+            code: outings.error?.name,
+            message: outings.error?.message,
+            prismaMeta: outings.error?.meta,
+            prismaErrorCode: outings.error?.errorCode,
+          },
+        });
+      }
+
+      const creatorProfilePromisesArray = await Promise.allSettled(
+        outings.data.map(async (outing: any) => {
+          return await GetProfileByProfileId(outing.creator_profile_id);
+        })
+      );
+
+      const creatorProfiles = creatorProfilePromisesArray
+        .map((promise) => {
+          if (
+            promise.status === 'fulfilled' &&
+            promise.value.status === 'Success'
+          ) {
+            return promise.value.data;
+          } else if (promise.status === 'rejected') {
+            // log to some service
+            console.log(
+              'Error getting creator profile for pending outing: ',
+              promise.reason
+            );
+            // even though we are return null here
+            // logging the creatorProfiles array below will show that 'undefined' is actually inserted into the array
+            return null;
+          }
+        })
+        .filter((profile) => profile !== undefined);
+
+      return {
+        pending_outings: outings.data,
+        outing_creator_profiles: creatorProfiles,
+      };
+    },
+    getPendingOutingsCount: async (parent, args, context, info) => {
+      const { authError, profile } = context;
+      if (authError) {
+        throw new GraphQLError(authError.message, {
+          extensions: { code: authError.code },
+        });
+      }
+
+      const { id } = profile.data;
+      const count = await GetPendingOutingsCount(id);
+
+      if (count.status === 'Failure') {
+        throw new GraphQLError('Cannot get pending count count', {
+          extensions: {
+            code: count.error?.name,
+            message: count.error?.message,
+            prismaMeta: count.error?.meta,
+            prismaErrorCode: count.error?.errorCode,
+          },
+        });
+      }
+
+      return count.data;
     },
     searchCity: async (parent, args, context, info) => {
       const { authError } = context;

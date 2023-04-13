@@ -5,6 +5,7 @@ import { useOnClickOutside } from '~/utils/useOnClickOutside';
 
 export type HeaderProps = {
   hasFriendRequests: boolean;
+  hasOutingInvites: boolean;
 };
 
 const NavMenu = () => {
@@ -28,7 +29,10 @@ const NavMenu = () => {
   );
 };
 
-export const BasicHeader = ({ hasFriendRequests }: HeaderProps) => {
+export const BasicHeader = ({
+  hasFriendRequests,
+  hasOutingInvites,
+}: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = React.useState<boolean>(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   useOnClickOutside(menuRef, () => setIsMenuOpen(false));
@@ -44,9 +48,10 @@ export const BasicHeader = ({ hasFriendRequests }: HeaderProps) => {
             Home
           </Link>
           <Link to="/outings" className="link">
-            Outings
+            Outings{' '}
+            {hasOutingInvites && <div className="notification-marker"></div>}
           </Link>
-          <Link to="/friends" className="link friends-link">
+          <Link to="/friends" className="link">
             Friends{' '}
             {hasFriendRequests && <div className="notification-marker"></div>}
           </Link>
