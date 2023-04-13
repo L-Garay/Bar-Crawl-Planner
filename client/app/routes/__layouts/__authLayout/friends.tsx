@@ -14,6 +14,7 @@ import { useMutation, useQuery } from '@apollo/client';
 import { useEffect, useState } from 'react';
 import logApolloError from '~/utils/getApolloError';
 import type { FriendRequestData, FriendshipData } from '~/types/sharedTypes';
+import moment from 'moment';
 
 export const links: LinksFunction = () => {
   return [
@@ -26,6 +27,7 @@ export const links: LinksFunction = () => {
 };
 
 export default function FriendsIndex() {
+  const [profileId, setProfileId] = useState<number>(0);
   const [friends, setFriends] = useState<FriendshipData[]>([]);
   const [sentRequests, setSentRequests] = useState<FriendRequestData[]>([]);
   const [recievedRequests, setRecievedRequests] = useState<FriendRequestData[]>(
@@ -36,7 +38,11 @@ export default function FriendsIndex() {
   const [invalidFriendInput, setInvalidFriendInput] = useState<boolean>(false);
 
   // NOTE this is used in blocking a profile, not sure what to do if we can't get the id
-  const { data: profileData } = useQuery(GET_PROFILE_ID);
+  const { data: profileData } = useQuery(GET_PROFILE_ID, {
+    onCompleted: (data) => {
+      setProfileId(data.getProfile.id);
+    },
+  });
 
   const { error: friendsError } = useQuery(GET_ALL_FRIENDSHIPS, {
     onCompleted: (data) => {
@@ -186,8 +192,12 @@ export default function FriendsIndex() {
                   return (
                     <div className="request" key={request.id}>
                       <li>
-                        From: {request.requestor_profile_id} created at:{' '}
-                        {request.created_at}{' '}
+                        <div>
+                          From: {request.requestor_profile_relation.name}
+                        </div>
+                        <div>
+                          Recieved: {moment(request.created_at).fromNow()}
+                        </div>
                         <span className="friend-buttons">
                           <button
                             onClick={() =>
@@ -256,9 +266,13 @@ export default function FriendsIndex() {
                 {/* we need to get the friend's profile data to display here */}
 
                 {friends.map((friend: any) => {
+                  const isRequestor = friend.requestor_profile_id === profileId;
+                  const name = isRequestor
+                    ? friend.addressee_profile_relation.name
+                    : friend.requestor_profile_relation.name;
                   return (
                     <li key={friend.id}>
-                      Friend: {friend.id} created at: {friend.created_at}{' '}
+                      <div>(profile img here) {name}</div>
                       <span className="friend-buttons">
                         <button
                           onClick={() =>
@@ -282,8 +296,7 @@ export default function FriendsIndex() {
                               },
                             });
                             const blocked_profile_id =
-                              friend.requestor_profile_id ===
-                              profileData.getProfile.id
+                              friend.requestor_profile_id === profileId
                                 ? friend.addressee_profile_id
                                 : friend.requestor_profile_id;
                             blockProfile({
@@ -317,8 +330,8 @@ export default function FriendsIndex() {
                   {sentRequests.map((request: any) => {
                     return (
                       <li key={request.id}>
-                        To: {request.addressee_profile_id} created at:{' '}
-                        {request.created_at}
+                        <div>To: {request.addressee_profile_relation.name}</div>
+                        <div>Sent: {moment(request.created_at).fromNow()}</div>
                       </li>
                     );
                   })}

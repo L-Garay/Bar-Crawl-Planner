@@ -46,6 +46,13 @@ export async function GetSentFriendRequests(
           },
         ],
       },
+      include: {
+        addressee_profile_relation: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
     return { status: 'Success', data: sent, error: null };
   } catch (error) {
@@ -67,6 +74,13 @@ export async function GetRecievedFriendRequests(
             status_code: 'S',
           },
         ],
+      },
+      include: {
+        requestor_profile_relation: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
     return { status: 'Success', data: recieved, error: null };
