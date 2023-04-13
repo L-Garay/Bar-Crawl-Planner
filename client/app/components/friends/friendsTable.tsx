@@ -5,15 +5,20 @@ import {
   SEND_OUTING_INVITES,
 } from '~/constants/graphqlConstants';
 import FriendTableItem from './friendTableItem';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import logApolloError from '~/utils/getApolloError';
+import type {
+  FriendshipData,
+  PartialProfilesInOuting,
+} from '~/types/sharedTypes';
 
 export type FriendsTableProps = {
   userId: number;
   outingId: number;
   outingName: string;
   startDateAndTime: string;
-  pendingProfiles: any[];
-  acceptedProfiles: any[];
+  pendingProfiles: PartialProfilesInOuting[];
+  acceptedProfiles: PartialProfilesInOuting[];
 };
 
 const FriendsTable = ({
@@ -24,18 +29,30 @@ const FriendsTable = ({
   acceptedProfiles,
   pendingProfiles,
 }: FriendsTableProps) => {
-  const { data: friendsData } = useQuery(GET_ALL_FRIENDSHIPS);
-  const friends = friendsData ? friendsData.getAllFriendships : [];
-
-  const [inviteFriends, { data: inviteData }] = useMutation(
-    SEND_OUTING_INVITES,
-    {
-      refetchQueries: [GET_PROFILES_IN_OUTING], // don't think this will work since the original query for the parent component comes from the loader, and so the updated/refecthed data will not be made available unless the page refreshes
-    }
-  );
-
-  // for added friends, we can store their account ids here and then when it's time to invite them we can just look up their accounts and grab their emails
   const [accountIds, setAccountIds] = useState<number[]>([]);
+  const [friends, setFriends] = useState<FriendshipData[]>([]);
+  const [hasFriendQueryError, setHasFriendQueryError] =
+    useState<boolean>(false);
+  const [hasInviteError, setHasInviteError] = useState<boolean>(false);
+
+  useQuery(GET_ALL_FRIENDSHIPS, {
+    onCompleted: (data) => {
+      setFriends(data.getAllFriendships);
+    },
+    onError: (err) => {
+      logApolloError(err);
+      setHasFriendQueryError(true);
+    },
+  });
+
+  const [inviteFriends] = useMutation(SEND_OUTING_INVITES, {
+    refetchQueries: [GET_PROFILES_IN_OUTING],
+    onError: (err) => {
+      logApolloError(err);
+      setHasInviteError(true);
+    },
+  });
+
   const addFriend = (accountId: number) => {
     if (!accountIds.includes(accountId)) {
       setAccountIds([...accountIds, accountId]);
@@ -48,61 +65,69 @@ const FriendsTable = ({
     }
   };
 
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => {
+      setHasInviteError(false);
+    }, 5000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [hasInviteError]);
+
   return (
-    <div
-      className="friends-table-container"
-      style={{
-        width: 250,
-        marginLeft: 100,
-      }}
-    >
-      {friends.length == 0 ? (
-        <p>No friends yet</p>
-      ) : (
-        <div style={{ outline: '1px solid black', padding: 10 }}>
-          <div
-            className="friends-table-header"
-            style={{ display: 'flex', alignItems: 'center' }}
-          >
-            <h4 style={{ marginRight: 10 }}>Friends</h4>
-            <small># of friends added: {accountIds.length}</small>
-          </div>
-          <div className="friends-table" style={{ minHeight: 100 }}>
-            <>
-              {friends.map((friend: any) => (
-                <FriendTableItem
-                  key={friend.id}
-                  userId={userId}
-                  friend={friend}
-                  addFriend={addFriend}
-                  removeFriend={removeFriend}
-                  accountIds={accountIds}
-                  pendingProfiles={pendingProfiles}
-                  acceptedProfiles={acceptedProfiles}
-                />
-              ))}
-            </>
-          </div>
-          <div className="friends-table-button">
-            {/* TODO create mutation to send outing invites to friends */}
-            {/* NOTE try to reuse as much of the sendOutingInvitesAndCreate mutation as possible. As in, just as the GetBlockedAccountEmails code was split out, see if you can do the same with the code that gets the emails using the account ids */}
-            <button
-              disabled={accountIds.length == 0}
-              onClick={() => {
-                inviteFriends({
-                  variables: {
-                    outing_id: outingId,
-                    start_date_and_time: startDateAndTime,
-                    account_Ids: accountIds,
-                    outing_name: outingName,
-                  },
-                });
-                setAccountIds([]);
-              }}
-            >
-              Invite Friends
-            </button>
-          </div>
+    <div className="friends-table-container">
+      <div className="box">
+        {hasFriendQueryError && (
+          <p>There was a problem getting your friendships</p>
+        )}
+        {friends.length == 0 && !hasFriendQueryError && <p>No friends yet</p>}
+        {friends.length && !hasFriendQueryError ? (
+          <>
+            <div className="friends-table-header">
+              <h4>Friends</h4>
+              <small># of friends added: {accountIds.length}</small>
+            </div>
+            <div className="friends-table">
+              <>
+                {friends.map((friend: any) => (
+                  <FriendTableItem
+                    key={friend.id}
+                    userId={userId}
+                    friend={friend}
+                    addFriend={addFriend}
+                    removeFriend={removeFriend}
+                    accountIds={accountIds}
+                    pendingProfiles={pendingProfiles}
+                    acceptedProfiles={acceptedProfiles}
+                  />
+                ))}
+              </>
+            </div>
+            <div className="friends-table-button">
+              <button
+                disabled={accountIds.length == 0}
+                onClick={() => {
+                  inviteFriends({
+                    variables: {
+                      outing_id: outingId,
+                      start_date_and_time: startDateAndTime,
+                      account_Ids: accountIds,
+                      outing_name: outingName,
+                    },
+                  });
+                  setAccountIds([]);
+                }}
+              >
+                Invite Friends
+              </button>
+            </div>
+          </>
+        ) : null}
+      </div>
+      {hasInviteError && (
+        <div className="invite-error">
+          <p>
+            Unable to send invitation(s), if problem continues contact support.
+          </p>
         </div>
       )}
     </div>

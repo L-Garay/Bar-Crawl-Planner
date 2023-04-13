@@ -2,15 +2,19 @@ import { useMemo, useState } from 'react';
 import MinusCircle from '../svgs/minusCircle';
 import PlusCircle from '../svgs/plusCircle';
 import GradientCheck from '~/assets/gradient-check32px.png';
+import type {
+  FriendshipData,
+  PartialProfilesInOuting,
+} from '~/types/sharedTypes';
 
 export type FriendTableItemProps = {
   userId: number;
-  friend: Record<string, any>;
+  friend: FriendshipData;
   addFriend: (accountId: number) => void;
   removeFriend: (accountId: number) => void;
   accountIds: number[];
-  pendingProfiles: Record<string, any>[];
-  acceptedProfiles: Record<string, any>[];
+  pendingProfiles: PartialProfilesInOuting[];
+  acceptedProfiles: PartialProfilesInOuting[];
 };
 
 export const FriendTableItem = ({
@@ -22,19 +26,12 @@ export const FriendTableItem = ({
   pendingProfiles,
   acceptedProfiles,
 }: FriendTableItemProps) => {
-  // can use this to determine if they are hovering over either plus or minus icon
   const [isHoveringIcon, setIsHoveringIcon] = useState<boolean>(false);
-  const {
-    id: addressee_id,
-    name: addressee_name,
-    account_Id: addressee_account_Id,
-  } = friend.addressee_profile_relation;
+  const { id: addressee_id, name: addressee_name } =
+    friend.addressee_profile_relation;
 
-  const {
-    id: requestor_id,
-    name: requestor_name,
-    account_Id: requestor_account_Id,
-  } = friend.requestor_profile_relation;
+  const { id: requestor_id, name: requestor_name } =
+    friend.requestor_profile_relation;
 
   const friendId = userId === addressee_id ? requestor_id : addressee_id;
   const nameToShow = userId === addressee_id ? requestor_name : addressee_name;
@@ -50,18 +47,13 @@ export const FriendTableItem = ({
   return (
     <div
       className="friend-list-item-container"
+      // NOTE is this considered bad practice to use inline styles?
+      // the style defined in the css will act as the default, and then we can overwrite it here
       style={{
-        display: 'flex',
-        alignItems: 'center',
         background: alreadySelected ? 'lightgray' : undefined,
       }}
     >
-      <p
-        className="friend-list-item"
-        style={{ paddingRight: 10, marginTop: 5, marginBottom: 5 }}
-      >
-        {nameToShow}
-      </p>
+      <p className="friend-name">{nameToShow}</p>
       <>
         {alreadyAdded ? (
           <img
@@ -77,14 +69,10 @@ export const FriendTableItem = ({
                 className="plus-icon-wrapper"
                 onMouseEnter={() => setIsHoveringIcon(true)}
                 onMouseLeave={() => setIsHoveringIcon(false)}
-                onClick={() => {
-                  console.log('should be adding friend');
-
-                  removeFriend(friendId);
-                }}
+                onClick={() => removeFriend(friendId)}
               >
                 <MinusCircle
-                  pathId={friendId!}
+                  pathId={friendId!.toString()}
                   stroke={isHoveringIcon ? 'lightseagreen' : undefined}
                 />
               </span>
@@ -93,12 +81,10 @@ export const FriendTableItem = ({
                 className="plus-icon-wrapper"
                 onMouseEnter={() => setIsHoveringIcon(true)}
                 onMouseLeave={() => setIsHoveringIcon(false)}
-                onClick={() => {
-                  addFriend(friendId);
-                }}
+                onClick={() => addFriend(friendId)}
               >
                 <PlusCircle
-                  pathId={friendId!}
+                  pathId={friendId!.toString()}
                   stroke={isHoveringIcon ? 'lightcoral' : undefined}
                 />
               </span>
