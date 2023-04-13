@@ -39,7 +39,20 @@
    }
   }
 
-  .flex {
-    align-items: center;
+}
+
+.outing-tables {
+  .outing-table {
+    min-width: 300px;
+    margin-right: 50px;
   }
+  .outing-table-name {
+    padding-right: 10px;
+  }
+  .outing-info {
+    cursor: pointer;
+    margin-right: 20px;
+  }
+
+
 }

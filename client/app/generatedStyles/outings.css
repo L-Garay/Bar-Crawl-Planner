@@ -32,8 +32,17 @@
 .outing-invite .error-message p {
   margin: 0;
 }
-.outing-invite .flex {
-  align-items: center;
+
+.outing-tables .outing-table {
+  min-width: 300px;
+  margin-right: 50px;
+}
+.outing-tables .outing-table-name {
+  padding-right: 10px;
+}
+.outing-tables .outing-info {
+  cursor: pointer;
+  margin-right: 20px;
 }
 
 /*# sourceMappingURL=outings.css.map */
