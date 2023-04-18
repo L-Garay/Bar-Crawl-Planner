@@ -166,8 +166,9 @@ export default function FriendsIndex() {
           <div className="add-friend-status">
             {requestError && showErrorMessage && (
               <p>
-                {requestError.graphQLErrors[0].message == 'Already friends'
-                  ? 'Already friends'
+                {requestError.graphQLErrors[0].message ==
+                'Already friends or requested'
+                  ? 'Already friends or requested'
                   : 'Error trying to add friend. If problem continues contact support.'}
               </p>
             )}
