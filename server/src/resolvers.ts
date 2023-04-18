@@ -60,6 +60,7 @@ import {
 import {
   CheckFriendShipStatus,
   GetAllFriendships,
+  GetFriendship,
   GetRecievedFriendRequestCount,
   GetRecievedFriendRequests,
   GetSentFriendRequests,
@@ -1000,9 +1001,13 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
-      const { blocked_profile_id } = args;
+      const { blocked_profile_id, friend_id } = args;
 
-      const status = await BlockProfile(profile.data.id, blocked_profile_id);
+      const status = await BlockProfile(
+        profile.data.id,
+        blocked_profile_id,
+        friend_id
+      );
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot block profile', {
           extensions: {
@@ -1025,7 +1030,26 @@ const resolvers: Resolvers = {
       }
       const { blocked_profile_id } = args;
 
-      const status = await UnblockProfile(profile.data, blocked_profile_id);
+      const friendship = await GetFriendship(
+        profile.data.id,
+        blocked_profile_id
+      );
+      if (friendship.status === 'Failure') {
+        throw new GraphQLError('Cannot get friendship', {
+          extensions: {
+            code: friendship.error?.name,
+            message: friendship.error?.message,
+            prismaMeta: friendship.error?.meta,
+            prismaErrorCode: friendship.error?.errorCode,
+          },
+        });
+      }
+
+      const status = await UnblockProfile(
+        profile.data,
+        blocked_profile_id,
+        friendship.data.id
+      );
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot unblock profile', {
           extensions: {

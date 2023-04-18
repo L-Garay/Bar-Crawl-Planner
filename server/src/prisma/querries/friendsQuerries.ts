@@ -1,6 +1,31 @@
 import prismaClient from '../..';
 import { PrismaData, PrismaError } from '../../types/sharedTypes';
 
+export async function GetFriendship(
+  requestor_profile_id: number,
+  addressee_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const friendship = await prismaClient.friendship.findFirst({
+      where: {
+        OR: [
+          {
+            requestor_profile_id,
+            addressee_profile_id,
+          },
+          {
+            requestor_profile_id: addressee_profile_id,
+            addressee_profile_id: requestor_profile_id,
+          },
+        ],
+      },
+    });
+    return { status: 'Success', data: friendship, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
 export async function GetAllFriendships(id: number): Promise<PrismaData> {
   try {
     const friends = await prismaClient.friendship.findMany({

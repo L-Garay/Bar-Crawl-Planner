@@ -236,6 +236,7 @@ export default function FriendsIndex() {
                                 variables: {
                                   blocked_profile_id:
                                     request.requestor_profile_id,
+                                  friend_id: request.id,
                                 },
                               });
                             }}
@@ -302,6 +303,7 @@ export default function FriendsIndex() {
                             blockProfile({
                               variables: {
                                 blocked_profile_id,
+                                friend_id: friend.id,
                               },
                             });
                           }}
