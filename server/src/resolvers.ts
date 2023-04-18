@@ -835,9 +835,32 @@ const resolvers: Resolvers = {
         });
       }
       const { profile_id, social_pin, email } = args;
+
+      const profile = await GetProfileByProfileId(profile_id);
+      if (profile.status === 'Failure') {
+        throw new GraphQLError('Cannot get profile', {
+          extensions: {
+            code: profile.error?.name,
+            message: profile.error?.message,
+            prismaMeta: profile.error?.meta,
+            prismaErrorCode: profile.error?.errorCode,
+          },
+        });
+      }
+      const account = await GetAccountByAccountId(profile.data.account_Id);
+      if (account.status === 'Failure') {
+        throw new GraphQLError('Cannot get account', {
+          extensions: {
+            code: account.error?.name,
+            message: account.error?.message,
+            prismaMeta: account.error?.meta,
+            prismaErrorCode: account.error?.errorCode,
+          },
+        });
+      }
+
       const updatedUser = await UpdateAccountBySocialPin(
-        profile_id,
-        social_pin,
+        account.data.id,
         email
       );
       if (updatedUser.status === 'Failure') {
