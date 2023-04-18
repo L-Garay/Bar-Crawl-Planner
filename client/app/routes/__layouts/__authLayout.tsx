@@ -6,7 +6,7 @@ import { BasicHeader } from '~/components/organisms/Headers';
 import { validateUserAndSession } from '~/utils/validateUserAndSession';
 import footerStyles from '~/generatedStyles/footer.css';
 import headerStyles from '~/generatedStyles/header.css';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import {
   GET_PENDING_OUTINGS_COUNT,
@@ -54,11 +54,9 @@ export default function AuthLayout() {
   const { redirectTo, outingId, profileId, socialPin, valid } = useLoaderData();
   const navigate = useNavigate();
   const hasOutingParams = outingId && profileId && socialPin;
-  // If a user is ever linked to a page that is wrapped in this authLayout route and they are not logged in when they click the link, they will all get caugh by the loader function above
-  // They wont' have a valid session, and if we pull off a redirectTo param then we know they were trying to access a protected route
-  // so we need to store the redirectTo param in local storage so that when they log in, we can redirect them to the page they were trying to access
-  // in order to do that we need access to the DOM and therefore need to pass the redirectTo value from the loader to the rendered component so we have access to window
-  // then we save the value in local storage, and navigate user to logout route
+  const [requestCount, setRequestCount] = useState<number>(0);
+  const [outingsCount, setOutingsCount] = useState<number>(0);
+
   useEffect(() => {
     const url = `/resources/logout?returnToLogin=true`;
     if (redirectTo && !hasOutingParams) {
@@ -72,26 +70,24 @@ export default function AuthLayout() {
     }
   }, [redirectTo, outingId, profileId, navigate, hasOutingParams, socialPin]);
 
-  const { data: requestCount } = useQuery(GET_RECIEVED_FRIEND_REQUEST_COUNT);
-  const { data: outingsCount } = useQuery(GET_PENDING_OUTINGS_COUNT);
-
-  const hasFriendRequests = useMemo(() => {
-    if (!requestCount) return false;
-    return requestCount.getRecievedFriendRequestCount > 0;
-  }, [requestCount]);
-
-  const hasOutingInvites = useMemo(() => {
-    if (!outingsCount) return false;
-    return outingsCount.getPendingOutingsCount > 0;
-  }, [outingsCount]);
+  useQuery(GET_RECIEVED_FRIEND_REQUEST_COUNT, {
+    onCompleted: (data) => {
+      setRequestCount(data.getRecievedFriendRequestCount);
+    },
+  });
+  useQuery(GET_PENDING_OUTINGS_COUNT, {
+    onCompleted: (data) => {
+      setOutingsCount(data.getPendingOutingsCount);
+    },
+  });
 
   return (
     <>
       {valid ? (
         <>
           <BasicHeader
-            hasFriendRequests={hasFriendRequests}
-            hasOutingInvites={hasOutingInvites}
+            hasFriendRequests={requestCount > 0}
+            hasOutingInvites={outingsCount > 0}
           />
           <Outlet />
           <BasicFooter />

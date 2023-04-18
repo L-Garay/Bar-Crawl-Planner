@@ -26,6 +26,9 @@ export const VALID_NAME_REGEX = /^[^0-9`!@#\$%\^&*+_=<>{}()\[\]]+$/;
 export const VALID_EMAIL_REGEX =
   /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/;
 
+export const VALID_PHONE_REGEX =
+  /^\W?\d*?\W*?(?<area>\d{3})\W*?(?<group1>\d{3})\W*?(?<group2>\d{4})\W*?$/;
+
 // Regex's for common seen email errors
 export const BAD_GMAIL_REGEX = /@gmail\.co$/;
 export const BAD_HOTMAIL_REGEX = /@hotmail\.co$/;

@@ -124,3 +124,20 @@ export type BasicOutingData = {
   start_date_and_time: string;
   place_ids: string[];
 };
+
+export type BasicAccount = {
+  id: number;
+  email: string;
+  email_verified: boolean;
+  phone_number: string;
+  created_at: string;
+  deactivated: boolean;
+};
+
+export type BasicProfile = {
+  id: number;
+  name: string;
+  account_Id: number;
+  blocked_profile_ids: number[];
+  social_pin: string;
+};

@@ -1,21 +1,49 @@
 import { useMutation, useQuery } from '@apollo/client';
+import { useEffect, useState } from 'react';
 import {
   GET_BLOCKED_PROFILES,
   GET_PROFILE,
   UNBLOCK_PROFILE,
 } from '~/constants/graphqlConstants';
+import type { BasicProfile } from '~/types/sharedTypes';
+import logApolloError from '~/utils/getApolloError';
 
 export default function ProfileIndex() {
-  const { data: profileData } = useQuery(GET_PROFILE);
-  const { data: blockedProfiles } = useQuery(GET_BLOCKED_PROFILES);
+  const [profile, setProfile] = useState<BasicProfile | null>(null);
+  const [blockedProfiles, setBlockedProfiles] = useState<BasicProfile[]>([]);
+  const [showError, setShowError] = useState<boolean>(false);
 
-  const [unblockProfile, { data: unblockedProfile }] = useMutation(
-    UNBLOCK_PROFILE,
-    {
-      refetchQueries: [GET_BLOCKED_PROFILES],
-    }
-  );
-  const social_pin = profileData ? profileData.getProfile.social_pin : '';
+  useQuery(GET_PROFILE, {
+    onCompleted: (data) => {
+      setProfile(data.getProfile);
+    },
+    onError: (error) => {
+      logApolloError(error);
+      setShowError(true);
+    },
+  });
+  useQuery(GET_BLOCKED_PROFILES, {
+    onCompleted: (data) => {
+      setBlockedProfiles(data.getBlockedProfiles);
+    },
+    onError: (error) => {
+      logApolloError(error);
+      setShowError(true);
+    },
+  });
+
+  const [unblockProfile] = useMutation(UNBLOCK_PROFILE, {
+    refetchQueries: [GET_BLOCKED_PROFILES],
+  });
+  const social_pin = profile ? profile.social_pin : '';
+
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => {
+      setShowError(false);
+    }, 5000);
+
+    return () => clearTimeout(errorTimeout);
+  }, [showError]);
 
   return (
     <>
@@ -61,9 +89,9 @@ export default function ProfileIndex() {
         <div className="blocked-profiles-container">
           <h3>Blocked Profiles</h3>
           <div className="blocked-profiles-list">
-            {blockedProfiles && blockedProfiles.getBlockedProfiles.length ? (
+            {blockedProfiles.length ? (
               <ul>
-                {blockedProfiles.getBlockedProfiles.map((profile: any) => (
+                {blockedProfiles.map((profile: any) => (
                   <li key={profile.id}>
                     <p>
                       {profile.name} with id {profile.id}
@@ -88,6 +116,11 @@ export default function ProfileIndex() {
               <p>You like everyone</p>
             )}
           </div>
+          {showError && (
+            <div className="error-message">
+              <p>We are unable to save your changes at this time.</p>
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -1,58 +1,59 @@
-import type { ActionFunction, LoaderFunction } from '@remix-run/node';
-import { Form, useLoaderData, useTransition } from '@remix-run/react';
-import React from 'react';
-import { getNewClient } from '~/apollo/getClient';
+import { useMutation, useQuery } from '@apollo/client';
+import { useEffect, useState } from 'react';
 import { Dynamic } from '~/components/animated/loadingSpinners';
 import { UPDATE_ACCOUNT, GET_ACCOUNT } from '~/constants/graphqlConstants';
+import { VALID_PHONE_REGEX } from '~/constants/inputValidationConstants';
+import type { BasicAccount } from '~/types/sharedTypes';
 import logApolloError from '~/utils/getApolloError';
 
-export const action: ActionFunction = async ({ request }) => {
-  const client = await getNewClient(request);
-  const formData = await request.formData();
-  const phone_number = formData.get('phone_number')?.toString();
+export default function AccountIndex() {
+  const [account, setAccount] = useState<BasicAccount | null>(null);
+  const [phoneNumberInput, setPhoneNumberInput] = useState<string>('');
+  const [showError, setShowError] = useState<boolean>(false);
+  const [phoneInputError, setPhoneInputError] = useState<boolean>(false);
 
-  const updatedUser = await client.mutate({
-    mutation: UPDATE_ACCOUNT,
-    variables: {
-      phone_number: phone_number,
+  const PHONE_MAX = 14; // ex (208)-888-8888 = 10 digits + 2 dashes + 2 parenthesis = 14
+
+  useQuery(GET_ACCOUNT, {
+    onCompleted: (data) => {
+      setAccount(data.getUserAccount);
+    },
+    onError: (error) => {
+      logApolloError(error);
+      setShowError(true);
     },
   });
-  const userData = updatedUser.data.updateUserAccount;
 
-  return { userData };
-};
+  const [updateAccount, { data: updateData, error: updateError }] = useMutation(
+    UPDATE_ACCOUNT,
+    {
+      onError: (error) => {
+        setShowError(true);
+      },
+    }
+  );
 
-export const loader: LoaderFunction = async ({ request }) => {
-  const client = await getNewClient(request);
-  let account: any;
-  try {
-    account = await client.query({
-      query: GET_ACCOUNT,
-    });
-  } catch (error) {
-    logApolloError(error);
-    throw new Response(JSON.stringify(error), { status: 500 });
-  }
-  return account;
-};
+  useEffect(() => {
+    if (!account && showError) {
+      throw new Error('Error getting account data');
+    }
+  }, [account, showError]);
 
-export default function AccountIndex() {
-  const transition = useTransition();
-  const loaderData = useLoaderData();
+  const phoneToShow = updateData
+    ? updateData.updateUserAccount.phone_number
+    : account?.phone_number;
 
-  const { getUserAccount: accountData } = loaderData.data;
+  useEffect(() => {
+    const errorTimeout = setTimeout(() => {
+      setShowError(false);
+    }, 5000);
 
-  // Optimistically show the user's updated values, or their current value
-  // Then once the sumbission process is over, the updated value should have then become their current value and it will remain in the UI
-  const phoneToShow = transition.submission
-    ? transition.submission?.formData.get('phone_number')
-    : accountData
-    ? accountData.phone_number
-    : null;
+    return () => clearTimeout(errorTimeout);
+  }, [showError]);
 
   return (
     <>
-      {accountData ? (
+      {account ? (
         <div
           style={{
             fontFamily: 'system-ui, sans-serif',
@@ -73,12 +74,44 @@ export default function AccountIndex() {
             can see soft deletes in the future.
           </p>
           <div className="form-container">
-            <Form method="patch" action="/account">
-              <label htmlFor="phone_number">Phone</label>
-              <input type="text" name="phone_number" />
-              <button type="submit">Submit</button>
-            </Form>
+            <label htmlFor="phone_number">Phone</label>
+            <input
+              type="text"
+              name="phone_number"
+              maxLength={PHONE_MAX}
+              onChange={(event) => {
+                setPhoneNumberInput(event.target.value);
+              }}
+            />
+            <button
+              onClick={() => {
+                const regex = new RegExp(VALID_PHONE_REGEX);
+                const match = regex.test(phoneNumberInput);
+                if (match) {
+                  updateAccount({
+                    variables: {
+                      phone_number: phoneNumberInput,
+                    },
+                  });
+                  setPhoneNumberInput('');
+                } else {
+                  setShowError(true);
+                  setPhoneInputError(true);
+                }
+              }}
+            >
+              Submit
+            </button>
           </div>
+          {showError && updateError ? (
+            <div className="error-message">
+              <p>We are unable to save your changes at this time.</p>
+            </div>
+          ) : showError && phoneInputError ? (
+            <div className="error-message">
+              <p>Phone number not formatted properly, please see examples.</p>
+            </div>
+          ) : null}
         </div>
       ) : (
         <Dynamic />
