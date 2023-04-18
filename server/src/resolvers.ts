@@ -47,9 +47,6 @@ import {
   CreateOuting,
   DeleteOuting,
   DisconnectUserWithOuting,
-  SendOutingInvites,
-  SendOutingInvitesAndCreate,
-  SendOutingJoinedEmail,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
@@ -68,6 +65,11 @@ import {
   GetRecievedFriendRequests,
   GetSentFriendRequests,
 } from './prisma/querries/friendsQuerries';
+import {
+  SendOutingInvites,
+  SendOutingInvitesAndCreate,
+  SendOutingJoinedEmail,
+} from './prisma/mutations/emailMutations';
 
 const resolvers: Resolvers = {
   Query: {
