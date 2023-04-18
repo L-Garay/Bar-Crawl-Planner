@@ -47,23 +47,29 @@ import {
   CreateOuting,
   DeleteOuting,
   DisconnectUserWithOuting,
-  SendOutingInvites,
-  SendOutingInvitesAndCreate,
-  SendOutingJoinedEmail,
   UpdateOuting,
 } from './prisma/mutations/outingMutations';
 import { Profile } from '@prisma/client';
 import {
   UpdateFriend,
-  SendFriendRequestAndEmail,
+  SendFriendRequestEmail,
+  AddFriend,
+  ReAddFriend,
 } from './prisma/mutations/friendsMutations';
 import {
-  CheckFriendShipStatus,
+  CheckDeclinedOrRemoved,
+  CheckFriendsOrRequested,
   GetAllFriendships,
+  GetFriendship,
   GetRecievedFriendRequestCount,
   GetRecievedFriendRequests,
   GetSentFriendRequests,
 } from './prisma/querries/friendsQuerries';
+import {
+  SendOutingInvites,
+  SendOutingInvitesAndCreate,
+  SendOutingJoinedEmail,
+} from './prisma/mutations/emailMutations';
 
 const resolvers: Resolvers = {
   Query: {
@@ -831,9 +837,32 @@ const resolvers: Resolvers = {
         });
       }
       const { profile_id, social_pin, email } = args;
+
+      const profile = await GetProfileByProfileId(profile_id);
+      if (profile.status === 'Failure') {
+        throw new GraphQLError('Cannot get profile', {
+          extensions: {
+            code: profile.error?.name,
+            message: profile.error?.message,
+            prismaMeta: profile.error?.meta,
+            prismaErrorCode: profile.error?.errorCode,
+          },
+        });
+      }
+      const account = await GetAccountByAccountId(profile.data.account_Id);
+      if (account.status === 'Failure') {
+        throw new GraphQLError('Cannot get account', {
+          extensions: {
+            code: account.error?.name,
+            message: account.error?.message,
+            prismaMeta: account.error?.meta,
+            prismaErrorCode: account.error?.errorCode,
+          },
+        });
+      }
+
       const updatedUser = await UpdateAccountBySocialPin(
-        profile_id,
-        social_pin,
+        account.data.id,
         email
       );
       if (updatedUser.status === 'Failure') {
@@ -894,30 +923,65 @@ const resolvers: Resolvers = {
       }
       const { addressee_profile_id } = args;
 
-      const friendStatus = await CheckFriendShipStatus(
+      const friendOrRequested = await CheckFriendsOrRequested(
         addressee_profile_id,
         sender_profile.data.id
       );
-      if (friendStatus.data == 1) {
+      if (friendOrRequested.data == 1) {
         throw new GraphQLError('Already friends');
       }
 
-      const emailResponse = await SendFriendRequestAndEmail(
+      // check for Removed or Declined
+      // if there is data, then we know that a record was found in the DB and data should not be null
+      const hasExistingFriendshipRecord = await CheckDeclinedOrRemoved(
+        addressee_profile_id,
+        sender_profile.data.id
+      );
+
+      if (hasExistingFriendshipRecord.data != null) {
+        const updatedFriend = await ReAddFriend(
+          hasExistingFriendshipRecord.data.id,
+          addressee_profile_id,
+          sender_profile.data.id
+        );
+        if (updatedFriend.status === 'Failure') {
+          throw new GraphQLError('Cannot update friend', {
+            extensions: {
+              code: updatedFriend.error?.name,
+              message: updatedFriend.error?.message,
+              prismaMeta: updatedFriend.error?.meta,
+              prismaErrorCode: updatedFriend.error?.errorCode,
+            },
+          });
+        }
+      } else {
+        const addedFriend = await AddFriend(
+          sender_profile.data.id,
+          addressee_profile_id
+        );
+
+        if (addedFriend.status === 'Failure') {
+          throw new GraphQLError('Cannot add friend', {
+            extensions: {
+              code: addedFriend.error?.name,
+              message: addedFriend.error?.message,
+              prismaMeta: addedFriend.error?.meta,
+              prismaErrorCode: addedFriend.error?.errorCode,
+            },
+          });
+        }
+      }
+
+      const emailResponse = await SendFriendRequestEmail(
         addressee_profile_id,
         sender_profile.data.id
       );
       if (emailResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot generate friend request', {
-          extensions: {
-            code: emailResponse.error?.name,
-            message: emailResponse.error?.message,
-            prismaMeta: emailResponse.error?.meta,
-            prismaErrorCode: emailResponse.error?.errorCode,
-          },
-        });
-      } else {
-        return emailResponse.data;
+        console.log(emailResponse.error);
+        console.log(`Error sending email ${emailResponse.error?.message}`);
       }
+
+      return emailResponse.data ? emailResponse.data : 'Friendship created';
     },
     sendFriendRequestFromSocialPin: async (parent, args, context, info) => {
       const { authError, profile: sender_profile } = context;
@@ -941,30 +1005,69 @@ const resolvers: Resolvers = {
         });
       }
 
-      const friendStatus = await CheckFriendShipStatus(
+      // checks for Accepted, Sent and Blocked
+      // if the status is 1 then we know they shouldn't be able to send a request
+      const friendOrRequested = await CheckFriendsOrRequested(
         addressee_profile.data.id,
         sender_profile.data.id
       );
-      if (friendStatus.data == 1) {
-        throw new GraphQLError('Already friends');
+      if (friendOrRequested.data == 1) {
+        throw new GraphQLError('Already friends or requested');
       }
 
-      const emailResponse = await SendFriendRequestAndEmail(
+      // check for Removed or Declined
+      // if there is data, then we know that a record was found in the DB and data should not be null
+      const hasExistingFriendshipRecord = await CheckDeclinedOrRemoved(
+        addressee_profile.data.id,
+        sender_profile.data.id
+      );
+
+      if (hasExistingFriendshipRecord.data != null) {
+        console.log('should be updating friend');
+        const updatedFriend = await ReAddFriend(
+          hasExistingFriendshipRecord.data.id,
+          addressee_profile.data.id,
+          sender_profile.data.id
+        );
+        if (updatedFriend.status === 'Failure') {
+          throw new GraphQLError('Cannot update friend', {
+            extensions: {
+              code: updatedFriend.error?.name,
+              message: updatedFriend.error?.message,
+              prismaMeta: updatedFriend.error?.meta,
+              prismaErrorCode: updatedFriend.error?.errorCode,
+            },
+          });
+        }
+      } else {
+        const addedFriend = await AddFriend(
+          sender_profile.data.id,
+          addressee_profile.data.id
+        );
+
+        if (addedFriend.status === 'Failure') {
+          throw new GraphQLError('Cannot add friend', {
+            extensions: {
+              code: addedFriend.error?.name,
+              message: addedFriend.error?.message,
+              prismaMeta: addedFriend.error?.meta,
+              prismaErrorCode: addedFriend.error?.errorCode,
+            },
+          });
+        }
+      }
+
+      const emailResponse = await SendFriendRequestEmail(
         addressee_profile.data.id,
         sender_profile.data.id
       );
       if (emailResponse.status === 'Failure') {
-        throw new GraphQLError('Cannot generate friend request', {
-          extensions: {
-            code: emailResponse.error?.name,
-            message: emailResponse.error?.message,
-            prismaMeta: emailResponse.error?.meta,
-            prismaErrorCode: emailResponse.error?.errorCode,
-          },
-        });
-      } else {
-        return emailResponse.data;
+        // we don't want to throw error here if we were able to create the friendship record but not send email
+        // user will still be able to see/interact with the friend request in the app
+        console.log(`Cannot send email: ${emailResponse.error?.message}`);
+        console.log(emailResponse.error);
       }
+      return emailResponse.data ? emailResponse.data : 'Friendship created';
     },
     updateFriend: async (parent, args, context, info) => {
       const { authError, profile } = context;
@@ -1000,9 +1103,13 @@ const resolvers: Resolvers = {
           extensions: { code: authError.code },
         });
       }
-      const { blocked_profile_id } = args;
+      const { blocked_profile_id, friend_id } = args;
 
-      const status = await BlockProfile(profile.data.id, blocked_profile_id);
+      const status = await BlockProfile(
+        profile.data.id,
+        blocked_profile_id,
+        friend_id
+      );
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot block profile', {
           extensions: {
@@ -1025,7 +1132,26 @@ const resolvers: Resolvers = {
       }
       const { blocked_profile_id } = args;
 
-      const status = await UnblockProfile(profile.data, blocked_profile_id);
+      const friendship = await GetFriendship(
+        profile.data.id,
+        blocked_profile_id
+      );
+      if (friendship.status === 'Failure') {
+        throw new GraphQLError('Cannot get friendship', {
+          extensions: {
+            code: friendship.error?.name,
+            message: friendship.error?.message,
+            prismaMeta: friendship.error?.meta,
+            prismaErrorCode: friendship.error?.errorCode,
+          },
+        });
+      }
+
+      const status = await UnblockProfile(
+        profile.data,
+        blocked_profile_id,
+        friendship.data.id
+      );
       if (status.status === 'Failure') {
         throw new GraphQLError('Cannot unblock profile', {
           extensions: {

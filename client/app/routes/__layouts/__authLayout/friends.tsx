@@ -166,8 +166,9 @@ export default function FriendsIndex() {
           <div className="add-friend-status">
             {requestError && showErrorMessage && (
               <p>
-                {requestError.graphQLErrors[0].message == 'Already friends'
-                  ? 'Already friends'
+                {requestError.graphQLErrors[0].message ==
+                'Already friends or requested'
+                  ? 'Already friends or requested'
                   : 'Error trying to add friend. If problem continues contact support.'}
               </p>
             )}
@@ -236,6 +237,7 @@ export default function FriendsIndex() {
                                 variables: {
                                   blocked_profile_id:
                                     request.requestor_profile_id,
+                                  friend_id: request.id,
                                 },
                               });
                             }}
@@ -302,6 +304,7 @@ export default function FriendsIndex() {
                             blockProfile({
                               variables: {
                                 blocked_profile_id,
+                                friend_id: friend.id,
                               },
                             });
                           }}

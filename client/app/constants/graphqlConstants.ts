@@ -144,8 +144,11 @@ export const GET_PROFILE_ID = gql`
 `;
 
 export const BLOCK_PROFILE = gql`
-  mutation blockProfile($blocked_profile_id: Int!) {
-    blockProfile(blocked_profile_id: $blocked_profile_id) {
+  mutation blockProfile($blocked_profile_id: Int!, $friend_id: Int!) {
+    blockProfile(
+      blocked_profile_id: $blocked_profile_id
+      friend_id: $friend_id
+    ) {
       id
       name
       account_Id

@@ -64,25 +64,13 @@ export async function DeactivateUserAccount(id: number): Promise<PrismaData> {
 }
 
 export async function UpdateAccountBySocialPin(
-  profile_id: number,
-  social_pin: string,
+  account_id: number,
   email: string
 ): Promise<PrismaData> {
   try {
-    const profile = await prismaClient.profile.findFirst({
-      where: {
-        id: profile_id,
-        social_pin,
-      },
-    });
-    const account = await prismaClient.account.findFirst({
-      where: {
-        id: profile?.account_Id,
-      },
-    });
     const updatedAccount = await prismaClient.account.update({
       where: {
-        id: account?.id,
+        id: account_id,
       },
       data: {
         email,

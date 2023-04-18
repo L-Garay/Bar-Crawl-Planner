@@ -13,11 +13,37 @@ export async function AddFriend(
   console.log('addressee_profile_id: ', addressee_profile_id);
 
   try {
-    const time = new Date().toISOString();
+    const date = new Date().toISOString();
     const friend = await prismaClient.friendship.create({
       data: {
-        created_at: time,
-        modified_at: time,
+        created_at: date,
+        modified_at: date,
+        requestor_profile_id: sender_profile_id,
+        addressee_profile_id,
+        last_modified_by: sender_profile_id,
+        status_code: 'S',
+      },
+    });
+    return { status: 'Success', data: friend, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function ReAddFriend(
+  friendship_id: number,
+  addressee_profile_id: number,
+  sender_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const date = new Date().toISOString();
+    const friend = await prismaClient.friendship.update({
+      where: {
+        id: friendship_id,
+      },
+      data: {
+        created_at: date,
+        modified_at: date,
         requestor_profile_id: sender_profile_id,
         addressee_profile_id,
         last_modified_by: sender_profile_id,
@@ -53,9 +79,31 @@ export async function UpdateFriend(
 }
 
 export async function SendFriendRequestEmail(
-  sender_profile: Profile,
-  addressee_profile: Profile
+  addressee_profile_id: number,
+  sender_profile_id: number
 ): Promise<PrismaData> {
+  const addresseeProfile = await prismaClient.profile.findUnique({
+    where: {
+      id: addressee_profile_id,
+    },
+  });
+  const senderProfile = await prismaClient.profile.findUnique({
+    where: {
+      id: sender_profile_id,
+    },
+  });
+
+  if (!addresseeProfile || !senderProfile) {
+    return {
+      status: 'Failure',
+      data: null,
+      error: {
+        name: 'No accounts',
+        message: 'Unable to find account to send request',
+      },
+    };
+  }
+
   const generator = new Mailgen({
     theme: 'default',
     product: {
@@ -85,7 +133,7 @@ export async function SendFriendRequestEmail(
 
   const addresseeAccount = await prismaClient.account.findUnique({
     where: {
-      id: addressee_profile.account_Id,
+      id: addresseeProfile.account_Id,
     },
   });
 
@@ -101,8 +149,8 @@ export async function SendFriendRequestEmail(
   }
 
   const generatedEmail = GenerateFriendRequestEmail(
-    sender_profile.name,
-    addressee_profile.name
+    senderProfile.name,
+    addresseeProfile.name
   );
   const emailToSend = generator.generate(generatedEmail);
   const mailOptions = {
@@ -122,44 +170,4 @@ export async function SendFriendRequestEmail(
   } catch (error) {
     return { status: 'Failure', data: null, error: error as PrismaError };
   }
-}
-
-export async function SendFriendRequestAndEmail(
-  addressee_profile_id: number,
-  sender_profile_id: number
-): Promise<PrismaData> {
-  const addedFriend = await AddFriend(sender_profile_id, addressee_profile_id);
-
-  if (addedFriend.status === 'Failure') {
-    return { status: 'Failure', data: null, error: addedFriend.error };
-  }
-
-  const addresseeProfile = await prismaClient.profile.findUnique({
-    where: {
-      id: addressee_profile_id,
-    },
-  });
-  const senderProfile = await prismaClient.profile.findUnique({
-    where: {
-      id: sender_profile_id,
-    },
-  });
-
-  if (!addresseeProfile || !senderProfile) {
-    return {
-      status: 'Failure',
-      data: null,
-      error: {
-        name: 'No accounts',
-        message: 'Unable to find account to send request',
-      },
-    };
-  }
-
-  const emailStatus = await SendFriendRequestEmail(
-    senderProfile,
-    addresseeProfile
-  );
-
-  return emailStatus;
 }

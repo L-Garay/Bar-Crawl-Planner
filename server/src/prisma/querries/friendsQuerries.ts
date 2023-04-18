@@ -1,6 +1,31 @@
 import prismaClient from '../..';
 import { PrismaData, PrismaError } from '../../types/sharedTypes';
 
+export async function GetFriendship(
+  requestor_profile_id: number,
+  addressee_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const friendship = await prismaClient.friendship.findFirst({
+      where: {
+        OR: [
+          {
+            requestor_profile_id,
+            addressee_profile_id,
+          },
+          {
+            requestor_profile_id: addressee_profile_id,
+            addressee_profile_id: requestor_profile_id,
+          },
+        ],
+      },
+    });
+    return { status: 'Success', data: friendship, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
 export async function GetAllFriendships(id: number): Promise<PrismaData> {
   try {
     const friends = await prismaClient.friendship.findMany({
@@ -111,14 +136,14 @@ export async function GetRecievedFriendRequestCount(
   }
 }
 
-export async function CheckFriendShipStatus(
+export async function CheckFriendsOrRequested(
   addressee_profile_id: number,
   requestor_profile_id: number
 ): Promise<PrismaData> {
   try {
     // This should find the friendship, if it exists, between the two profiles where if they are in one of these states we know they shouldn't be allowed to send another friend request.
     // Where the data value should either be 1 or 0
-    const friendship = await prismaClient.friendship.count({
+    const count = await prismaClient.friendship.count({
       where: {
         OR: [
           {
@@ -150,6 +175,43 @@ export async function CheckFriendShipStatus(
             requestor_profile_id: addressee_profile_id,
             addressee_profile_id: requestor_profile_id,
             status_code: 'B',
+          },
+        ],
+      },
+    });
+    return { status: 'Success', data: count, error: null };
+  } catch (error) {
+    return { status: 'Failure', data: null, error: error as PrismaError };
+  }
+}
+
+export async function CheckDeclinedOrRemoved(
+  addressee_profile_id: number,
+  requestor_profile_id: number
+): Promise<PrismaData> {
+  try {
+    const friendship = await prismaClient.friendship.findFirst({
+      where: {
+        OR: [
+          {
+            requestor_profile_id,
+            addressee_profile_id,
+            status_code: 'D',
+          },
+          {
+            requestor_profile_id,
+            addressee_profile_id,
+            status_code: 'R',
+          },
+          {
+            requestor_profile_id: addressee_profile_id,
+            addressee_profile_id: requestor_profile_id,
+            status_code: 'D',
+          },
+          {
+            requestor_profile_id: addressee_profile_id,
+            addressee_profile_id: requestor_profile_id,
+            status_code: 'R',
           },
         ],
       },

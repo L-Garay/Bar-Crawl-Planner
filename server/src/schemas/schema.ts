@@ -167,7 +167,7 @@ const typeDefs = `#graphql
     sendFriendRequestEmail(addressee_profile_id: Int!): String
     sendFriendRequestFromSocialPin(social_pin: String!): String
     updateFriend(friendship_id: Int!, status_code: String!): Friendship
-    blockProfile(blocked_profile_id: Int!): Profile
+    blockProfile(blocked_profile_id: Int!, friend_id: Int!): Profile
     unblockProfile(blocked_profile_id: Int!): Profile
   }
 `;

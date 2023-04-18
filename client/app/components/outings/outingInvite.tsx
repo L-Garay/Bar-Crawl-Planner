@@ -7,6 +7,7 @@ import {
   DISCONNECT_PROFILE,
   GET_PENDING_OUTINGS,
   GET_PENDING_OUTINGS_COUNT,
+  SEND_OUTING_JOINED_EMAIL,
 } from '~/constants/graphqlConstants';
 import logApolloError from '~/utils/getApolloError';
 
@@ -34,6 +35,12 @@ const OutingInvite = ({
     },
     onCompleted: (data) => {
       navigate(`/outings/my-outings/${data.ConnectUserWithOuting.id}`);
+    },
+  });
+  const [sendOutingJoinedEmail] = useMutation(SEND_OUTING_JOINED_EMAIL, {
+    onError: (error) => {
+      logApolloError(error);
+      setShowError(true);
     },
   });
 
@@ -65,14 +72,20 @@ const OutingInvite = ({
       <div className="flex">
         <p className="label">Do you accept?</p>
         <button
-          onClick={() =>
+          onClick={() => {
+            sendOutingJoinedEmail({
+              variables: {
+                outing_id: outingId,
+                profile_id: profileId,
+              },
+            });
             connectUserToOuting({
               variables: {
                 outing_id: outingId,
                 profile_id: profileId,
               },
-            })
-          }
+            });
+          }}
         >
           Accept
         </button>
